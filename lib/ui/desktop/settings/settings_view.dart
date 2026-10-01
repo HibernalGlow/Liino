@@ -3,8 +3,6 @@ import 'package:looper_player/core/utils/ui_scale_steps.dart';
 import 'package:looper_player/core/utils/ui_utils.dart';
 import 'package:looper_player/features/playback/presentation/widgets/lyrics/lyrics_scale.dart';
 import 'package:flutter/material.dart';
-import 'package:looper_player/features/playback/presentation/widgets/lyrics/advanced_lyric_line/advanced_lyric_line.dart'
-    show activeLyricsIsWhite;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/features/library/data/services/saf_folder_service.dart';
@@ -23,6 +21,12 @@ import 'package:looper_player/core/theme/app_assets.dart';
 import 'package:looper_player/core/utils/app_links.dart';
 import 'package:looper_player/features/settings/presentation/widgets/tiles/about_settings_tiles.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:looper_player/core/theme/app_fonts.dart';
+import 'package:looper_player/features/settings/presentation/widgets/tiles/audio_playback_settings_tiles.dart';
+import 'package:looper_player/features/settings/presentation/widgets/tiles/backup_logs_settings_tiles.dart';
+import 'package:looper_player/features/settings/presentation/widgets/tiles/dashboard_settings_tiles.dart';
+import 'package:looper_player/features/settings/presentation/widgets/tiles/theme/theme_settings_tiles.dart';
+import 'collapsible_settings_section.dart';
 part 'settings_rows.dart';
 part 'library_folders_list.dart';
 part 'maintainer_section.dart';
@@ -35,6 +39,8 @@ class SettingsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
+    const divider = Divider(height: 1, indent: 72, color: Colors.white10);
+    final dynamicTheming = settings.enableDynamicTheming;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -64,6 +70,8 @@ class SettingsView extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _Section(
                   title: l10n.appearance,
+                  icon: LucideIcons.palette,
+                  initiallyExpanded: true,
                   children: [
                     _PremiumSwitchRow(
                       icon: LucideIcons.palette,
@@ -318,6 +326,7 @@ class SettingsView extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _Section(
                   title: l10n.language,
+                  icon: LucideIcons.languages,
                   children: [
                     _PremiumDropdownRow<String>(
                       icon: LucideIcons.languages,
@@ -369,12 +378,112 @@ class SettingsView extends ConsumerWidget {
               ),
             ),
 
+            // Options shared with the Android settings, built from the same
+            // tile widgets.
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: _Section(
+                  title: l10n.themeGroupFonts,
+                  icon: LucideIcons.type,
+                  children: [
+                    const UseNewFontTile(),
+                    if (settings.useNewFont) ...[
+                      divider,
+                      const FontFamilySelectionTile(),
+                      divider,
+                      const FontWeightSelectionTile(),
+                    ],
+                    divider,
+                    const UseNewFontLyricsTile(),
+                    if (settings.useNewFontLyrics) ...[
+                      divider,
+                      const LyricsFontFamilySelectionTile(),
+                      divider,
+                      const LyricsFontWeightSelectionTile(),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: _Section(
+                  title: l10n.lyrics,
+                  icon: LucideIcons.micVocal,
+                  children: [
+                    const AmbientLyricsBgTile(),
+                    divider,
+                    const BlurredArtworkLyricsTile(),
+                    if (dynamicTheming ||
+                        settings.ambientColorBackground ||
+                        settings.keepBackgroundGradient ||
+                        settings.blurredArtworkForLyrics) ...[
+                      divider,
+                      const LyricsDarknessSlider(),
+                    ],
+                    divider,
+                    const LyricsProviderTile(),
+                  ],
+                ),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: _Section(
+                  title: l10n.nowPlaying,
+                  icon: LucideIcons.playCircle,
+                  children: [
+                    const ProgressBarStyleTile(),
+                    divider,
+                    const EnablePlayerGradientTile(),
+                    if (settings.enablePlayerGradient) ...[
+                      divider,
+                      const AnimatePlayerGradientTile(),
+                      divider,
+                      const KeepBackgroundGradientTile(),
+                      if (settings.keepBackgroundGradient) ...[
+                        divider,
+                        const AnimateBackgroundGradientTile(),
+                      ],
+                    ],
+                    if (!dynamicTheming) ...[
+                      divider,
+                      const AlwaysBlurSheetsTile(),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: _Section(
+                  title: l10n.homeDashboardSettings,
+                  icon: LucideIcons.layoutDashboard,
+                  children: const [
+                    ShowRecentRowTile(),
+                    divider,
+                    ShowGenresRowTile(),
+                    divider,
+                    ShowArtistsRowTile(),
+                  ],
+                ),
+              ),
+            ),
+
             // Audio & Playback Section
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _Section(
                   title: l10n.audioPlayback,
+                  icon: LucideIcons.audioLines,
                   children: [
                     _PremiumSwitchRow(
                       icon: LucideIcons.music,
@@ -473,6 +582,12 @@ class SettingsView extends ConsumerWidget {
                         ),
                       ],
                     ],
+                    divider,
+                    const ShuffleTile(),
+                    divider,
+                    const PersistQueueTile(),
+                    divider,
+                    const KeepSongProgressTile(),
                   ],
                 ),
               ),
@@ -484,6 +599,7 @@ class SettingsView extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _Section(
                   title: l10n.librarySettings,
+                  icon: LucideIcons.folderOpen,
                   children: [
                     const _PremiumLibraryFoldersList(),
                     _PremiumActionRow(
@@ -556,12 +672,32 @@ class SettingsView extends ConsumerWidget {
               ),
             ),
 
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: _Section(
+                  title: l10n.backupsAndLogs,
+                  icon: LucideIcons.databaseBackup,
+                  children: const [
+                    ExportBackupTile(),
+                    divider,
+                    ImportBackupTile(),
+                    divider,
+                    ExportLogsTile(),
+                    divider,
+                    ClearLogsTile(),
+                  ],
+                ),
+              ),
+            ),
+
             // About Section
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _Section(
                   title: l10n.aboutApp,
+                  icon: LucideIcons.info,
                   children: [
                     Consumer(
                       builder: (context, ref, _) {
@@ -618,7 +754,49 @@ class SettingsView extends ConsumerWidget {
                           );
                         }
                       },
-                      isLast: true,
+                      isLast: false,
+                    ),
+                    const OpenSourceLicensesTile(),
+                    divider,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.appInfoPrivacy.toUpperCase(),
+                            style: AppFonts.jostStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(
+                                settings.accentColor,
+                              ).withValues(alpha: 0.8),
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          InfoSubTile(
+                            icon: LucideIcons.music,
+                            title: l10n.corePurpose,
+                            description: l10n.corePurposeDesc,
+                          ),
+                          const SizedBox(height: 16),
+                          InfoSubTile(
+                            icon: LucideIcons.globe,
+                            title: l10n.whyInternetUsed,
+                            description: l10n.whyInternetUsedDesc,
+                          ),
+                          const SizedBox(height: 16),
+                          InfoSubTile(
+                            icon: LucideIcons.lock,
+                            title: l10n.privacySafety,
+                            description: l10n.privacySafetyDesc,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -631,6 +809,7 @@ class SettingsView extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _Section(
                   title: l10n.lyricsSources,
+                  icon: LucideIcons.scroll,
                   children: [
                     for (final (i, credit) in lyricsCredits(l10n).indexed)
                       _PremiumActionRow(

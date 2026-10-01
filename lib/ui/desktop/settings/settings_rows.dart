@@ -2,47 +2,32 @@ part of 'settings_view.dart';
 
 class _Section extends StatelessWidget {
   final String title;
+  final IconData icon;
+  final bool initiallyExpanded;
   final List<Widget> children;
 
-  const _Section({required this.title, required this.children});
+  const _Section({
+    required this.title,
+    required this.children,
+    this.icon = LucideIcons.settings,
+    this.initiallyExpanded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            PremiumSection(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(32),
-                bottomLeft: Radius.circular(32),
-                topRight: Radius.circular(8),
-                bottomRight: Radius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              useExpanded: false,
-              child: Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        PremiumSection(
-          borderRadius: BorderRadius.circular(20),
-          padding: EdgeInsets.zero,
-          useExpanded: false,
-          child: Column(children: children),
-        ),
-        const SizedBox(height: 28),
-      ],
+    return CollapsibleSettingsSection(
+      // The title is unique per section and stable within a session.
+      id: title,
+      title: title,
+      icon: icon,
+      initiallyExpanded: initiallyExpanded,
+      cardBuilder: (child) => PremiumSection(
+        borderRadius: BorderRadius.circular(20),
+        padding: EdgeInsets.zero,
+        useExpanded: false,
+        child: child,
+      ),
+      children: children,
     );
   }
 }
