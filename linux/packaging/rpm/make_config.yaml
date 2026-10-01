@@ -20,3 +20,5 @@ requires:
   - gtk3
   - vlc-libs
   - mpv-libs
+  - /usr/bin/ffprobe
+  - /usr/bin/ffmpeg

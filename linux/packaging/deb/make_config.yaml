@@ -22,3 +22,4 @@ depends:
   - libgtk-3-0
   - libvlc5
   - libmpv2
+  - ffmpeg

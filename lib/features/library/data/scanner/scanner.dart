@@ -14,6 +14,7 @@ import '../services/saf_folder_service.dart';
 import '../../../../core/services/storage/local_json_store.dart';
 import 'scan_result.dart';
 import 'artist_parser.dart';
+import 'linux_tag_reader.dart';
 export 'artist_parser.dart';
 part 'scan_paths.dart';
 part 'media_sources.dart';
@@ -707,13 +708,24 @@ class LibraryScanner {
         transient = true;
       } catch (_) {}
 
-      String? title = metadata?.title;
-      String? artist = metadata?.artist;
-      String? album = metadata?.album;
-      String? genre = _cleanGenre(metadata?.genre);
-      int? durationMs = metadata?.durationMs?.toInt();
-      int? trackNumber = metadata?.trackNumber;
-      int? year = metadata?.year;
+      // Linux has no native tag fallback, so when metadata_god couldn't
+      // read the file (or failed to initialise at all) ask ffprobe.
+      LinuxTags? linuxTags;
+      if (Platform.isLinux && metadata == null) {
+        try {
+          linuxTags = await LinuxTagReader.read(file.path, timeout: tagTimeout);
+        } on TimeoutException {
+          transient = true;
+        }
+      }
+
+      String? title = metadata?.title ?? linuxTags?.title;
+      String? artist = metadata?.artist ?? linuxTags?.artist;
+      String? album = metadata?.album ?? linuxTags?.album;
+      String? genre = _cleanGenre(metadata?.genre ?? linuxTags?.genre);
+      int? durationMs = metadata?.durationMs?.toInt() ?? linuxTags?.durationMs;
+      int? trackNumber = metadata?.trackNumber ?? linuxTags?.trackNumber;
+      int? year = metadata?.year ?? linuxTags?.year;
       List<int>? pictureData = metadata?.picture?.data;
 
       // Use native MediaStore fallbacks if MetadataGod fields are null or empty
@@ -753,6 +765,17 @@ class LibraryScanner {
       if (pictureData == null && Platform.isAndroid) {
         try {
           pictureData = await _fetchNativeEmbeddedPicture(
+            file.path,
+            timeout: pictureTimeout,
+          );
+        } on TimeoutException {
+          transient = true;
+        }
+      }
+
+      if (pictureData == null && Platform.isLinux) {
+        try {
+          pictureData = await LinuxTagReader.readCover(
             file.path,
             timeout: pictureTimeout,
           );
