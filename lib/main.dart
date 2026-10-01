@@ -21,6 +21,7 @@ import 'ui/home_screen/home_screen.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:looper_player/core/theme/theme_provider.dart';
 import 'package:looper_player/ui/widgets/common/keyboard_handler.dart';
+import 'package:looper_player/ui/widgets/common/desktop_ui_scale.dart';
 import 'core/utils/logger_helper.dart';
 import 'core/services/window/window_geometry.dart';
 import 'core/services/window/window_geometry_listener.dart';
@@ -263,7 +264,10 @@ class MyApp extends ConsumerWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        builder: (context, child) => child!,
+        builder: (context, child) => DesktopUiScale(
+          scale: settings?.desktopUiScale ?? 1.0,
+          child: child!,
+        ),
         home: buildHome(),
       );
     }

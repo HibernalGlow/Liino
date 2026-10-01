@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import 'package:looper_player/core/providers/providers.dart';
 import 'package:looper_player/core/providers/navigation_provider.dart';
+import 'package:looper_player/core/utils/ui_scale_steps.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
+import 'package:looper_player/features/playback/presentation/widgets/lyrics/lyrics_scale.dart';
+import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 
 class KeyboardHandler extends ConsumerStatefulWidget {
   final Widget child;
@@ -60,6 +64,46 @@ class _KeyboardHandlerState extends ConsumerState<KeyboardHandler> {
     final playback = ref.read(playbackProvider.notifier);
     final nav = ref.read(appNavigationProvider.notifier);
     final key = event.logicalKey;
+
+    // Desktop sizing: Ctrl +/-/0 for the whole UI, plain +/- for the lyrics
+    // text while the lyrics view is open.
+    if (UiUtils.isDesktop) {
+      final settings = ref.read(settingsProvider);
+      final settingsNotifier = ref.read(settingsProvider.notifier);
+      final bool larger =
+          key == LogicalKeyboardKey.equal ||
+          key == LogicalKeyboardKey.add ||
+          key == LogicalKeyboardKey.numpadAdd;
+      final bool smaller =
+          key == LogicalKeyboardKey.minus ||
+          key == LogicalKeyboardKey.numpadSubtract;
+
+      if (HardwareKeyboard.instance.isControlPressed) {
+        if (larger) {
+          settingsNotifier.updateDesktopUiScale(
+            UiScaleSteps.next(settings.desktopUiScale),
+          );
+          return true;
+        }
+        if (smaller) {
+          settingsNotifier.updateDesktopUiScale(
+            UiScaleSteps.previous(settings.desktopUiScale),
+          );
+          return true;
+        }
+        if (key == LogicalKeyboardKey.digit0 ||
+            key == LogicalKeyboardKey.numpad0) {
+          settingsNotifier.updateDesktopUiScale(1.0);
+          return true;
+        }
+      } else if ((larger || smaller) &&
+          ref.read(appNavigationProvider).activeItem == NavItem.lyrics) {
+        settingsNotifier.updateLyricsFontScale(
+          LyricsScale.stepBy(settings.lyricsFontScale, larger ? 1 : -1),
+        );
+        return true;
+      }
+    }
 
     // Global Playback Shortcuts
     if (key == LogicalKeyboardKey.space) {
