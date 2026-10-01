@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
+import 'package:looper_player/ui/android/player/lyrics/widgets/android_lyrics_menu_sheet.dart';
 import 'package:looper_player/features/library/domain/models/models.dart';
 import 'package:looper_player/features/playback/presentation/providers/lyrics/lyrics_notifier.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
@@ -13,6 +16,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../widgets/lyrics/advanced_lyric_renderer.dart';
+import '../widgets/lyrics/desktop_lyrics_toolbar.dart';
+import '../widgets/lyrics/lyrics_scale.dart';
 import '../widgets/lyrics/lyrics_skeleton.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
@@ -75,8 +80,78 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final syncMode = _syncMode;
+    if (!UiUtils.isDesktop) return _buildLyrics(context, syncMode);
+
+    // Read everything here, not inside the LayoutBuilder: its builder runs
+    // during layout, where providers must not be watched.
     final lyricsState = ref.watch(lyricsProvider);
+    final userScale = LyricsScale.normalize(
+      ref.watch(settingsProvider.select((s) => s.lyricsFontScale)),
+    );
+    final song = ref.watch(playbackProvider.select((s) => s.currentSong));
+    final settingsNotifier = ref.read(settingsProvider.notifier);
+    final syncSelector = _buildModeSelector(true);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final paneWidth = constraints.maxWidth;
+        final autoScale = LyricsScale.auto(paneWidth);
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: _buildLyrics(
+                context,
+                syncMode,
+                desktop: (lyricsState: lyricsState, song: song),
+                fontScale: userScale * autoScale,
+                onFontScaleChanged: (scale) =>
+                    settingsNotifier.updateLyricsFontScale(scale / autoScale),
+                // Cap the lyrics column at 900px, centred, while the whole
+                // pane keeps scrolling.
+                horizontalPadding: math.max(24.0, (paneWidth - 900) / 2),
+                bottomPadding: constraints.maxHeight * 0.45,
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 16,
+              child: DesktopLyricsToolbar(
+                scale: userScale,
+                onSmaller: () => settingsNotifier.updateLyricsFontScale(
+                  LyricsScale.stepBy(userScale, -1),
+                ),
+                onLarger: () => settingsNotifier.updateLyricsFontScale(
+                  LyricsScale.stepBy(userScale, 1),
+                ),
+                onReset: () => settingsNotifier.updateLyricsFontScale(1.0),
+                syncSelector: paneWidth >= 520 ? syncSelector : null,
+                onMenu: song == null
+                    ? null
+                    : () => showLyricsMenuDialog(context, ref, song),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// The lyrics body. [desktop] carries the state the desktop branch has
+  /// already watched (its caller runs inside a LayoutBuilder); without it
+  /// the providers are watched here, as on mobile.
+  Widget _buildLyrics(
+    BuildContext context,
+    LyricsSyncMode syncMode, {
+    ({LyricsState lyricsState, Song? song})? desktop,
+    double? fontScale,
+    ValueChanged<double>? onFontScaleChanged,
+    double? horizontalPadding,
+    double? bottomPadding,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final LyricsState lyricsState =
+        desktop?.lyricsState ?? ref.watch(lyricsProvider);
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Stack(
@@ -101,14 +176,23 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
                     : lyricsState.rawLrc == null
                     ? KeyedSubtree(
                         key: const ValueKey('empty'),
-                        child: _buildNoLyricsState(context, l10n, primaryColor),
+                        child: _buildNoLyricsState(
+                          context,
+                          l10n,
+                          primaryColor,
+                          desktop: desktop,
+                        ),
                       )
                     : AdvancedLyricRenderer(
                         key: const ValueKey('lyrics'),
                         lines: lyricsState.parsedLines,
-                        mode: _syncMode,
+                        mode: syncMode,
                         onSeek: (pos) =>
                             ref.read(playbackProvider.notifier).seek(pos),
+                        fontScale: fontScale,
+                        onFontScaleChanged: onFontScaleChanged,
+                        horizontalPadding: horizontalPadding,
+                        bottomPadding: bottomPadding,
                       ),
               ),
             ),
@@ -123,9 +207,12 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
   Widget _buildNoLyricsState(
     BuildContext context,
     AppLocalizations l10n,
-    Color primaryColor,
-  ) {
-    final song = ref.watch(playbackProvider.select((s) => s.currentSong));
+    Color primaryColor, {
+    ({LyricsState lyricsState, Song? song})? desktop,
+  }) {
+    final song = desktop != null
+        ? desktop.song
+        : ref.watch(playbackProvider.select((s) => s.currentSong));
 
     return Center(
       child: Padding(

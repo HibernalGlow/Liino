@@ -29,10 +29,33 @@ void showLyricsMenuBottomSheet(BuildContext context, WidgetRef ref, Song song) {
   );
 }
 
+/// The same menu for mouse-and-window platforms: a centred dialog instead
+/// of a bottom sheet, without the touch-only entries.
+void showLyricsMenuDialog(BuildContext context, WidgetRef ref, Song song) {
+  showDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: _LyricsMenuSheetContent(song: song, desktop: true),
+        ),
+      ),
+    ),
+  );
+}
+
 class _LyricsMenuSheetContent extends ConsumerWidget {
   final Song song;
 
-  const _LyricsMenuSheetContent({required this.song});
+  /// Shown in a dialog on desktop: no drag handle, no touch-gesture tips.
+  final bool desktop;
+
+  const _LyricsMenuSheetContent({required this.song, this.desktop = false});
 
   String _formatSourceLabel(AppLocalizations l10n, String? source) {
     if (source == null || source.isEmpty) return l10n.noLyricsSource;
@@ -90,6 +113,7 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
 
     return AppBottomSheetContainer(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      showDragHandle: !desktop,
       // The sheet shell lays its child out with unbounded height, so the
       // scroll view needs an explicit cap to actually scroll.
       child: ConstrainedBox(
@@ -421,16 +445,17 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                         .read(settingsProvider.notifier)
                         .updateAmbientColorBackground(val),
                   ),
-                  _MenuActionTile(
-                    icon: LucideIcons.hand,
-                    title: l10n.gestureTips,
-                    subtitle: l10n.gestureTipsDesc,
-                    onTap: () {
-                      AppHaptics.medium();
-                      Navigator.pop(context);
-                      showLyricsGesturesTutorial(context, ref);
-                    },
-                  ),
+                  if (!desktop)
+                    _MenuActionTile(
+                      icon: LucideIcons.hand,
+                      title: l10n.gestureTips,
+                      subtitle: l10n.gestureTipsDesc,
+                      onTap: () {
+                        AppHaptics.medium();
+                        Navigator.pop(context);
+                        showLyricsGesturesTutorial(context, ref);
+                      },
+                    ),
                 ],
               ),
 
