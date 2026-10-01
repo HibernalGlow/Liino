@@ -2959,4 +2959,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get updateCheckFailed => '无法检查更新。';
+
+  @override
+  String get uiScale => '界面缩放';
+
+  @override
+  String get lyricsSize => '歌词大小';
+
+  @override
+  String get lyricsSizeDesc => '歌词页面的文字大小';
+
+  @override
+  String get lyricsSizeSmaller => '缩小歌词';
+
+  @override
+  String get lyricsSizeLarger => '放大歌词';
+
+  @override
+  String get lyricsOptions => '歌词选项';
 }

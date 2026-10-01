@@ -942,5 +942,11 @@
   "updateErrorInstall": "Impossible d'installer la mise à jour.",
   "checkForUpdates": "Rechercher des mises à jour",
   "updateUpToDate": "Vous avez la dernière version.",
-  "updateCheckFailed": "Impossible de rechercher des mises à jour."
+  "updateCheckFailed": "Impossible de rechercher des mises à jour.",
+  "uiScale": "Échelle de l'interface",
+  "lyricsSize": "Taille des paroles",
+  "lyricsSizeDesc": "Taille du texte sur l'écran des paroles",
+  "lyricsSizeSmaller": "Paroles plus petites",
+  "lyricsSizeLarger": "Paroles plus grandes",
+  "lyricsOptions": "Options des paroles"
 }

@@ -3172,4 +3172,22 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'Не удалось проверить обновления.';
+
+  @override
+  String get uiScale => 'Масштаб интерфейса';
+
+  @override
+  String get lyricsSize => 'Размер текста песни';
+
+  @override
+  String get lyricsSizeDesc => 'Размер текста на экране текста песни';
+
+  @override
+  String get lyricsSizeSmaller => 'Текст меньше';
+
+  @override
+  String get lyricsSizeLarger => 'Текст больше';
+
+  @override
+  String get lyricsOptions => 'Параметры текста песни';
 }

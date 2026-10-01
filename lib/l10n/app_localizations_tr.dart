@@ -3127,4 +3127,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'Güncellemeler denetlenemedi.';
+
+  @override
+  String get uiScale => 'Arayüz ölçeği';
+
+  @override
+  String get lyricsSize => 'Şarkı sözü boyutu';
+
+  @override
+  String get lyricsSizeDesc => 'Şarkı sözleri ekranındaki metin boyutu';
+
+  @override
+  String get lyricsSizeSmaller => 'Sözleri küçült';
+
+  @override
+  String get lyricsSizeLarger => 'Sözleri büyüt';
+
+  @override
+  String get lyricsOptions => 'Şarkı sözü seçenekleri';
 }

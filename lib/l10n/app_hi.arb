@@ -942,5 +942,11 @@
   "updateErrorInstall": "अपडेट इंस्टॉल नहीं हो सका।",
   "checkForUpdates": "अपडेट की जाँच करें",
   "updateUpToDate": "आपके पास सबसे नया वर्शन है।",
-  "updateCheckFailed": "अपडेट की जाँच नहीं हो सकी।"
+  "updateCheckFailed": "अपडेट की जाँच नहीं हो सकी।",
+  "uiScale": "इंटरफ़ेस का आकार",
+  "lyricsSize": "लिरिक्स का आकार",
+  "lyricsSizeDesc": "लिरिक्स स्क्रीन पर टेक्स्ट का आकार",
+  "lyricsSizeSmaller": "लिरिक्स छोटे करें",
+  "lyricsSizeLarger": "लिरिक्स बड़े करें",
+  "lyricsOptions": "लिरिक्स विकल्प"
 }

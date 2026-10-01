@@ -942,5 +942,11 @@
   "updateErrorInstall": "No se pudo instalar la actualización.",
   "checkForUpdates": "Buscar actualizaciones",
   "updateUpToDate": "Tienes la última versión.",
-  "updateCheckFailed": "No se pudo buscar actualizaciones."
+  "updateCheckFailed": "No se pudo buscar actualizaciones.",
+  "uiScale": "Escala de la interfaz",
+  "lyricsSize": "Tamaño de la letra",
+  "lyricsSizeDesc": "Tamaño del texto en la pantalla de letras",
+  "lyricsSizeSmaller": "Letra más pequeña",
+  "lyricsSizeLarger": "Letra más grande",
+  "lyricsOptions": "Opciones de letra"
 }

@@ -942,5 +942,11 @@
   "updateErrorInstall": "Güncelleme yüklenemedi.",
   "checkForUpdates": "Güncellemeleri denetle",
   "updateUpToDate": "En son sürümü kullanıyorsunuz.",
-  "updateCheckFailed": "Güncellemeler denetlenemedi."
+  "updateCheckFailed": "Güncellemeler denetlenemedi.",
+  "uiScale": "Arayüz ölçeği",
+  "lyricsSize": "Şarkı sözü boyutu",
+  "lyricsSizeDesc": "Şarkı sözleri ekranındaki metin boyutu",
+  "lyricsSizeSmaller": "Sözleri küçült",
+  "lyricsSizeLarger": "Sözleri büyüt",
+  "lyricsOptions": "Şarkı sözü seçenekleri"
 }

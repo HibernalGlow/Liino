@@ -942,5 +942,11 @@
   "updateErrorInstall": "Das Update konnte nicht installiert werden.",
   "checkForUpdates": "Nach Updates suchen",
   "updateUpToDate": "Du hast die neueste Version.",
-  "updateCheckFailed": "Suche nach Updates fehlgeschlagen."
+  "updateCheckFailed": "Suche nach Updates fehlgeschlagen.",
+  "uiScale": "Oberflächengröße",
+  "lyricsSize": "Songtext-Größe",
+  "lyricsSizeDesc": "Textgröße in der Songtext-Ansicht",
+  "lyricsSizeSmaller": "Songtext kleiner",
+  "lyricsSizeLarger": "Songtext größer",
+  "lyricsOptions": "Songtext-Optionen"
 }

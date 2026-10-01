@@ -3167,4 +3167,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'Impossible de rechercher des mises à jour.';
+
+  @override
+  String get uiScale => 'Échelle de l\'interface';
+
+  @override
+  String get lyricsSize => 'Taille des paroles';
+
+  @override
+  String get lyricsSizeDesc => 'Taille du texte sur l\'écran des paroles';
+
+  @override
+  String get lyricsSizeSmaller => 'Paroles plus petites';
+
+  @override
+  String get lyricsSizeLarger => 'Paroles plus grandes';
+
+  @override
+  String get lyricsOptions => 'Options des paroles';
 }

@@ -942,5 +942,11 @@
   "updateErrorInstall": "アップデートをインストールできませんでした。",
   "checkForUpdates": "アップデートを確認",
   "updateUpToDate": "最新バージョンです。",
-  "updateCheckFailed": "アップデートを確認できませんでした。"
+  "updateCheckFailed": "アップデートを確認できませんでした。",
+  "uiScale": "UIの拡大率",
+  "lyricsSize": "歌詞のサイズ",
+  "lyricsSizeDesc": "歌詞画面の文字サイズ",
+  "lyricsSizeSmaller": "歌詞を小さく",
+  "lyricsSizeLarger": "歌詞を大きく",
+  "lyricsOptions": "歌詞オプション"
 }

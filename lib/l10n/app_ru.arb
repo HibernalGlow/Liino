@@ -942,5 +942,11 @@
   "updateErrorInstall": "Не удалось установить обновление.",
   "checkForUpdates": "Проверить обновления",
   "updateUpToDate": "У вас последняя версия.",
-  "updateCheckFailed": "Не удалось проверить обновления."
+  "updateCheckFailed": "Не удалось проверить обновления.",
+  "uiScale": "Масштаб интерфейса",
+  "lyricsSize": "Размер текста песни",
+  "lyricsSizeDesc": "Размер текста на экране текста песни",
+  "lyricsSizeSmaller": "Текст меньше",
+  "lyricsSizeLarger": "Текст больше",
+  "lyricsOptions": "Параметры текста песни"
 }

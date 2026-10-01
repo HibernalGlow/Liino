@@ -942,5 +942,11 @@
   "updateErrorInstall": "De update kon niet worden geïnstalleerd.",
   "checkForUpdates": "Controleren op updates",
   "updateUpToDate": "Je hebt de nieuwste versie.",
-  "updateCheckFailed": "Controleren op updates is mislukt."
+  "updateCheckFailed": "Controleren op updates is mislukt.",
+  "uiScale": "Interfaceschaal",
+  "lyricsSize": "Grootte songtekst",
+  "lyricsSizeDesc": "Tekstgrootte op het songtekstscherm",
+  "lyricsSizeSmaller": "Kleinere songtekst",
+  "lyricsSizeLarger": "Grotere songtekst",
+  "lyricsOptions": "Songtekstopties"
 }

@@ -3156,4 +3156,22 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'Controleren op updates is mislukt.';
+
+  @override
+  String get uiScale => 'Interfaceschaal';
+
+  @override
+  String get lyricsSize => 'Grootte songtekst';
+
+  @override
+  String get lyricsSizeDesc => 'Tekstgrootte op het songtekstscherm';
+
+  @override
+  String get lyricsSizeSmaller => 'Kleinere songtekst';
+
+  @override
+  String get lyricsSizeLarger => 'Grotere songtekst';
+
+  @override
+  String get lyricsOptions => 'Songtekstopties';
 }

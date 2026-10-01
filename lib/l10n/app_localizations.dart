@@ -5653,6 +5653,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t check for updates.'**
   String get updateCheckFailed;
+
+  /// No description provided for @uiScale.
+  ///
+  /// In en, this message translates to:
+  /// **'UI scale'**
+  String get uiScale;
+
+  /// No description provided for @lyricsSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics size'**
+  String get lyricsSize;
+
+  /// No description provided for @lyricsSizeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size on the lyrics screen'**
+  String get lyricsSizeDesc;
+
+  /// No description provided for @lyricsSizeSmaller.
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller lyrics'**
+  String get lyricsSizeSmaller;
+
+  /// No description provided for @lyricsSizeLarger.
+  ///
+  /// In en, this message translates to:
+  /// **'Larger lyrics'**
+  String get lyricsSizeLarger;
+
+  /// No description provided for @lyricsOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics options'**
+  String get lyricsOptions;
 }
 
 class _AppLocalizationsDelegate

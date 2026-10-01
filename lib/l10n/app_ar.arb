@@ -942,5 +942,11 @@
   "updateErrorInstall": "تعذّر تثبيت التحديث.",
   "checkForUpdates": "التحقق من وجود تحديثات",
   "updateUpToDate": "أنت تستخدم أحدث إصدار.",
-  "updateCheckFailed": "تعذّر التحقق من وجود تحديثات."
+  "updateCheckFailed": "تعذّر التحقق من وجود تحديثات.",
+  "uiScale": "حجم الواجهة",
+  "lyricsSize": "حجم كلمات الأغنية",
+  "lyricsSizeDesc": "حجم النص في شاشة الكلمات",
+  "lyricsSizeSmaller": "كلمات أصغر",
+  "lyricsSizeLarger": "كلمات أكبر",
+  "lyricsOptions": "خيارات الكلمات"
 }

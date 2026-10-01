@@ -3000,4 +3000,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'アップデートを確認できませんでした。';
+
+  @override
+  String get uiScale => 'UIの拡大率';
+
+  @override
+  String get lyricsSize => '歌詞のサイズ';
+
+  @override
+  String get lyricsSizeDesc => '歌詞画面の文字サイズ';
+
+  @override
+  String get lyricsSizeSmaller => '歌詞を小さく';
+
+  @override
+  String get lyricsSizeLarger => '歌詞を大きく';
+
+  @override
+  String get lyricsOptions => '歌詞オプション';
 }

@@ -3155,4 +3155,22 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'Impossibile controllare gli aggiornamenti.';
+
+  @override
+  String get uiScale => 'Scala dell\'interfaccia';
+
+  @override
+  String get lyricsSize => 'Dimensione del testo';
+
+  @override
+  String get lyricsSizeDesc => 'Dimensione del testo nella schermata dei testi';
+
+  @override
+  String get lyricsSizeSmaller => 'Testo più piccolo';
+
+  @override
+  String get lyricsSizeLarger => 'Testo più grande';
+
+  @override
+  String get lyricsOptions => 'Opzioni del testo';
 }

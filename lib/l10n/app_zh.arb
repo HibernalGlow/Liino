@@ -942,5 +942,11 @@
   "updateErrorInstall": "无法安装更新。",
   "checkForUpdates": "检查更新",
   "updateUpToDate": "当前已是最新版本。",
-  "updateCheckFailed": "无法检查更新。"
+  "updateCheckFailed": "无法检查更新。",
+  "uiScale": "界面缩放",
+  "lyricsSize": "歌词大小",
+  "lyricsSizeDesc": "歌词页面的文字大小",
+  "lyricsSizeSmaller": "缩小歌词",
+  "lyricsSizeLarger": "放大歌词",
+  "lyricsOptions": "歌词选项"
 }

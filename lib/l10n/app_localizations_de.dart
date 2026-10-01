@@ -3155,4 +3155,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'Suche nach Updates fehlgeschlagen.';
+
+  @override
+  String get uiScale => 'Oberflächengröße';
+
+  @override
+  String get lyricsSize => 'Songtext-Größe';
+
+  @override
+  String get lyricsSizeDesc => 'Textgröße in der Songtext-Ansicht';
+
+  @override
+  String get lyricsSizeSmaller => 'Songtext kleiner';
+
+  @override
+  String get lyricsSizeLarger => 'Songtext größer';
+
+  @override
+  String get lyricsOptions => 'Songtext-Optionen';
 }

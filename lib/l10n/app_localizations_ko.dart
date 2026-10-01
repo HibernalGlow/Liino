@@ -2998,4 +2998,22 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get updateCheckFailed => '업데이트를 확인할 수 없습니다.';
+
+  @override
+  String get uiScale => 'UI 배율';
+
+  @override
+  String get lyricsSize => '가사 크기';
+
+  @override
+  String get lyricsSizeDesc => '가사 화면의 글자 크기';
+
+  @override
+  String get lyricsSizeSmaller => '가사 작게';
+
+  @override
+  String get lyricsSizeLarger => '가사 크게';
+
+  @override
+  String get lyricsOptions => '가사 옵션';
 }

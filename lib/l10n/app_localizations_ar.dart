@@ -3104,4 +3104,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'تعذّر التحقق من وجود تحديثات.';
+
+  @override
+  String get uiScale => 'حجم الواجهة';
+
+  @override
+  String get lyricsSize => 'حجم كلمات الأغنية';
+
+  @override
+  String get lyricsSizeDesc => 'حجم النص في شاشة الكلمات';
+
+  @override
+  String get lyricsSizeSmaller => 'كلمات أصغر';
+
+  @override
+  String get lyricsSizeLarger => 'كلمات أكبر';
+
+  @override
+  String get lyricsOptions => 'خيارات الكلمات';
 }

@@ -1309,5 +1309,11 @@
   "updateErrorInstall": "Couldn't install the update.",
   "checkForUpdates": "Check for updates",
   "updateUpToDate": "You're on the latest version.",
-  "updateCheckFailed": "Couldn't check for updates."
+  "updateCheckFailed": "Couldn't check for updates.",
+  "uiScale": "UI scale",
+  "lyricsSize": "Lyrics size",
+  "lyricsSizeDesc": "Text size on the lyrics screen",
+  "lyricsSizeSmaller": "Smaller lyrics",
+  "lyricsSizeLarger": "Larger lyrics",
+  "lyricsOptions": "Lyrics options"
 }

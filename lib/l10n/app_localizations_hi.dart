@@ -3130,4 +3130,22 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get updateCheckFailed => 'अपडेट की जाँच नहीं हो सकी।';
+
+  @override
+  String get uiScale => 'इंटरफ़ेस का आकार';
+
+  @override
+  String get lyricsSize => 'लिरिक्स का आकार';
+
+  @override
+  String get lyricsSizeDesc => 'लिरिक्स स्क्रीन पर टेक्स्ट का आकार';
+
+  @override
+  String get lyricsSizeSmaller => 'लिरिक्स छोटे करें';
+
+  @override
+  String get lyricsSizeLarger => 'लिरिक्स बड़े करें';
+
+  @override
+  String get lyricsOptions => 'लिरिक्स विकल्प';
 }
