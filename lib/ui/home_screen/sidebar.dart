@@ -141,21 +141,30 @@ class _HeaderButton extends StatelessWidget {
   final String label;
   final bool isDynamic;
 
+  /// Icon only, with the label as a tooltip. For narrow windows.
+  final bool compact;
+
   const _HeaderButton({
     required this.onTap,
     required this.icon,
     required this.label,
     required this.isDynamic,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final button = _buildButton();
+    return compact ? Tooltip(message: label, child: button) : button;
+  }
+
+  Widget _buildButton() {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(30),
       child: Container(
         height: 55.s,
-        padding: EdgeInsets.symmetric(horizontal: 20.s),
+        padding: EdgeInsets.symmetric(horizontal: (compact ? 16 : 20).s),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
           color: const Color.fromARGB(
@@ -184,15 +193,17 @@ class _HeaderButton extends StatelessWidget {
               )
             else
               Icon(icon, size: AppIcons.headerIcon.s, color: Colors.white),
-            SizedBox(width: 10.s),
-            Text(
-              label,
-              style: AppFonts.jostStyle(
-                color: Colors.white,
-                fontSize: 14.ts,
-                fontWeight: FontWeight.normal,
+            if (!compact) ...[
+              SizedBox(width: 10.s),
+              Text(
+                label,
+                style: AppFonts.jostStyle(
+                  color: Colors.white,
+                  fontSize: 14.ts,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

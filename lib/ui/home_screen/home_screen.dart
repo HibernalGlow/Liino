@@ -309,22 +309,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                     ),
                                                   ),
                                                 ),
-                                                const Expanded(
-                                                  child: GlobalSearchBar(),
+                                                // The search bar takes the
+                                                // row but stops growing at
+                                                // 640px, so on a wide window
+                                                // it doesn't stretch to half
+                                                // the screen.
+                                                Expanded(
+                                                  child: Align(
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    child: ConstrainedBox(
+                                                      constraints:
+                                                          const BoxConstraints(
+                                                            maxWidth: 640,
+                                                          ),
+                                                      child:
+                                                          const GlobalSearchBar(),
+                                                    ),
+                                                  ),
                                                 ),
-                                                // const SizedBox(width: 48),
-                                                Spacer(),
-                                                _HeaderButton(
-                                                  onTap: () {
-                                                    FolderPickerHelper.pickFolder(
-                                                      context,
-                                                      ref,
-                                                    );
-                                                  },
-                                                  icon: LucideIcons.plus,
-                                                  label: l10n.addFolder,
-                                                  isDynamic: isDynamic,
-                                                ),
+                                                if (DesktopShellRules.showAddFolder(
+                                                  nav.activeItem,
+                                                  libraryEmpty:
+                                                      library.songs.isEmpty,
+                                                )) ...[
+                                                  const SizedBox(width: 16),
+                                                  _HeaderButton(
+                                                    onTap: () {
+                                                      FolderPickerHelper.pickFolder(
+                                                        context,
+                                                        ref,
+                                                      );
+                                                    },
+                                                    icon: LucideIcons.plus,
+                                                    label: l10n.addFolder,
+                                                    isDynamic: isDynamic,
+                                                    compact: isNarrowLayout,
+                                                  ),
+                                                ],
                                               ],
                                             ),
                                           ),
