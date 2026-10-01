@@ -1,5 +1,8 @@
 import 'package:flutter/widgets.dart';
 
+/// How much horizontal room a desktop window offers.
+enum WindowClass { compact, medium, expanded }
+
 /// Window-shape checks shared by the orientation-aware layouts.
 ///
 /// These key off the window size rather than `Orientation` or the platform: a
@@ -13,4 +16,16 @@ class Responsive {
   static bool isLandscape(Size size) => size.width > size.height;
 
   static bool isShort(Size size) => size.height < shortHeight;
+
+  /// From this width the sidebar is shown beside the content.
+  static const double mediumWidth = 800;
+
+  /// From this width there is room for extra panes.
+  static const double expandedWidth = 1400;
+
+  static WindowClass windowClass(double width) {
+    if (width < mediumWidth) return WindowClass.compact;
+    if (width < expandedWidth) return WindowClass.medium;
+    return WindowClass.expanded;
+  }
 }

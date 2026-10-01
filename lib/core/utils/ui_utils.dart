@@ -4,6 +4,10 @@ class UiUtils {
   static bool get isAndroid => Platform.isAndroid;
   static bool get isLinux => Platform.isLinux;
 
+  /// Mouse-and-window platforms. Desktop-only behaviour keys off this.
+  static bool get isDesktop =>
+      Platform.isLinux || Platform.isWindows || Platform.isMacOS;
+
   /// Returns a scaling factor for UI components.
   /// Android gets a smaller scale (0.85) to fit more content.
   static double get scale => isAndroid ? 0.85 : 1.0;
