@@ -20,6 +20,8 @@ import 'package:looper_player/features/playlists/data/services/playlist_service.
 import 'package:looper_player/features/playlists/presentation/screens/playlist_view.dart'
     show playlistProvider;
 import 'song_tile.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
+import 'song_columns.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
 export 'song_tile.dart';
@@ -304,6 +306,85 @@ class _SongsListState extends ConsumerState<SongsList> {
     );
   }
 
+  /// The list every platform had before two-column mode; moved here
+  /// unchanged so the desktop path can choose between it and the grid.
+  Widget _buildSingleColumnList(AppLocalizations l10n) {
+    return ListView.builder(
+      controller: widget.controller,
+      shrinkWrap: false,
+      physics:
+          widget.physics ??
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 180),
+      itemCount: widget.songs.length,
+      // Every row is the same fixed-height SongTile, so give the
+      // sliver one real instance to measure once instead of
+      // re-measuring each row as it scrolls into view - this is
+      // the list a fast fling scroll actually has to keep up with.
+      prototypeItem: SongTile(
+        song: widget.songs.first,
+        l10n: l10n,
+        songs: widget.songs,
+        searchQuery: widget.searchQuery,
+        playlist: widget.playlist,
+        selectionMode: false,
+        selected: false,
+        onToggleSelect: () {},
+        onEnterSelection: () {},
+      ),
+      itemBuilder: (context, index) {
+        final song = widget.songs[index];
+        return SongTile(
+          key: ValueKey(song.path),
+          song: song,
+          l10n: l10n,
+          songs: widget.songs,
+          searchQuery: widget.searchQuery,
+          playlist: widget.playlist,
+          selectionMode: _isSelecting,
+          selected: _selectedPaths.contains(song.path),
+          onToggleSelect: () => _toggleSelected(song),
+          onEnterSelection: () => _enterSelection(song),
+        );
+      },
+    );
+  }
+
+  Widget _buildRow(int index, AppLocalizations l10n) {
+    final song = widget.songs[index];
+    return SongTile(
+      key: ValueKey(song.path),
+      song: song,
+      l10n: l10n,
+      songs: widget.songs,
+      searchQuery: widget.searchQuery,
+      playlist: widget.playlist,
+      selectionMode: _isSelecting,
+      selected: _selectedPaths.contains(song.path),
+      onToggleSelect: () => _toggleSelected(song),
+      onEnterSelection: () => _enterSelection(song),
+    );
+  }
+
+  /// Desktop only: the same rows laid out two across. 64 is the height of
+  /// a two-line SongTile.
+  Widget _buildTwoColumnGrid(AppLocalizations l10n) {
+    return GridView.builder(
+      controller: widget.controller,
+      physics:
+          widget.physics ??
+          const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 180),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisExtent: 64,
+        crossAxisSpacing: 24,
+      ),
+      itemCount: widget.songs.length,
+      itemBuilder: (context, index) => _buildRow(index, l10n),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -353,47 +434,20 @@ class _SongsListState extends ConsumerState<SongsList> {
               onRefresh: () => ref
                   .read(libraryProvider.notifier)
                   .scanSavedFolders(showVisualIndicator: false),
-              child: ListView.builder(
-                controller: widget.controller,
-                shrinkWrap: false,
-                physics:
-                    widget.physics ??
-                    const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
-                    ),
-                padding: const EdgeInsets.fromLTRB(0, 8, 0, 180),
-                itemCount: widget.songs.length,
-                // Every row is the same fixed-height SongTile, so give the
-                // sliver one real instance to measure once instead of
-                // re-measuring each row as it scrolls into view - this is
-                // the list a fast fling scroll actually has to keep up with.
-                prototypeItem: SongTile(
-                  song: widget.songs.first,
-                  l10n: l10n,
-                  songs: widget.songs,
-                  searchQuery: widget.searchQuery,
-                  playlist: widget.playlist,
-                  selectionMode: false,
-                  selected: false,
-                  onToggleSelect: () {},
-                  onEnterSelection: () {},
-                ),
-                itemBuilder: (context, index) {
-                  final song = widget.songs[index];
-                  return SongTile(
-                    key: ValueKey(song.path),
-                    song: song,
-                    l10n: l10n,
-                    songs: widget.songs,
-                    searchQuery: widget.searchQuery,
-                    playlist: widget.playlist,
-                    selectionMode: _isSelecting,
-                    selected: _selectedPaths.contains(song.path),
-                    onToggleSelect: () => _toggleSelected(song),
-                    onEnterSelection: () => _enterSelection(song),
-                  );
-                },
-              ),
+              child: UiUtils.isDesktop
+                  ? LayoutBuilder(
+                      builder: (context, constraints) =>
+                          songColumnsFor(
+                                constraints.maxWidth,
+                                desktop: true,
+                                searching:
+                                    widget.searchQuery?.isNotEmpty ?? false,
+                              ) ==
+                              2
+                          ? _buildTwoColumnGrid(l10n)
+                          : _buildSingleColumnList(l10n),
+                    )
+                  : _buildSingleColumnList(l10n),
             ),
           ),
       ],

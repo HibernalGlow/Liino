@@ -13,6 +13,7 @@ import 'package:looper_player/ui/widgets/player/global_playing_indicator.dart';
 import 'package:isar_community/isar.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/ui/desktop/widgets/hover_card.dart';
 
 part 'library_grids.g.dart';
 
@@ -47,12 +48,12 @@ class AlbumsGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDynamic = ref.watch(settingsProvider).enableDynamicTheming;
     final albumsAsync = ref.watch(albumsProvider);
 
     return albumsAsync.when(
       data: (albums) => GridView.builder(
-        padding: EdgeInsets.all(24.s),
+        // The bottom inset keeps the last row clear of the player bar.
+        padding: EdgeInsets.fromLTRB(24.s, 16.s, 24.s, 140),
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 200.s,
           childAspectRatio: 0.72,
@@ -74,7 +75,6 @@ class _AlbumCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDynamic = ref.watch(settingsProvider).enableDynamicTheming;
     // Combined into one select so this card only rebuilds when ITS OWN
     // playing state flips, instead of every album card rebuilding on any
     // play/pause toggle.
@@ -94,7 +94,7 @@ class _AlbumCard extends ConsumerWidget {
       ),
     );
 
-    return InkWell(
+    return HoverCard(
       onTap: () async {
         final songs = await DbService.isar.songs
             .filter()
@@ -110,28 +110,9 @@ class _AlbumCard extends ConsumerWidget {
               album: album,
             );
       },
-      borderRadius: BorderRadius.circular(24),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
+      selected: isSelected,
+      child: Padding(
         padding: EdgeInsets.all(12.s),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          color: isSelected
-              ? const Color.fromARGB(
-                  255,
-                  53,
-                  53,
-                  53,
-                ).withValues(alpha: isDynamic ? 0.3 : 0.1)
-              : Colors.transparent,
-          border: isSelected
-              ? Border.all(
-                  color: Colors.white10.withValues(alpha: 0.1),
-                  width: 1,
-                )
-              : null,
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -215,17 +196,17 @@ class ArtistsGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDynamic = ref.watch(settingsProvider).enableDynamicTheming;
     final artistsAsync = ref.watch(artistsProvider);
 
     return artistsAsync.when(
       data: (artists) => GridView.builder(
-        padding: EdgeInsets.all(24.s),
+        // The bottom inset keeps the last row clear of the player bar.
+        padding: EdgeInsets.fromLTRB(24.s, 16.s, 24.s, 140),
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 180.s,
-          childAspectRatio: 0.8,
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20,
+          maxCrossAxisExtent: 190.s,
+          childAspectRatio: 0.82,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
         ),
         itemCount: artists.length,
         itemBuilder: (context, index) => _ArtistCard(artist: artists[index]),
@@ -242,7 +223,6 @@ class _ArtistCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDynamic = ref.watch(settingsProvider).enableDynamicTheming;
     // Select just whether THIS artist is the selected one, instead of
     // watching the whole nav state (which would rebuild every visible card
     // on any navigation change).
@@ -254,7 +234,7 @@ class _ArtistCard extends ConsumerWidget {
       ),
     );
 
-    return InkWell(
+    return HoverCard(
       onTap: () async {
         final songs = await DbService.isar.songs
             .filter()
@@ -276,28 +256,9 @@ class _ArtistCard extends ConsumerWidget {
               songs: songs,
             );
       },
-      borderRadius: BorderRadius.circular(24),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
+      selected: isSelected,
+      child: Padding(
         padding: EdgeInsets.all(12.s),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          color: isSelected
-              ? const Color.fromARGB(
-                  255,
-                  53,
-                  53,
-                  53,
-                ).withValues(alpha: isDynamic ? 0.3 : 0.1)
-              : Colors.transparent,
-          border: isSelected
-              ? Border.all(
-                  color: Colors.white10.withValues(alpha: 0.1),
-                  width: 1,
-                )
-              : null,
-        ),
         child: Column(
           children: [
             Expanded(
@@ -332,8 +293,9 @@ class _ArtistCard extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               artist.name,
+              textAlign: TextAlign.center,
               style: AppFonts.jostStyle(
-                fontWeight: FontWeight.normal,
+                fontWeight: FontWeight.w500,
                 fontSize: 14.ts,
               ),
               maxLines: 1,
