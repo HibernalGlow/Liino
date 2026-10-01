@@ -1,6 +1,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'line_thumb_shape.dart';
 import 'squiggly_slider_track_shape.dart';
 
@@ -101,6 +102,8 @@ class SquigglySlider extends Slider {
     this.squiggleAmplitude = 0.0,
     this.squiggleWavelength = 0.0,
     this.squiggleSpeed = 1.0,
+    this.squiggleAnimating = true,
+    this.thumbGap,
     this.useLineThumb = false,
   });
 
@@ -113,6 +116,13 @@ class SquigglySlider extends Slider {
   /// The speed of the squiggle in waves per second.
   final double squiggleSpeed;
 
+  /// Whether the wave moves. When false it holds still where it is.
+  final bool squiggleAnimating;
+
+  /// Empty space between the thumb and each side of the track, see
+  /// [SquigglySliderTrackShape.thumbGap].
+  final double? thumbGap;
+
   /// Use the Android 13's like slider thumb
   final bool useLineThumb;
 
@@ -122,84 +132,99 @@ class SquigglySlider extends Slider {
 
 class _SquigglySliderState extends State<SquigglySlider>
     with SingleTickerProviderStateMixin {
-  late AnimationController phaseController;
-  DateTime _lastRebuild = DateTime.fromMillisecondsSinceEpoch(0);
+  // The wave's phase in [0, 1), advanced by a ticker. The track shape reads
+  // it at paint time, so moving the wave only repaints the slider's own
+  // layer (via [_boundaryKey]) instead of rebuilding the whole Slider.
+  final ValueNotifier<double> _phase = ValueNotifier<double>(0.5);
+  final GlobalKey _boundaryKey = GlobalKey();
+  late final Ticker _ticker = createTicker(_onTick);
+  Duration? _lastElapsed;
+  Duration _lastPaint = Duration.zero;
+
+  // The wave drifts slowly; ~30 repaints a second is already smooth.
+  static const Duration _paintInterval = Duration(milliseconds: 33);
 
   @override
   void initState() {
     super.initState();
-    if (widget.squiggleSpeed == 0) {
-      phaseController = AnimationController(vsync: this);
-      phaseController.value = 0.5;
-    } else {
-      phaseController =
-          AnimationController(
-              duration: Duration(
-                milliseconds: (1000.0 / widget.squiggleSpeed.abs()).round(),
-              ),
-              vsync: this,
-            )
-            ..repeat(min: 0, max: 1)
-            ..addListener(_onPhaseTick);
+    _syncTicker();
+  }
+
+  @override
+  void didUpdateWidget(covariant SquigglySlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncTicker();
+  }
+
+  bool get _wantsTick =>
+      widget.squiggleSpeed != 0 &&
+      widget.squiggleAnimating &&
+      // Nothing visible changes while the wave is flat (amplitude 0 -
+      // paused, or squiggle disabled), so don't tick for it.
+      widget.squiggleAmplitude != 0;
+
+  void _syncTicker() {
+    if (_wantsTick && !_ticker.isActive) {
+      _lastElapsed = null;
+      _ticker.start();
+    } else if (!_wantsTick && _ticker.isActive) {
+      _ticker.stop();
     }
   }
 
-  void _onPhaseTick() {
-    // Nothing visible changes while the wave is flat (amplitude 0 - paused,
-    // or squiggle disabled), so skip rebuilding the whole Slider for it.
-    if (widget.squiggleAmplitude == 0) return;
-    // This ticks every animation frame (~60/s), but the wave itself drifts
-    // over ~20s - sampling its phase this often only means rebuilding (and
-    // repainting a several-hundred-point sine curve for) the whole Slider
-    // far more often than the eye can tell apart from ~15/s.
-    final now = DateTime.now();
-    if (now.difference(_lastRebuild) < const Duration(milliseconds: 66)) {
-      return;
-    }
-    _lastRebuild = now;
-    setState(() {
-      // The state that has changed here is the animation object's value.
-    });
+  void _onTick(Duration elapsed) {
+    final Duration? last = _lastElapsed;
+    _lastElapsed = elapsed;
+    if (last == null) return;
+    final double dt = ((elapsed - last).inMicroseconds / 1e6).clamp(0.0, 0.1);
+    final double next = (_phase.value + dt * widget.squiggleSpeed) % 1.0;
+    _phase.value = next < 0 ? next + 1 : next;
+    if (elapsed - _lastPaint < _paintInterval) return;
+    _lastPaint = elapsed;
+    _boundaryKey.currentContext?.findRenderObject()?.markNeedsPaint();
   }
 
   @override
   void dispose() {
-    phaseController.dispose();
+    _ticker.dispose();
+    _phase.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => SliderTheme(
-    data: SliderTheme.of(context).copyWith(
-      trackShape: SquigglySliderTrackShape(
-        squiggleAmplitude: widget.squiggleAmplitude,
-        squiggleWavelength: widget.squiggleWavelength,
-        squigglePhaseFactor: widget.squiggleSpeed < 0
-            ? 1 - phaseController.value
-            : phaseController.value,
+  Widget build(BuildContext context) => RepaintBoundary(
+    key: _boundaryKey,
+    child: SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        trackShape: SquigglySliderTrackShape(
+          squiggleAmplitude: widget.squiggleAmplitude,
+          squiggleWavelength: widget.squiggleWavelength,
+          phase: _phase,
+          thumbGap: widget.thumbGap,
+        ),
+        thumbShape: widget.useLineThumb ? const LineThumbShape() : null,
       ),
-      thumbShape: widget.useLineThumb ? const LineThumbShape() : null,
-    ),
-    child: Slider(
-      key: widget.key,
-      value: widget.value,
-      secondaryTrackValue: widget.secondaryTrackValue,
-      onChanged: widget.onChanged,
-      onChangeStart: widget.onChangeStart,
-      onChangeEnd: widget.onChangeEnd,
-      min: widget.min,
-      max: widget.max,
-      divisions: widget.divisions,
-      label: widget.label,
-      activeColor: widget.activeColor,
-      inactiveColor: widget.inactiveColor,
-      secondaryActiveColor: widget.secondaryActiveColor,
-      thumbColor: widget.thumbColor,
-      overlayColor: widget.overlayColor,
-      mouseCursor: widget.mouseCursor,
-      semanticFormatterCallback: widget.semanticFormatterCallback,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
+      child: Slider(
+        key: widget.key,
+        value: widget.value,
+        secondaryTrackValue: widget.secondaryTrackValue,
+        onChanged: widget.onChanged,
+        onChangeStart: widget.onChangeStart,
+        onChangeEnd: widget.onChangeEnd,
+        min: widget.min,
+        max: widget.max,
+        divisions: widget.divisions,
+        label: widget.label,
+        activeColor: widget.activeColor,
+        inactiveColor: widget.inactiveColor,
+        secondaryActiveColor: widget.secondaryActiveColor,
+        thumbColor: widget.thumbColor,
+        overlayColor: widget.overlayColor,
+        mouseCursor: widget.mouseCursor,
+        semanticFormatterCallback: widget.semanticFormatterCallback,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+      ),
     ),
   );
 }

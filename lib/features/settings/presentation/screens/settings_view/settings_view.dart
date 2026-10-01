@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:looper_player/core/services/update/apk_installer.dart';
 import 'package:looper_player/features/library/domain/models/models.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -25,6 +25,7 @@ import '../../widgets/tiles/playback_settings_tiles.dart';
 import '../../widgets/tiles/audio_playback_settings_tiles.dart';
 import '../../widgets/tiles/library_settings_tiles.dart';
 import '../../widgets/tiles/about_settings_tiles.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 export '../settings_category_screen.dart';
 
 part 'settings_view.g.dart';
@@ -109,7 +110,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                 useExpanded: false,
                                 forceNoBlur: true,
                                 onTap: () {
-                                  HapticFeedback.lightImpact();
+                                  AppHaptics.light();
                                   setState(() {
                                     _isSearching = false;
                                     _searchController.clear();
@@ -201,7 +202,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                 forceNoBlur: true,
                                 useExpanded: false,
                                 onTap: () {
-                                  HapticFeedback.lightImpact();
+                                  AppHaptics.light();
                                   ref
                                       .read(appNavigationProvider.notifier)
                                       .goBack();
@@ -233,7 +234,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                 forceNoBlur: true,
                                 useBlur: useBlur,
                                 onTap: () {
-                                  HapticFeedback.lightImpact();
+                                  AppHaptics.light();
                                   setState(() {
                                     _isSearching = true;
                                   });

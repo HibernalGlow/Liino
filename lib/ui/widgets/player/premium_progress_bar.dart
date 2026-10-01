@@ -6,6 +6,7 @@ import 'squiggly_slider/slider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/core/utils/ui_utils.dart';
+import 'package:looper_player/features/settings/domain/progress_bar_style.dart';
 
 class ExpressiveSlider extends ConsumerStatefulWidget {
   final Duration position;
@@ -17,6 +18,10 @@ class ExpressiveSlider extends ConsumerStatefulWidget {
   final Color color;
   final bool showTimestamps;
 
+  /// Overrides the style from settings - used by the settings preview to
+  /// show unsaved changes live. Ignored on Linux, which keeps its own look.
+  final ProgressBarStyle? style;
+
   const ExpressiveSlider({
     super.key,
     required this.position,
@@ -27,7 +32,13 @@ class ExpressiveSlider extends ConsumerStatefulWidget {
     this.onSeekEnd,
     required this.color,
     this.showTimestamps = true,
+    this.style,
   });
+
+  /// Whether this is the desktop (Linux) bar with its own fixed look.
+  /// Overridable so tests (which run on Linux) can reach the Android bar.
+  @visibleForTesting
+  static bool useDesktopLayout = Platform.isLinux;
 
   @override
   ConsumerState<ExpressiveSlider> createState() => _ExpressiveSliderState();
@@ -98,35 +109,35 @@ class _ExpressiveSliderState extends ConsumerState<ExpressiveSlider> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final settings = ref.watch(settingsProvider);
-    final double progress = widget.duration.inMilliseconds > 0
-        ? (widget.position.inMilliseconds / widget.duration.inMilliseconds)
-              .clamp(0.0, 1.0)
-        : 0.0;
+  void _onChanged(double val) {
+    setState(() => _dragValue = val);
+    widget.onSeek(widget.duration * val);
+  }
 
-    final displayValue = _dragValue ?? progress;
+  void _onChangeStart(double val) {
+    setState(() => _dragValue = val);
+    widget.onSeekStart?.call();
+  }
+
+  void _onChangeEnd(double val) {
+    setState(() => _dragValue = null);
+    widget.onSeekEnd?.call();
+  }
+
+  /// The desktop (Linux) bar: fixed look, not affected by the progress bar
+  /// style settings apart from the flat-bar toggle.
+  Widget _buildLinuxSlider(double displayValue) {
+    final disableSquiggle = ref.watch(
+      settingsProvider.select((s) => s.disableSquiggle),
+    );
     final bool enableWave = widget.isPlaying && displayValue > 0.12;
-    final displayPosition = _dragValue != null
-        ? widget.duration * _dragValue!
-        : widget.position;
-
-    final targetAmplitude = settings.disableSquiggle
-        ? 0.0
-        : (enableWave ? 2.0 : 0.0);
-
-    final sliderWidget = SliderTheme(
+    final targetAmplitude = disableSquiggle ? 0.0 : (enableWave ? 2.0 : 0.0);
+    return SliderTheme(
       data: SliderTheme.of(context).copyWith(
-        trackHeight: Platform.isLinux ? 3.0 : 8.0,
+        trackHeight: 3.0,
         activeTrackColor: widget.color,
-        trackShape: PremiumGapTrackShape(gap: Platform.isLinux ? 4 : 6),
         inactiveTrackColor: Colors.white10,
-
-        thumbShape: LineThumbShape(
-          thumbHeight: Platform.isLinux ? 12 : 16,
-          thumbWidth: Platform.isLinux ? 3 : 6,
-        ),
+        thumbShape: const LineThumbShape(thumbHeight: 12, thumbWidth: 3),
         overlayShape: SliderComponentShape.noOverlay,
       ),
       child: TweenAnimationBuilder<double>(
@@ -136,30 +147,103 @@ class _ExpressiveSliderState extends ConsumerState<ExpressiveSlider> {
         builder: (context, amplitude, child) {
           return SquigglySlider(
             value: displayValue,
-            onChanged: (val) {
-              setState(() => _dragValue = val);
-              widget.onSeek(widget.duration * val);
-            },
-            onChangeStart: (val) {
-              setState(() => _dragValue = val);
-              widget.onSeekStart?.call();
-            },
-            onChangeEnd: (val) {
-              setState(() => _dragValue = null);
-              widget.onSeekEnd?.call();
-            },
+            onChanged: _onChanged,
+            onChangeStart: _onChangeStart,
+            onChangeEnd: _onChangeEnd,
             activeColor: widget.color,
             inactiveColor: Colors.white10,
             squiggleAmplitude: amplitude,
-            squiggleWavelength: Platform.isLinux ? 4.5 : 6.0,
-            squiggleSpeed: Platform.isLinux ? 0.08 : 0.05,
+            squiggleWavelength: 4.5,
+            squiggleSpeed: 0.08,
             useLineThumb: false,
           );
         },
       ),
     );
+  }
 
-    if (Platform.isLinux) {
+  Widget _buildStyledSlider(double displayValue, ProgressBarStyle style) {
+    final bool pastStart = style.waveFromStart || displayValue > 0.12;
+    final bool showWave =
+        style.wave && pastStart && (widget.isPlaying || style.freezeWhenPaused);
+    final double targetAmplitude = showWave ? style.waveHeight : 0.0;
+    final Color inactive = Colors.white.withValues(
+      alpha: style.inactiveOpacity,
+    );
+    final double thumbWidth = switch (style.thumbStyle) {
+      ProgressThumbStyle.pill => style.thumbWidth,
+      ProgressThumbStyle.round => style.thumbHeight,
+      ProgressThumbStyle.none => 0,
+    };
+    final double thumbHeight = style.thumbStyle == ProgressThumbStyle.none
+        ? 0
+        : style.thumbHeight;
+
+    // Fixed at the default bar's height (its 16dp thumb) whatever the style,
+    // so thicker bars, taller thumbs or no thumb never move the player's
+    // layout - bigger parts just paint past it (nothing up the tree clips).
+    return SizedBox(
+      height: ProgressBarStyle.defaultThumbHeight,
+      child: SliderTheme(
+        data: SliderTheme.of(context).copyWith(
+          trackHeight: style.thickness,
+          activeTrackColor: widget.color,
+          inactiveTrackColor: inactive,
+          thumbShape: LineThumbShape(
+            thumbHeight: thumbHeight,
+            thumbWidth: thumbWidth,
+            growOnDrag: style.growThumbOnDrag,
+          ),
+          overlayShape: SliderComponentShape.noOverlay,
+        ),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0.0, end: targetAmplitude),
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOutCubic,
+          builder: (context, amplitude, child) {
+            return SquigglySlider(
+              value: displayValue,
+              onChanged: _onChanged,
+              onChangeStart: _onChangeStart,
+              onChangeEnd: _onChangeEnd,
+              activeColor: widget.color,
+              inactiveColor: inactive,
+              squiggleAmplitude: amplitude,
+              squiggleWavelength: style.squiggleWavelength,
+              squiggleSpeed: style.waveSpeed,
+              squiggleAnimating: widget.isPlaying,
+              thumbGap: style.thumbGap,
+              useLineThumb: false,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double progress = widget.duration.inMilliseconds > 0
+        ? (widget.position.inMilliseconds / widget.duration.inMilliseconds)
+              .clamp(0.0, 1.0)
+        : 0.0;
+
+    final displayValue = _dragValue ?? progress;
+    final displayPosition = _dragValue != null
+        ? widget.duration * _dragValue!
+        : widget.position;
+
+    final sliderWidget = ExpressiveSlider.useDesktopLayout
+        ? _buildLinuxSlider(displayValue)
+        : _buildStyledSlider(
+            displayValue,
+            widget.style ??
+                ref.watch(
+                  settingsProvider.select(ProgressBarStyle.fromSettings),
+                ),
+          );
+
+    if (ExpressiveSlider.useDesktopLayout) {
       return Row(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -203,7 +287,14 @@ class LineThumbShape extends SliderComponentShape {
   final double thumbHeight;
   final double thumbWidth;
 
-  const LineThumbShape({this.thumbHeight = 12, this.thumbWidth = 2});
+  /// Grow the thumb a little while it's being dragged.
+  final bool growOnDrag;
+
+  const LineThumbShape({
+    this.thumbHeight = 12,
+    this.thumbWidth = 2,
+    this.growOnDrag = false,
+  });
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -225,6 +316,8 @@ class LineThumbShape extends SliderComponentShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
+    if (thumbWidth <= 0 || thumbHeight <= 0) return;
+    final double grow = growOnDrag ? 1 + 0.35 * activationAnimation.value : 1;
     final Canvas canvas = context.canvas;
     final Paint paint = Paint()
       ..color = sliderTheme.thumbColor ?? Colors.white
@@ -232,78 +325,14 @@ class LineThumbShape extends SliderComponentShape {
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: center, width: thumbWidth, height: thumbHeight),
-        Radius.circular(thumbWidth / 2),
+        Rect.fromCenter(
+          center: center,
+          width: thumbWidth * grow,
+          height: thumbHeight * grow,
+        ),
+        Radius.circular(thumbWidth * grow / 2),
       ),
       paint,
     );
-  }
-}
-
-class PremiumGapTrackShape extends RoundedRectSliderTrackShape {
-  final double gap;
-
-  const PremiumGapTrackShape({this.gap = 6});
-
-  @override
-  void paint(
-    PaintingContext context,
-    Offset offset, {
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required Animation<double> enableAnimation,
-    required Offset thumbCenter,
-    Offset? secondaryOffset,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-    required TextDirection textDirection,
-    double additionalActiveTrackHeight = 0.0,
-  }) {
-    if (sliderTheme.trackHeight == null || sliderTheme.trackHeight! <= 0) {
-      return;
-    }
-
-    final Rect trackRect = getPreferredRect(
-      parentBox: parentBox,
-      offset: offset,
-      sliderTheme: sliderTheme,
-      isEnabled: isEnabled,
-      isDiscrete: isDiscrete,
-    );
-
-    final Paint activePaint = Paint()..color = sliderTheme.activeTrackColor!;
-
-    final Paint inactivePaint = Paint()
-      ..color = sliderTheme.inactiveTrackColor!;
-
-    final double trackHeight = sliderTheme.trackHeight!;
-    final Radius radius = Radius.circular(trackHeight / 2);
-
-    // ACTIVE TRACK
-    final RRect activeRRect = RRect.fromLTRBAndCorners(
-      trackRect.left,
-      trackRect.top,
-      thumbCenter.dx - gap,
-      trackRect.bottom,
-      topLeft: radius,
-      bottomLeft: radius,
-      topRight: radius,
-      bottomRight: radius,
-    );
-
-    // INACTIVE TRACK
-    final RRect inactiveRRect = RRect.fromLTRBAndCorners(
-      thumbCenter.dx + gap,
-      trackRect.top,
-      trackRect.right,
-      trackRect.bottom,
-      topLeft: radius,
-      bottomLeft: radius,
-      topRight: radius,
-      bottomRight: radius,
-    );
-
-    context.canvas.drawRRect(activeRRect, activePaint);
-    context.canvas.drawRRect(inactiveRRect, inactivePaint);
   }
 }

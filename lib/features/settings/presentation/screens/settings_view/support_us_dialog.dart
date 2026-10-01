@@ -68,7 +68,7 @@ extension _SettingsSupportUsDialog on _SettingsViewState {
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () async {
-                        HapticFeedback.mediumImpact();
+                        AppHaptics.medium();
                         final upiUri = Uri.parse(AppLinks.upiPay);
                         final webUri = Uri.parse(AppLinks.buyMeACoffee);
                         try {

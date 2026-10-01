@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:looper_player/core/utils/logger_helper.dart';
 
+import 'lyrics_providers/lrc_red_client.dart';
+import 'lyrics_providers/lyrics_plus_client.dart';
+
 class LyricsResponse {
   final String? lyrics;
   final bool? instrumental;
@@ -155,6 +158,24 @@ class LyricsService {
     );
 
     switch (provider.toUpperCase()) {
+      case 'LRC.RED':
+        return _wrapSynced(
+          await LrcRedClient.fetch(
+            title: trackName,
+            artist: artistName,
+            album: albumName,
+            durationSeconds: durationSeconds,
+          ),
+        );
+      case 'LYRICSPLUS':
+        return _wrapSynced(
+          await LyricsPlusClient.fetch(
+            title: trackName,
+            artist: artistName,
+            album: albumName,
+            durationSeconds: durationSeconds,
+          ),
+        );
       case 'GENIUS':
         return _fetchGeniusLyrics(trackName, artistName);
       case 'MUSIXMATCH':
@@ -176,7 +197,11 @@ class LyricsService {
     }
   }
 
-  // --- 1. LRCLIB (Default / Existing) ---
+  /// lrc.red / LyricsPlus clients already hand back (enhanced) LRC.
+  LyricsResponse? _wrapSynced(String? lrc) =>
+      lrc == null ? null : LyricsResponse(syncedLyrics: lrc);
+
+  // --- 1. LRCLIB ---
   Future<LyricsResponse?> _fetchLrcLibLyrics(
     String trackName,
     String artistName,

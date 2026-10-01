@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
@@ -10,6 +9,7 @@ import 'package:looper_player/features/playback/presentation/providers/lyrics/ly
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'lyrics_share_sheet.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 /// Floating pill bar shown above the lyrics list while the user has an
 /// active multi-line selection (started via long-press in `AdvancedLyricLine`).
@@ -45,7 +45,7 @@ class LyricsSelectionToolbar extends ConsumerWidget {
               children: [
                 IconButton(
                   onPressed: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     ref.read(lyricsSelectionProvider.notifier).clear();
                   },
                   icon: const Icon(
@@ -68,7 +68,7 @@ class LyricsSelectionToolbar extends ConsumerWidget {
                 GestureDetector(
                   onTap: () {
                     if (!selection.isActive) return;
-                    HapticFeedback.mediumImpact();
+                    AppHaptics.medium();
                     final allLines = ref.read(lyricsProvider).parsedLines;
                     final selected = allLines.sublist(
                       selection.startIndex!,

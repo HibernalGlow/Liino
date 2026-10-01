@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -22,6 +21,7 @@ import 'package:looper_player/features/playlists/presentation/screens/playlist_v
     show playlistProvider;
 import 'song_tile.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 export 'song_tile.dart';
 part 'sort_bottom_sheet.dart';
 

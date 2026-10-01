@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -10,6 +9,8 @@ import 'package:looper_player/features/library/presentation/providers/library/li
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class ColorCircle extends StatelessWidget {
   final Color color;
@@ -27,7 +28,7 @@ class ColorCircle extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         onTap();
       },
       child: Container(
@@ -94,7 +95,7 @@ class MaintainerTile extends StatelessWidget {
         children: [
           IconButton(
             icon: SvgPicture.asset(
-              'assets/about/github_icon.svg',
+              AppAssets.github,
               width: 18,
               height: 18,
               colorFilter: const ColorFilter.mode(

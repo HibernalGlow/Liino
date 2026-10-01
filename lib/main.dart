@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show GestureBinding;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 import 'package:looper_player/features/settings/presentation/widgets/tiles/theme/theme_settings_tiles.dart';
 import 'package:mpv_audio_kit/mpv_audio_kit.dart';
 import 'package:window_manager/window_manager.dart';
@@ -39,6 +40,7 @@ void main(List<String> args) async {
   if (Platform.isAndroid) {
     GestureBinding.instance.resamplingEnabled = true;
   }
+  AppHaptics.init();
 
   // Capture unhandled Flutter framework errors
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -108,7 +110,7 @@ void main(List<String> args) async {
   // Initialize native plugins in parallel
   final Future<void> nativePluginsInit = () async {
     try {
-      MetadataGod.initialize();
+      await MetadataGod.initialize();
     } catch (e, s) {
       LoggerHelper.write('Failed to initialize MetadataGod', e, s);
     }
@@ -200,12 +202,14 @@ class MyApp extends ConsumerWidget {
     final String language = settings?.language ?? '';
 
     final String fontFamily = useNewFont
-        ? (customFontFamily.isEmpty ? 'Jost' : customFontFamily)
-        : 'DM Sans';
+        ? (customFontFamily.isEmpty ? 'Stack Sans Text' : customFontFamily)
+        : 'Stack Sans Text';
 
+    final fontFallback = AppFonts.scriptFallbackFor(fontFamily);
     final textTheme = AppFonts.adjustTextTheme(
       ThemeData.dark().textTheme.apply(
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFallback,
         displayColor: Colors.white,
         bodyColor: Colors.white70,
       ),
@@ -223,6 +227,7 @@ class MyApp extends ConsumerWidget {
           useMaterial3: true,
           colorScheme: colorScheme,
           fontFamily: fontFamily,
+          fontFamilyFallback: fontFallback,
           textTheme: textTheme,
         ),
         themeAnimationDuration: const Duration(milliseconds: 1000),

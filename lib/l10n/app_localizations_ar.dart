@@ -237,7 +237,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dynamicColorActiveLyricsDesc =>
-      'استخدم ألوان العمل الفني المستخرجة لخط كلمات الأغاني الجاري تشغيله حاليًا';
+      'تلوين سطر الكلمات الحالي؛ عند الإيقاف يبقى أبيض';
+
+  @override
+  String get activeLyricsIntensity => 'شدة السطر النشط';
+
+  @override
+  String get activeLyricsIntensityDesc =>
+      'مقدار اللون الظاهر في سطر الكلمات الحالي';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => 'سطر غير نشط';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => 'سطر نشط';
+
+  @override
+  String get activeLyricsUseAccent => 'لون التمييز للسطر النشط';
+
+  @override
+  String get activeLyricsUseAccentDesc =>
+      'استخدام لون التمييز الصافي؛ عند الإيقاف يُمزج مع الأبيض للحصول على درجة أنعم';
 
   @override
   String get dynamicLyricsBg => 'كلمات ديناميكية BG';
@@ -420,7 +440,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lyricsProviderDesc =>
-      'تُجلب كلمات الأغاني عبر الإنترنت من lrclib.net (LRCLIB)';
+      'كلمات عبر الإنترنت من lrc.red وLyricsPlus وLRCLIB وغيرها';
 
   @override
   String get maintainersAndDesigners => 'المطورون والمصممون';
@@ -818,6 +838,65 @@ class AppLocalizationsAr extends AppLocalizations {
   String get showMore => 'عرض المزيد';
 
   @override
+  String get segmentedUtilityButtons => 'أزرار المشغل المقسّمة';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      'عرض أزرار الخلط والتكرار والتالي والكلمات كأربعة مربعات أيقونات بنفس تصميم أزرار التشغيل';
+
+  @override
+  String get qualityBadgeStyle => 'نمط شارة الجودة';
+
+  @override
+  String get qualityBadgeStyleDesc =>
+      'مظهر شارة جودة الصوت وأيقونتها وألوانها وتفاصيلها';
+
+  @override
+  String get qualityBadgeLook => 'المظهر';
+
+  @override
+  String get qualityBadgeLookPill => 'ممتلئ';
+
+  @override
+  String get qualityBadgeLookOutlined => 'محدد';
+
+  @override
+  String get qualityBadgeLookText => 'نص';
+
+  @override
+  String get qualityBadgeIcon => 'الأيقونة';
+
+  @override
+  String get qualityBadgeColorsByQuality => 'حسب الجودة';
+
+  @override
+  String get qualityBadgeSeparator => 'الفاصل';
+
+  @override
+  String get qualityBadgeDetails => 'التفاصيل';
+
+  @override
+  String get qualityBadgeLevel => 'مستوى الجودة';
+
+  @override
+  String get qualityBadgeLayout => 'المحتوى';
+
+  @override
+  String get qualityBadgeLayoutName => 'الاسم فقط';
+
+  @override
+  String get qualityBadgeShape => 'الشكل';
+
+  @override
+  String get qualityBadgeShapePill => 'كبسولة';
+
+  @override
+  String get qualityBadgeShapeRounded => 'مستدير';
+
+  @override
+  String get qualityBadgeShapeSquare => 'مربع';
+
+  @override
   String get showQualityBadge => 'إظهار شارة الجودة';
 
   @override
@@ -968,6 +1047,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'اسحب المشغل المصغر لأعلى لتحويله إلى المشغل الكامل';
 
   @override
+  String get hapticFeedback => 'الاستجابة اللمسية';
+
+  @override
+  String get hapticFeedbackDesc => 'اهتزاز عند اللمس والتبديل والإيماءات';
+
+  @override
   String get viewAll => 'عرض الكل';
 
   @override
@@ -1015,7 +1100,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      '• مزامنة كلمات الأغاني الديناميكية: تُستخدم فقط لجلب وتنزيل كلمات الأغاني المتزامنة (تنسيقات LRC) بشكل آمن من قواعد البيانات عبر الإنترنت. لا يتم تحميل أو مشاركة أي بيانات شخصية أو إعدادات أو ملفات وسائط على الإطلاق.';
+      '• كلمات الأغاني: يجلب الكلمات المتزامنة من lrc.red أو LyricsPlus أو LRCLIB أو المزوّد الذي تختاره. يُرسل فقط عنوان الأغنية والفنان والألبوم والمدة للعثور على تطابق. لا يتم أبدًا رفع أو مشاركة أي بيانات شخصية أو إعدادات أو ملفات وسائط.';
 
   @override
   String get whyPermissionsUsed => 'لماذا يتم استخدام الأذونات';
@@ -2087,10 +2172,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => 'نصائح الإيماءات';
+  String get gestureTips => 'نصائح الكلمات';
 
   @override
-  String get gestureTipsDesc => 'النقر والضغط المطوّل والقرص للتكبير والمزيد';
+  String get gestureTipsDesc => 'الإيماءات والمزامنة بالكلمة والتوقيت والمزيد';
 
   @override
   String get exportLyrics => 'تصدير الكلمات';
@@ -2115,8 +2200,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gestureLongPressLine => 'اضغط مطولًا على سطر';
 
   @override
-  String get gestureLongPressLineDesc =>
-      'ابدأ تحديد الأسطر لتحويلها إلى بطاقة كلمات قابلة للمشاركة. انقر على أسطر أخرى لتوسيع التحديد.';
+  String get gestureLongPressLineDesc => 'حدّد أسطرًا لمشاركتها كبطاقة كلمات.';
 
   @override
   String get gesturePinch => 'اقرص بإصبعين';
@@ -2131,7 +2215,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gestureSwipeDownDesc => 'أغلق شاشة الكلمات وارجع إلى المشغّل.';
 
   @override
-  String get lyricsGestures => 'إيماءات الكلمات';
+  String get lyricsGestures => 'نصائح الكلمات';
 
   @override
   String get lyricsGesturesIntro =>
@@ -2302,6 +2386,154 @@ class AppLocalizationsAr extends AppLocalizations {
   String nyquistKhz(String khz) {
     return 'نايكويست: $khz كيلوهرتز';
   }
+
+  @override
+  String get qualityHiRes => 'دقة عالية بدون فقدان';
+
+  @override
+  String get qualityMono => 'أحادي';
+
+  @override
+  String get qualityStereo => 'ستيريو';
+
+  @override
+  String get qualitySignalPath => 'مسار الإشارة';
+
+  @override
+  String get qualityStageSource => 'المصدر';
+
+  @override
+  String get qualityStageDecoder => 'فك الترميز';
+
+  @override
+  String get qualityStageOutput => 'الإخراج';
+
+  @override
+  String get qualityStageDevice => 'الجهاز';
+
+  @override
+  String get qualityNativeEndToEnd =>
+      'يُشغَّل بمعدل العينة الأصلي للملف طوال المسار';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return 'أُعيد تشكيله من $from إلى $to عند الإخراج';
+  }
+
+  @override
+  String get qualitySectionSource => 'الملف المصدر';
+
+  @override
+  String get qualitySectionEngine => 'محرك التشغيل';
+
+  @override
+  String get qualitySectionDevice => 'جهاز الإخراج';
+
+  @override
+  String get qualitySectionPhone => 'هذا الهاتف';
+
+  @override
+  String get qualityOutputFormat => 'تنسيق الإخراج';
+
+  @override
+  String get qualityOutputRate => 'معدل عينة الإخراج';
+
+  @override
+  String get qualityOutputChannels => 'قنوات الإخراج';
+
+  @override
+  String get qualityLiveBitrate => 'معدل البت الحالي';
+
+  @override
+  String get qualityGapless => 'تشغيل بلا فواصل';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => 'المقطع';
+
+  @override
+  String get qualityReplayGainAlbum => 'الألبوم';
+
+  @override
+  String get qualitySpeed => 'السرعة';
+
+  @override
+  String get qualityDeviceName => 'الاسم';
+
+  @override
+  String get qualityDeviceType => 'النوع';
+
+  @override
+  String get qualityDeviceSpeaker => 'مكبر صوت الهاتف';
+
+  @override
+  String get qualityDeviceWired => 'سماعات سلكية';
+
+  @override
+  String get qualityDeviceBluetooth => 'بلوتوث';
+
+  @override
+  String get qualityDeviceUsb => 'صوت USB';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => 'سماعة طبية';
+
+  @override
+  String get qualityDeviceDock => 'قاعدة';
+
+  @override
+  String get qualitySupportedRates => 'المعدلات المدعومة';
+
+  @override
+  String get qualityAnyRate => 'أي معدل';
+
+  @override
+  String get qualityMaxBitDepth => 'أقصى عمق بت';
+
+  @override
+  String get qualityMaxChannels => 'أقصى عدد قنوات';
+
+  @override
+  String get qualityBitPerfect => 'وضع Bit-perfect';
+
+  @override
+  String get qualitySupported => 'مدعوم';
+
+  @override
+  String get qualityNotSupported => 'غير مدعوم';
+
+  @override
+  String get qualitySpatialAudio => 'الصوت المكاني';
+
+  @override
+  String get qualityDeviceNote =>
+      'لا يخبر أندرويد التطبيقات بالمخرج الذي يُوجَّه إليه المشغل، لذا هذا هو الجهاز الذي تُرسل إليه الموسيقى عادةً.';
+
+  @override
+  String get qualityPhoneModel => 'الطراز';
+
+  @override
+  String get qualityAndroidVersion => 'إصدار أندرويد';
+
+  @override
+  String get qualityMixerRate => 'معدل عينة المازج';
+
+  @override
+  String get qualityMixerBuffer => 'مخزن المازج المؤقت';
+
+  @override
+  String get qualityLowLatency => 'صوت منخفض التأخير';
+
+  @override
+  String get qualityProAudio => 'الصوت الاحترافي';
+
+  @override
+  String get qualityDeviceUnavailable => 'تفاصيل الجهاز متاحة على أندرويد فقط.';
 
   @override
   String get qualityLossless => 'بدون فقدان';
@@ -2483,4 +2715,393 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mono => 'أحادي';
+
+  @override
+  String get progressBarStyle => 'نمط شريط التقدم';
+
+  @override
+  String get progressBarStyleDesc => 'الموجة والسماكة والمؤشر والمزيد';
+
+  @override
+  String get progressBarPreview => 'معاينة';
+
+  @override
+  String get progressWave => 'الموجة';
+
+  @override
+  String get progressWaveDesc => 'رسم الجزء المُشغَّل من الشريط كموجة متحركة';
+
+  @override
+  String get progressWaveHeight => 'ارتفاع الموجة';
+
+  @override
+  String get progressWaveLength => 'طول الموجة';
+
+  @override
+  String get progressWaveLengthDesc => 'المسافة بين موجة والتي تليها';
+
+  @override
+  String get progressWaveSpeed => 'سرعة الموجة';
+
+  @override
+  String get progressWaveFromStart => 'الموجة من البداية';
+
+  @override
+  String get progressWaveFromStartDesc =>
+      'إظهار الموجة فورًا بدلًا من انتظار الجزء الأول من الأغنية';
+
+  @override
+  String get progressKeepWavePaused => 'إبقاء الموجة عند الإيقاف المؤقت';
+
+  @override
+  String get progressKeepWavePausedDesc => 'تثبيت الموجة بدلًا من تسطيحها';
+
+  @override
+  String get progressBarThickness => 'سماكة الشريط';
+
+  @override
+  String get progressThumb => 'المؤشر';
+
+  @override
+  String get progressThumbPill => 'كبسولة';
+
+  @override
+  String get progressThumbRound => 'دائري';
+
+  @override
+  String get progressThumbWidth => 'عرض المؤشر';
+
+  @override
+  String get progressThumbHeight => 'ارتفاع المؤشر';
+
+  @override
+  String get progressThumbSize => 'حجم المؤشر';
+
+  @override
+  String get progressThumbGap => 'المسافة حول المؤشر';
+
+  @override
+  String get progressTrackOpacity => 'شفافية الجزء غير المُشغَّل';
+
+  @override
+  String get progressGrowThumb => 'تكبير المؤشر أثناء السحب';
+
+  @override
+  String get resetToDefaults => 'إعادة التعيين إلى الافتراضي';
+
+  @override
+  String get artworkVisualizer => 'مؤثرات الغلاف';
+
+  @override
+  String get artworkVisualizerDesc =>
+      'تأثير يتفاعل مع الموسيقى على غلاف الأغنية الحالية';
+
+  @override
+  String get visualizerEffect => 'التأثير';
+
+  @override
+  String get visualizerAura => 'توهج الهالة';
+
+  @override
+  String get visualizerRing => 'حلقة الطيف';
+
+  @override
+  String get visualizerWave => 'موجة سفلية';
+
+  @override
+  String get visualizerBars => 'أشرطة';
+
+  @override
+  String get visualizerBreathing => 'تنفّس';
+
+  @override
+  String get visualizerIntensity => 'الشدة';
+
+  @override
+  String get visualizerSubtle => 'خفيف';
+
+  @override
+  String get visualizerNormal => 'عادي';
+
+  @override
+  String get visualizerStrong => 'قوي';
+
+  @override
+  String get visualizerColors => 'الألوان';
+
+  @override
+  String get visualizerColorsArtwork => 'الغلاف';
+
+  @override
+  String get visualizerColorsTheme => 'السمة';
+
+  @override
+  String get visualizerColorsWhite => 'أبيض';
+
+  @override
+  String get progressTrack => 'المسار';
+
+  @override
+  String get visualizerSync => 'مزامنة الصوت';
+
+  @override
+  String get visualizerSyncDesc =>
+      'أخّر التأثير ليتزامن مع ما تسمعه. زِده لسماعات البلوتوث.';
+
+  @override
+  String get visualizerSyncHint => 'شغّل أغنية لضبط هذا بالسمع';
+
+  @override
+  String get lyricsHighlightStyle => 'نمط التمييز';
+
+  @override
+  String get lyricsStyleLine => 'سطر';
+
+  @override
+  String get lyricsStyleWord => 'كلمة بكلمة';
+
+  @override
+  String get lyricsStyleCharacter => 'حرفًا بحرف';
+
+  @override
+  String get lyricsWordSynced => 'متزامنة بالكلمات';
+
+  @override
+  String get lyricsLineSynced => 'متزامنة بالأسطر';
+
+  @override
+  String get findWordSyncedLyrics => 'البحث عن كلمات متزامنة بالكلمات';
+
+  @override
+  String get searchingWordSyncedLyrics => 'جارٍ البحث في lrc.red وLyricsPlus…';
+
+  @override
+  String get wordSyncedLyricsLoaded => 'تم تحميل كلمات متزامنة بالكلمات';
+
+  @override
+  String get noWordSyncedLyricsFound =>
+      'لم يتم العثور على كلمات متزامنة بالكلمات لهذه الأغنية';
+
+  @override
+  String get lyricsTiming => 'توقيت الكلمات';
+
+  @override
+  String get lyricsTimingDesc =>
+      'القيمة الموجبة تُظهر الكلمات أبكر، والسالبة أبطأ. إذا سبقت الكلمات الأغنية (شائع مع البلوتوث)، فاخفضها.';
+
+  @override
+  String get lyricsTimingEarlier => 'أبكر';
+
+  @override
+  String get lyricsTimingLater => 'لاحقًا';
+
+  @override
+  String get lyricsTimingReset => 'إعادة ضبط';
+
+  @override
+  String get themeGroupColors => 'الألوان';
+
+  @override
+  String get themeGroupBlurBackgrounds => 'التمويه والخلفيات';
+
+  @override
+  String get themeGroupDarkness => 'درجة التعتيم';
+
+  @override
+  String get themeGroupFonts => 'الخطوط';
+
+  @override
+  String get themeGroupProfile => 'الملف الشخصي';
+
+  @override
+  String get lyricsTipsGestures => 'الإيماءات';
+
+  @override
+  String get lyricsTipsMenu => 'في القائمة ⋮';
+
+  @override
+  String get gestureScroll => 'مرّر بحرية';
+
+  @override
+  String get gestureScrollDesc =>
+      'تتوقف المتابعة التلقائية أثناء التصفح. اضغط إعادة المزامنة للعودة.';
+
+  @override
+  String get tipFindWordSyncDesc =>
+      'يجلب توقيت كل كلمة من lrc.red وLyricsPlus.';
+
+  @override
+  String get tipHighlightStyleDesc =>
+      'سطر أو كلمة بكلمة أو حرف بحرف، للكلمات المتزامنة بالكلمة.';
+
+  @override
+  String get tipLyricsTimingDesc => 'قدّم الكلمات أو أخّرها، مفيد مع البلوتوث.';
+
+  @override
+  String get tipChangeProviderDesc => 'كلمات خاطئة أو مفقودة؟ جرّب مصدرًا آخر.';
+
+  @override
+  String get tipOwnLyrics => 'كلماتك الخاصة';
+
+  @override
+  String get tipOwnLyricsDesc =>
+      'حمّل ملف ‎.lrc أو صدّر هذه الكلمات إلى جهازك.';
+
+  @override
+  String get lyricsSources => 'مصادر كلمات الأغاني';
+
+  @override
+  String get creditLrcRedDesc =>
+      'كلمات متزامنة كلمةً بكلمة (المزوّد الافتراضي)';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      'كلمات متزامنة كلمةً بكلمة · خادم مفتوح المصدر من ibratabian17 (Apache-2.0)، يستضيفه binimum';
+
+  @override
+  String get creditLrclibDesc =>
+      'كلمات متزامنة سطرًا بسطر · قاعدة بيانات كلمات مجانية ومفتوحة';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      'يعثر على رمز ISRC لكل أغنية ليطابقها lrc.red · قاعدة بيانات موسيقية مفتوحة (بيانات CC0)';
+
+  @override
+  String get creditAmLyricsDesc =>
+      'ألهم ميزة الكلمات المتزامنة كلمةً بكلمة · من binimum (MPL-2.0)';
+
+  @override
+  String get lyricsCopyrightNote =>
+      'كلمات الأغاني ملك لفنانيها وأصحاب حقوقها. يجلبها Looper للعرض الشخصي فقط ويحتفظ بها على جهازك.';
+
+  @override
+  String get clearLyricsCache => 'مسح ذاكرة الكلمات المؤقتة';
+
+  @override
+  String get clearLyricsCacheDesc =>
+      'تُحفظ الكلمات المنزّلة حتى تمسحها. تبقى ملفاتك وملفات ‎.lrc التي اخترتها.';
+
+  @override
+  String get clearLyricsCacheConfirm =>
+      'مسح كل الكلمات المنزّلة؟ ستبحث الأغاني عنها عبر الإنترنت مجددًا عند تشغيلها التالي.';
+
+  @override
+  String get lyricsCacheCleared => 'تم مسح ذاكرة الكلمات المؤقتة';
+
+  @override
+  String get analyzeYourTopSong => 'أغنيتك رقم 1';
+
+  @override
+  String get analyzeHighlights => 'أبرز النقاط';
+
+  @override
+  String get analyzePeakTime => 'وقت الذروة';
+
+  @override
+  String get analyzeBusiestDay => 'أكثر يوم استماعًا';
+
+  @override
+  String get analyzeTopGenre => 'النوع الأول';
+
+  @override
+  String get analyzeLibraryExplored => 'استكشاف المكتبة';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$played من $total أغنية';
+  }
+
+  @override
+  String get analyzeCurrentStreak => 'السلسلة الحالية';
+
+  @override
+  String get analyzeLongestStreak => 'أطول سلسلة';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أيام',
+      one: 'يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours س $minutes د';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes د';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return '$avg يوميًا في المتوسط';
+  }
+
+  @override
+  String get dayPartMorning => 'الصباح';
+
+  @override
+  String get dayPartAfternoon => 'بعد الظهر';
+
+  @override
+  String get dayPartEvening => 'المساء';
+
+  @override
+  String get dayPartNight => 'الليل';
+
+  @override
+  String get updateNow => 'تحديث';
+
+  @override
+  String get updateLater => 'لاحقًا';
+
+  @override
+  String get updateInstall => 'تثبيت';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get updateWhatsNew => 'ما الجديد';
+
+  @override
+  String get updateDownloading => 'جارٍ تنزيل التحديث';
+
+  @override
+  String get updateVerifying => 'جارٍ التحقق من التنزيل…';
+
+  @override
+  String get updateWaitingForInstaller => 'في انتظار المثبِّت…';
+
+  @override
+  String get updateReadyToInstall => 'تم التنزيل وهو جاهز للتثبيت.';
+
+  @override
+  String get updateErrorNetwork =>
+      'فشل التنزيل. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get updateErrorChecksum =>
+      'الملف الذي تم تنزيله تالف. يُرجى المحاولة مرة أخرى.';
+
+  @override
+  String get updateErrorStorage => 'لا توجد مساحة تخزين كافية للتحديث.';
+
+  @override
+  String get updateErrorInstall => 'تعذّر تثبيت التحديث.';
+
+  @override
+  String get checkForUpdates => 'التحقق من وجود تحديثات';
+
+  @override
+  String get updateUpToDate => 'أنت تستخدم أحدث إصدار.';
+
+  @override
+  String get updateCheckFailed => 'تعذّر التحقق من وجود تحديثات.';
 }

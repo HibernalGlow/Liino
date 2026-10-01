@@ -8,6 +8,7 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 /**
@@ -44,6 +45,13 @@ class InAppUpdater(
     init {
         manager.registerListener(installListener)
     }
+
+    /**
+     * Extra update-channel methods a flavor handles itself. The github flavor
+     * installs downloaded APKs here; Play has none, so nothing is handled.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    fun onMethodCall(call: MethodCall, result: MethodChannel.Result): Boolean = false
 
     /**
      * Asks Play whether a newer build exists and, if so, opens Play's consent

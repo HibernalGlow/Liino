@@ -238,7 +238,27 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dynamicColorActiveLyricsDesc =>
-      'Использовать извлеченные цвета изображения для воспроизводимой в данный момент строки текста.';
+      'Окрашивает текущую строку текста; если выключено, она остаётся белой';
+
+  @override
+  String get activeLyricsIntensity => 'Яркость активной строки';
+
+  @override
+  String get activeLyricsIntensityDesc =>
+      'Насколько насыщенным цветом показывается текущая строка текста';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => 'Неактивная строка';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => 'Активная строка';
+
+  @override
+  String get activeLyricsUseAccent => 'Акцентный цвет активной строки';
+
+  @override
+  String get activeLyricsUseAccentDesc =>
+      'Использовать чистый акцентный цвет; если выключено, он смешивается с белым для мягкого оттенка';
 
   @override
   String get dynamicLyricsBg => 'Динамические тексты песен BG';
@@ -424,7 +444,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get lyricsProviderDesc =>
-      'Онлайн-тексты песен загружаются с lrclib.net (LRCLIB)';
+      'Онлайн-тексты из lrc.red, LyricsPlus, LRCLIB и других';
 
   @override
   String get maintainersAndDesigners => 'Разработчики и дизайнеры';
@@ -833,6 +853,65 @@ class AppLocalizationsRu extends AppLocalizations {
   String get showMore => 'Показать больше';
 
   @override
+  String get segmentedUtilityButtons => 'Сегментированные кнопки плеера';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      'Показывать перемешивание, повтор, очередь и текст песни как четыре плитки со значками в стиле кнопок воспроизведения';
+
+  @override
+  String get qualityBadgeStyle => 'Стиль значка качества';
+
+  @override
+  String get qualityBadgeStyleDesc =>
+      'Вид, значок, цвета и сведения значка качества звука';
+
+  @override
+  String get qualityBadgeLook => 'Вид';
+
+  @override
+  String get qualityBadgeLookPill => 'Заливка';
+
+  @override
+  String get qualityBadgeLookOutlined => 'Контур';
+
+  @override
+  String get qualityBadgeLookText => 'Текст';
+
+  @override
+  String get qualityBadgeIcon => 'Значок';
+
+  @override
+  String get qualityBadgeColorsByQuality => 'По качеству';
+
+  @override
+  String get qualityBadgeSeparator => 'Разделитель';
+
+  @override
+  String get qualityBadgeDetails => 'Сведения';
+
+  @override
+  String get qualityBadgeLevel => 'Уровень качества';
+
+  @override
+  String get qualityBadgeLayout => 'Содержимое';
+
+  @override
+  String get qualityBadgeLayoutName => 'Только название';
+
+  @override
+  String get qualityBadgeShape => 'Форма';
+
+  @override
+  String get qualityBadgeShapePill => 'Капсула';
+
+  @override
+  String get qualityBadgeShapeRounded => 'Скруглённая';
+
+  @override
+  String get qualityBadgeShapeSquare => 'Квадратная';
+
+  @override
   String get showQualityBadge => 'Показать значок качества';
 
   @override
@@ -988,6 +1067,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Потяните мини-плеер вверх, чтобы превратить его в полноэкранный плеер';
 
   @override
+  String get hapticFeedback => 'Тактильный отклик';
+
+  @override
+  String get hapticFeedbackDesc =>
+      'Вибрация при нажатиях, переключениях и жестах';
+
+  @override
   String get viewAll => 'Посмотреть все';
 
   @override
@@ -1035,7 +1121,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      '• Динамическая синхронизация текстов песен: используется исключительно для безопасного получения и загрузки синхронизированных текстов песен (форматы LRC) из онлайн-баз данных. Никакие личные данные, настройки или мультимедийные файлы никогда не загружаются и не передаются.';
+      '• Тексты песен: загружает синхронизированные тексты из lrc.red, LyricsPlus, LRCLIB или выбранного провайдера. Для поиска отправляются только название, исполнитель, альбом и длительность трека. Личные данные, настройки и медиафайлы никогда не загружаются и не передаются.';
 
   @override
   String get whyPermissionsUsed => 'Почему используются разрешения';
@@ -2126,11 +2212,11 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => 'Подсказки по жестам';
+  String get gestureTips => 'Советы по текстам';
 
   @override
   String get gestureTipsDesc =>
-      'Касание, долгое нажатие, масштабирование щипком и другое';
+      'Жесты, синхронизация по словам, сдвиг и другое';
 
   @override
   String get exportLyrics => 'Экспорт текста';
@@ -2156,7 +2242,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get gestureLongPressLineDesc =>
-      'Начните выбирать строки, чтобы создать карточку с текстом для отправки. Касайтесь других строк, чтобы расширить выбор.';
+      'Выберите строки, чтобы поделиться карточкой с текстом.';
 
   @override
   String get gesturePinch => 'Сведите или разведите два пальца';
@@ -2172,7 +2258,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Закрыть экран текста и вернуться к плееру.';
 
   @override
-  String get lyricsGestures => 'Жесты на экране текста';
+  String get lyricsGestures => 'Советы по текстам';
 
   @override
   String get lyricsGesturesIntro =>
@@ -2349,6 +2435,155 @@ class AppLocalizationsRu extends AppLocalizations {
   String nyquistKhz(String khz) {
     return 'Найквист: $khz кГц';
   }
+
+  @override
+  String get qualityHiRes => 'Hi-Res без потерь';
+
+  @override
+  String get qualityMono => 'Моно';
+
+  @override
+  String get qualityStereo => 'Стерео';
+
+  @override
+  String get qualitySignalPath => 'Тракт сигнала';
+
+  @override
+  String get qualityStageSource => 'Источник';
+
+  @override
+  String get qualityStageDecoder => 'Декодер';
+
+  @override
+  String get qualityStageOutput => 'Вывод';
+
+  @override
+  String get qualityStageDevice => 'Устройство';
+
+  @override
+  String get qualityNativeEndToEnd =>
+      'Воспроизводится с исходной частотой дискретизации файла на всём пути';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return 'На выходе пересчитано с $from на $to';
+  }
+
+  @override
+  String get qualitySectionSource => 'Исходный файл';
+
+  @override
+  String get qualitySectionEngine => 'Движок воспроизведения';
+
+  @override
+  String get qualitySectionDevice => 'Устройство вывода';
+
+  @override
+  String get qualitySectionPhone => 'Этот телефон';
+
+  @override
+  String get qualityOutputFormat => 'Формат вывода';
+
+  @override
+  String get qualityOutputRate => 'Частота вывода';
+
+  @override
+  String get qualityOutputChannels => 'Каналы вывода';
+
+  @override
+  String get qualityLiveBitrate => 'Текущий битрейт';
+
+  @override
+  String get qualityGapless => 'Воспроизведение без пауз';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => 'Трек';
+
+  @override
+  String get qualityReplayGainAlbum => 'Альбом';
+
+  @override
+  String get qualitySpeed => 'Скорость';
+
+  @override
+  String get qualityDeviceName => 'Название';
+
+  @override
+  String get qualityDeviceType => 'Тип';
+
+  @override
+  String get qualityDeviceSpeaker => 'Динамик телефона';
+
+  @override
+  String get qualityDeviceWired => 'Проводные наушники';
+
+  @override
+  String get qualityDeviceBluetooth => 'Bluetooth';
+
+  @override
+  String get qualityDeviceUsb => 'USB-аудио';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => 'Слуховой аппарат';
+
+  @override
+  String get qualityDeviceDock => 'Док-станция';
+
+  @override
+  String get qualitySupportedRates => 'Поддерживаемые частоты';
+
+  @override
+  String get qualityAnyRate => 'Любая';
+
+  @override
+  String get qualityMaxBitDepth => 'Макс. разрядность';
+
+  @override
+  String get qualityMaxChannels => 'Макс. каналов';
+
+  @override
+  String get qualityBitPerfect => 'Режим bit-perfect';
+
+  @override
+  String get qualitySupported => 'Поддерживается';
+
+  @override
+  String get qualityNotSupported => 'Не поддерживается';
+
+  @override
+  String get qualitySpatialAudio => 'Пространственный звук';
+
+  @override
+  String get qualityDeviceNote =>
+      'Android не сообщает приложениям, куда направлен звук плеера; это устройство, на которое обычно идёт музыка.';
+
+  @override
+  String get qualityPhoneModel => 'Модель';
+
+  @override
+  String get qualityAndroidVersion => 'Версия Android';
+
+  @override
+  String get qualityMixerRate => 'Частота микшера';
+
+  @override
+  String get qualityMixerBuffer => 'Буфер микшера';
+
+  @override
+  String get qualityLowLatency => 'Звук с низкой задержкой';
+
+  @override
+  String get qualityProAudio => 'Pro Audio';
+
+  @override
+  String get qualityDeviceUnavailable =>
+      'Сведения об устройстве доступны только на Android.';
 
   @override
   String get qualityLossless => 'Без потерь';
@@ -2540,4 +2775,401 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mono => 'Моно';
+
+  @override
+  String get progressBarStyle => 'Стиль полосы прогресса';
+
+  @override
+  String get progressBarStyleDesc => 'Волна, толщина, ползунок и другое';
+
+  @override
+  String get progressBarPreview => 'Предпросмотр';
+
+  @override
+  String get progressWave => 'Волна';
+
+  @override
+  String get progressWaveDesc =>
+      'Показывать проигранную часть полосы движущейся волной';
+
+  @override
+  String get progressWaveHeight => 'Высота волны';
+
+  @override
+  String get progressWaveLength => 'Длина волны';
+
+  @override
+  String get progressWaveLengthDesc => 'Расстояние между соседними волнами';
+
+  @override
+  String get progressWaveSpeed => 'Скорость волны';
+
+  @override
+  String get progressWaveFromStart => 'Волна с самого начала';
+
+  @override
+  String get progressWaveFromStartDesc =>
+      'Показывать волну сразу, а не после начала трека';
+
+  @override
+  String get progressKeepWavePaused => 'Сохранять волну на паузе';
+
+  @override
+  String get progressKeepWavePausedDesc =>
+      'Останавливать волну, а не выпрямлять её';
+
+  @override
+  String get progressBarThickness => 'Толщина полосы';
+
+  @override
+  String get progressThumb => 'Ползунок';
+
+  @override
+  String get progressThumbPill => 'Капсула';
+
+  @override
+  String get progressThumbRound => 'Круглый';
+
+  @override
+  String get progressThumbWidth => 'Ширина ползунка';
+
+  @override
+  String get progressThumbHeight => 'Высота ползунка';
+
+  @override
+  String get progressThumbSize => 'Размер ползунка';
+
+  @override
+  String get progressThumbGap => 'Отступ вокруг ползунка';
+
+  @override
+  String get progressTrackOpacity => 'Непрозрачность непроигранной части';
+
+  @override
+  String get progressGrowThumb => 'Увеличивать ползунок при перетаскивании';
+
+  @override
+  String get resetToDefaults => 'Сбросить по умолчанию';
+
+  @override
+  String get artworkVisualizer => 'Визуализация на обложке';
+
+  @override
+  String get artworkVisualizerDesc =>
+      'Эффект на обложке текущего трека, реагирующий на музыку';
+
+  @override
+  String get visualizerEffect => 'Эффект';
+
+  @override
+  String get visualizerAura => 'Сияние ауры';
+
+  @override
+  String get visualizerRing => 'Кольцо спектра';
+
+  @override
+  String get visualizerWave => 'Волна снизу';
+
+  @override
+  String get visualizerBars => 'Столбики';
+
+  @override
+  String get visualizerBreathing => 'Дыхание';
+
+  @override
+  String get visualizerIntensity => 'Интенсивность';
+
+  @override
+  String get visualizerSubtle => 'Слабая';
+
+  @override
+  String get visualizerNormal => 'Обычная';
+
+  @override
+  String get visualizerStrong => 'Сильная';
+
+  @override
+  String get visualizerColors => 'Цвета';
+
+  @override
+  String get visualizerColorsArtwork => 'Обложка';
+
+  @override
+  String get visualizerColorsTheme => 'Тема';
+
+  @override
+  String get visualizerColorsWhite => 'Белый';
+
+  @override
+  String get progressTrack => 'Дорожка';
+
+  @override
+  String get visualizerSync => 'Синхронизация со звуком';
+
+  @override
+  String get visualizerSyncDesc =>
+      'Задерживает эффект, чтобы он совпадал с тем, что вы слышите. Увеличьте для Bluetooth-наушников.';
+
+  @override
+  String get visualizerSyncHint => 'Включите трек, чтобы настроить на слух';
+
+  @override
+  String get lyricsHighlightStyle => 'Стиль подсветки';
+
+  @override
+  String get lyricsStyleLine => 'Строка';
+
+  @override
+  String get lyricsStyleWord => 'По словам';
+
+  @override
+  String get lyricsStyleCharacter => 'По буквам';
+
+  @override
+  String get lyricsWordSynced => 'Синхронизация по словам';
+
+  @override
+  String get lyricsLineSynced => 'Синхронизация по строкам';
+
+  @override
+  String get findWordSyncedLyrics => 'Найти текст с синхронизацией по словам';
+
+  @override
+  String get searchingWordSyncedLyrics => 'Поиск на lrc.red и LyricsPlus…';
+
+  @override
+  String get wordSyncedLyricsLoaded =>
+      'Текст с синхронизацией по словам загружен';
+
+  @override
+  String get noWordSyncedLyricsFound =>
+      'Текст с синхронизацией по словам для этой песни не найден';
+
+  @override
+  String get lyricsTiming => 'Тайминг текста';
+
+  @override
+  String get lyricsTimingDesc =>
+      'Положительное значение показывает текст раньше, отрицательное — позже. Если текст опережает песню (часто при Bluetooth), уменьшите значение.';
+
+  @override
+  String get lyricsTimingEarlier => 'Раньше';
+
+  @override
+  String get lyricsTimingLater => 'Позже';
+
+  @override
+  String get lyricsTimingReset => 'Сбросить';
+
+  @override
+  String get themeGroupColors => 'Цвета';
+
+  @override
+  String get themeGroupBlurBackgrounds => 'Размытие и фоны';
+
+  @override
+  String get themeGroupDarkness => 'Затемнение';
+
+  @override
+  String get themeGroupFonts => 'Шрифты';
+
+  @override
+  String get themeGroupProfile => 'Профиль';
+
+  @override
+  String get lyricsTipsGestures => 'Жесты';
+
+  @override
+  String get lyricsTipsMenu => 'В меню ⋮';
+
+  @override
+  String get gestureScroll => 'Листайте свободно';
+
+  @override
+  String get gestureScrollDesc =>
+      'Автопрокрутка приостанавливается, пока вы листаете. Нажмите «Пересинхронизировать», чтобы вернуться.';
+
+  @override
+  String get tipFindWordSyncDesc =>
+      'Загружает тайминг по словам с lrc.red и LyricsPlus.';
+
+  @override
+  String get tipHighlightStyleDesc =>
+      'Строка, по словам или по буквам — для текстов с синхронизацией по словам.';
+
+  @override
+  String get tipLyricsTimingDesc =>
+      'Сдвиньте текст раньше или позже — удобно с Bluetooth.';
+
+  @override
+  String get tipChangeProviderDesc =>
+      'Неверный текст или его нет? Попробуйте другой источник.';
+
+  @override
+  String get tipOwnLyrics => 'Свои тексты';
+
+  @override
+  String get tipOwnLyricsDesc =>
+      'Загрузите файл .lrc или экспортируйте этот текст на устройство.';
+
+  @override
+  String get lyricsSources => 'Источники текстов';
+
+  @override
+  String get creditLrcRedDesc =>
+      'Тексты с синхронизацией по словам (провайдер по умолчанию)';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      'Тексты с синхронизацией по словам · сервер с открытым кодом от ibratabian17 (Apache-2.0), размещён binimum';
+
+  @override
+  String get creditLrclibDesc =>
+      'Тексты с построчной синхронизацией · свободная открытая база текстов';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      'Находит ISRC каждой песни, чтобы lrc.red мог её сопоставить · открытая музыкальная база (данные CC0)';
+
+  @override
+  String get creditAmLyricsDesc =>
+      'Вдохновил нашу синхронизацию по словам · от binimum (MPL-2.0)';
+
+  @override
+  String get lyricsCopyrightNote =>
+      'Тексты песен принадлежат их исполнителям и правообладателям. Looper загружает их только для личного просмотра и хранит на вашем устройстве.';
+
+  @override
+  String get clearLyricsCache => 'Очистить кэш текстов';
+
+  @override
+  String get clearLyricsCacheDesc =>
+      'Загруженные тексты хранятся, пока вы их не очистите. Ваши файлы и выбранные .lrc остаются.';
+
+  @override
+  String get clearLyricsCacheConfirm =>
+      'Удалить все загруженные тексты? При следующем воспроизведении песни снова найдут их в сети.';
+
+  @override
+  String get lyricsCacheCleared => 'Кэш текстов очищен';
+
+  @override
+  String get analyzeYourTopSong => 'Ваш трек № 1';
+
+  @override
+  String get analyzeHighlights => 'Главное';
+
+  @override
+  String get analyzePeakTime => 'Пиковое время';
+
+  @override
+  String get analyzeBusiestDay => 'Самый активный день';
+
+  @override
+  String get analyzeTopGenre => 'Любимый жанр';
+
+  @override
+  String get analyzeLibraryExplored => 'Изучено в медиатеке';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$played из $total треков';
+  }
+
+  @override
+  String get analyzeCurrentStreak => 'Текущая серия';
+
+  @override
+  String get analyzeLongestStreak => 'Самая длинная серия';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дня',
+      many: '$count дней',
+      few: '$count дня',
+      one: '$count день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours ч $minutes мин';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes мин';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return 'В среднем $avg в день';
+  }
+
+  @override
+  String get dayPartMorning => 'Утро';
+
+  @override
+  String get dayPartAfternoon => 'День';
+
+  @override
+  String get dayPartEvening => 'Вечер';
+
+  @override
+  String get dayPartNight => 'Ночь';
+
+  @override
+  String get updateNow => 'Обновить';
+
+  @override
+  String get updateLater => 'Позже';
+
+  @override
+  String get updateInstall => 'Установить';
+
+  @override
+  String get retry => 'Повторить';
+
+  @override
+  String get updateWhatsNew => 'Что нового';
+
+  @override
+  String get updateDownloading => 'Загрузка обновления';
+
+  @override
+  String get updateVerifying => 'Проверка загрузки…';
+
+  @override
+  String get updateWaitingForInstaller => 'Ожидание установщика…';
+
+  @override
+  String get updateReadyToInstall => 'Загружено и готово к установке.';
+
+  @override
+  String get updateErrorNetwork =>
+      'Не удалось загрузить. Проверьте подключение и повторите попытку.';
+
+  @override
+  String get updateErrorChecksum =>
+      'Загруженный файл повреждён. Повторите попытку.';
+
+  @override
+  String get updateErrorStorage =>
+      'Недостаточно свободного места для обновления.';
+
+  @override
+  String get updateErrorInstall => 'Не удалось установить обновление.';
+
+  @override
+  String get checkForUpdates => 'Проверить обновления';
+
+  @override
+  String get updateUpToDate => 'У вас последняя версия.';
+
+  @override
+  String get updateCheckFailed => 'Не удалось проверить обновления.';
 }

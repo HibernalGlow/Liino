@@ -39,7 +39,7 @@ void _showSortBottomSheet(
                     ),
                     TextButton.icon(
                       onPressed: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref.read(libraryProvider.notifier).toggleSortOrder();
                       },
                       icon: Icon(
@@ -89,7 +89,7 @@ void _showSortBottomSheet(
                               accentColor: accentColor,
                               isLast: false,
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(
@@ -106,7 +106,7 @@ void _showSortBottomSheet(
                               accentColor: accentColor,
                               isLast: false,
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(SongSortStrategy.title);
@@ -121,7 +121,7 @@ void _showSortBottomSheet(
                               accentColor: accentColor,
                               isLast: false,
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(SongSortStrategy.artist);
@@ -136,7 +136,7 @@ void _showSortBottomSheet(
                               accentColor: accentColor,
                               isLast: false,
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(SongSortStrategy.album);
@@ -152,7 +152,7 @@ void _showSortBottomSheet(
                               accentColor: accentColor,
                               isLast: false,
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(SongSortStrategy.duration);
@@ -167,7 +167,7 @@ void _showSortBottomSheet(
                               accentColor: accentColor,
                               isLast: false,
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(SongSortStrategy.year);
@@ -183,7 +183,7 @@ void _showSortBottomSheet(
                               accentColor: accentColor,
                               isLast: false,
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(
@@ -201,7 +201,7 @@ void _showSortBottomSheet(
                               accentColor: accentColor,
                               isLast: true,
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(

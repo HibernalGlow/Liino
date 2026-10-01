@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:looper_player/ui/widgets/common/app_loading_indicator.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/features/library/presentation/providers/library/library_notifier.dart';
@@ -9,6 +8,7 @@ import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/ui/widgets/common/folder_picker_helper.dart';
 import 'premium_section.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class EmptyLibraryView extends ConsumerWidget {
   final String title;
@@ -93,7 +93,7 @@ class EmptyLibraryView extends ConsumerWidget {
                 // Primary Action: Scan Storage
                 _EmptyActionButton(
                   onPressed: () {
-                    HapticFeedback.mediumImpact();
+                    AppHaptics.medium();
                     ref.read(libraryProvider.notifier).scanSavedFolders();
                   },
                   label: l10n.scanForMusic,
@@ -105,7 +105,7 @@ class EmptyLibraryView extends ConsumerWidget {
                 // Secondary Action: Select Folder
                 _EmptyActionButton(
                   onPressed: () async {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     await FolderPickerHelper.pickFolder(context, ref);
                   },
                   label: l10n.selectCustomFolder,

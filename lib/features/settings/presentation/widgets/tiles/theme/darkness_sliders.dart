@@ -113,7 +113,7 @@ class LyricsDarknessSlider extends ConsumerWidget {
       title: l10n.lyricsDarkness,
       subtitle: l10n.lyricsDarknessDesc,
       value:
-          (settings.lyricsDarkness.isNaN ? 0.55 : settings.lyricsDarkness) *
+          (settings.lyricsDarkness.isNaN ? 0.35 : settings.lyricsDarkness) *
           100,
       min: 0.0,
       max: 100.0,

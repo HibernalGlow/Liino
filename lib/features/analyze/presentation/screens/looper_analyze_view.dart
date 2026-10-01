@@ -1,26 +1,28 @@
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/providers/navigation_provider.dart';
-import 'package:looper_player/core/utils/responsive.dart';
 import 'package:looper_player/features/analyze/domain/analyze_models.dart';
 import 'package:looper_player/features/analyze/presentation/providers/analyze_notifier.dart';
 import 'package:looper_player/features/analyze/presentation/widgets/analyze_activity_heatmap.dart';
 import 'package:looper_player/features/analyze/presentation/widgets/analyze_genre_donut.dart';
+import 'package:looper_player/features/analyze/presentation/widgets/analyze_hero_card.dart';
+import 'package:looper_player/features/analyze/presentation/widgets/analyze_highlights.dart';
+import 'package:looper_player/features/analyze/presentation/widgets/analyze_overview.dart';
 import 'package:looper_player/features/analyze/presentation/widgets/analyze_top_albums_section.dart';
 import 'package:looper_player/features/analyze/presentation/widgets/analyze_top_artists_section.dart';
 import 'package:looper_player/features/analyze/presentation/widgets/analyze_top_songs_section.dart';
 import 'package:looper_player/features/analyze/presentation/widgets/analyze_trend_chart.dart';
 import 'package:looper_player/features/analyze/presentation/widgets/staggered_reveal.dart';
-import 'package:looper_player/features/analyze/presentation/widgets/stat_tile.dart';
+import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import 'package:looper_player/ui/android/widgets/premium_section.dart';
 import 'package:looper_player/ui/widgets/common/empty_state_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 /// Looper Analyze — a personal listening "report card": top played songs,
 /// top artists/albums/genres, and time-based insights (trend, streaks,
@@ -69,11 +71,25 @@ class LooperAnalyzeView extends ConsumerWidget {
               Positioned.fill(
                 child: Container(color: Colors.black.withValues(alpha: 0.72)),
               ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.center,
+                      colors: [
+                        accent.withValues(alpha: 0.16),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               SafeArea(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Header(accent: accent, snapshot: snapshot),
+                    _Header(snapshot: snapshot),
                     Expanded(
                       child: snapshot.hasHistory
                           ? _AnalyzeBody(snapshot: snapshot, accent: accent)
@@ -96,30 +112,23 @@ class LooperAnalyzeView extends ConsumerWidget {
 }
 
 class _Header extends ConsumerWidget {
-  final Color accent;
   final AnalyzeSnapshot snapshot;
-  const _Header({required this.accent, required this.snapshot});
+  const _Header({required this.snapshot});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           PremiumSection(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(32),
-              bottomLeft: Radius.circular(32),
-              topRight: Radius.circular(10),
-              bottomRight: Radius.circular(10),
-            ),
+            borderRadius: BorderRadius.circular(24),
             width: 48,
             height: 48,
             useExpanded: false,
             forceNoBlur: true,
             onTap: () {
-              HapticFeedback.lightImpact();
+              AppHaptics.light();
               ref.read(appNavigationProvider.notifier).goBack();
             },
             child: const Icon(
@@ -128,44 +137,38 @@ class _Header extends ConsumerWidget {
               size: 20,
             ),
           ),
-          Column(
-            children: [
-              Text(
-                context.l10n.looperAnalyze,
-                style: AppFonts.jostStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              if (snapshot.hasHistory)
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Text(
-                  context.l10n.analyzePlaysAndSongs(
-                    snapshot.totalPlays,
-                    snapshot.uniqueSongsPlayed,
-                  ),
+                  context.l10n.looperAnalyze,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppFonts.jostStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
-                    fontSize: 11.5,
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
                   ),
                 ),
-            ],
-          ),
-          Container(
-            width: 48,
-            height: 48,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.16),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                bottomLeft: Radius.circular(10),
-                topRight: Radius.circular(32),
-                bottomRight: Radius.circular(32),
-              ),
+                if (snapshot.hasHistory)
+                  Text(
+                    context.l10n.analyzePlaysAndSongs(
+                      snapshot.totalPlays,
+                      snapshot.uniqueSongsPlayed,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppFonts.jostStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 12,
+                    ),
+                  ),
+              ],
             ),
-            child: Icon(LucideIcons.trophy, color: accent, size: 20),
           ),
         ],
       ),
@@ -173,111 +176,80 @@ class _Header extends ConsumerWidget {
   }
 }
 
-class _AnalyzeBody extends StatelessWidget {
+class _AnalyzeBody extends ConsumerWidget {
   final AnalyzeSnapshot snapshot;
   final Color accent;
   const _AnalyzeBody({required this.snapshot, required this.accent});
 
-  String _formatListeningTime(int ms) {
-    final totalMinutes = (ms / 60000).round();
-    final hours = totalMinutes ~/ 60;
-    final minutes = totalMinutes % 60;
-    if (hours > 0) return '${hours}h ${minutes}m';
-    return '${minutes}m';
-  }
+  /// Past this width the report splits into two columns (landscape phones,
+  /// tablets); below it, one column.
+  static const double _twoColumnWidth = 720;
 
   @override
-  Widget build(BuildContext context) {
-    // Was a fixed 2 columns regardless of width - on a landscape phone/
-    // tablet that leaves 4 needlessly wide tiles instead of using the extra
-    // width for more columns. Same target tile width the original 2-column
-    // math implied on a portrait phone (~168dp), just computed instead of
-    // hardcoded to exactly 2.
-    const spacing = 12.0;
-    const targetTileWidth = 168.0;
-    final availableWidth = MediaQuery.sizeOf(context).width - 32;
-    final columns = Responsive.isLandscape(MediaQuery.sizeOf(context))
-        ? math.max(
-            2,
-            ((availableWidth + spacing) / (targetTileWidth + spacing)).floor(),
-          )
-        : 2;
-    final tileWidth = (availableWidth - spacing * (columns - 1)) / columns;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final topSong = snapshot.topSongs.isNotEmpty
+        ? snapshot.topSongs.first
+        : null;
 
-    final sections = <Widget>[
-      Wrap(
-        spacing: spacing,
-        runSpacing: spacing,
-        children: [
-          SizedBox(
-            width: tileWidth,
-            child: StatTile(
-              icon: LucideIcons.play,
-              value: snapshot.totalPlays,
-              label: context.l10n.totalPlays,
-              accent: accent,
-            ),
-          ),
-          SizedBox(
-            width: tileWidth,
-            child: StatTile(
-              icon: LucideIcons.clock,
-              value: snapshot.totalListenedMs,
-              label: context.l10n.listeningTime,
-              accent: accent,
-              formatter: _formatListeningTime,
-            ),
-          ),
-          SizedBox(
-            width: tileWidth,
-            child: StatTile(
-              icon: LucideIcons.flame,
-              value: snapshot.streak.current,
-              label: context.l10n.currentStreakDays,
-              accent: accent,
-            ),
-          ),
-          SizedBox(
-            width: tileWidth,
-            child: StatTile(
-              icon: LucideIcons.award,
-              value: snapshot.streak.longest,
-              label: context.l10n.longestStreakDays,
-              accent: accent,
-            ),
-          ),
-        ],
-      ),
+    final lead = <Widget>[
+      if (topSong != null)
+        AnalyzeHeroCard(
+          stat: topSong,
+          accent: accent,
+          onPlay: () => ref
+              .read(playbackProvider.notifier)
+              .setPlaylist(snapshot.topSongs.map((s) => s.song).toList()),
+        ),
+      AnalyzeOverview(snapshot: snapshot, accent: accent),
+      AnalyzeHighlights(snapshot: snapshot, accent: accent),
       if (snapshot.topSongs.isNotEmpty)
         AnalyzeTopSongsSection(topSongs: snapshot.topSongs, accent: accent),
+    ];
+    final rest = <Widget>[
       if (snapshot.topArtists.isNotEmpty)
         AnalyzeTopArtistsSection(
           topArtists: snapshot.topArtists,
           accent: accent,
         ),
-      if (snapshot.topAlbums.isNotEmpty)
-        AnalyzeTopAlbumsSection(topAlbums: snapshot.topAlbums, accent: accent),
+      AnalyzeTrendChart(dailyCounts: snapshot.dailyCounts, accent: accent),
       if (snapshot.topGenres.isNotEmpty)
         AnalyzeGenreDonut(genres: snapshot.topGenres),
-      AnalyzeTrendChart(dailyCounts: snapshot.dailyCounts, accent: accent),
+      if (snapshot.topAlbums.isNotEmpty)
+        AnalyzeTopAlbumsSection(topAlbums: snapshot.topAlbums, accent: accent),
       AnalyzeActivityHeatmap(grid: snapshot.activityGrid, accent: accent),
     ];
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 160),
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
+    Widget column(List<Widget> sections, {int delayOffset = 0}) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < sections.length; i++)
           Padding(
-            padding: const EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.only(bottom: 26),
             child: StaggeredReveal(
-              delay: Duration(milliseconds: 60 * i),
+              delay: Duration(milliseconds: 60 * (i + delayOffset)),
               child: sections[i],
             ),
           ),
       ],
+    );
+
+    final twoColumns = MediaQuery.sizeOf(context).width >= _twoColumnWidth;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 160),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      child: twoColumns
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: column(lead)),
+                const SizedBox(width: 20),
+                Expanded(child: column(rest, delayOffset: 1)),
+              ],
+            )
+          : column([...lead, ...rest]),
     );
   }
 }

@@ -240,7 +240,27 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get dynamicColorActiveLyricsDesc =>
-      'Gebruik geëxtraheerde artworkkleuren voor de momenteel afgespeelde songtekstregel';
+      'Kleur de spelende songtekstregel; uit houdt die wit';
+
+  @override
+  String get activeLyricsIntensity => 'Intensiteit actieve regel';
+
+  @override
+  String get activeLyricsIntensityDesc =>
+      'Hoeveel kleur de spelende songtekstregel toont';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => 'Inactieve regel';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => 'Actieve regel';
+
+  @override
+  String get activeLyricsUseAccent => 'Accentkleur actieve regel';
+
+  @override
+  String get activeLyricsUseAccentDesc =>
+      'Gebruik de pure accentkleur; uit mengt die met wit voor een zachtere tint';
 
   @override
   String get dynamicLyricsBg => 'Dynamische songteksten BG';
@@ -426,7 +446,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get lyricsProviderDesc =>
-      'Online songteksten opgehaald van lrclib.net (LRCLIB)';
+      'Online songteksten van lrc.red, LyricsPlus, LRCLIB en meer';
 
   @override
   String get maintainersAndDesigners => 'Ontwikkelaars & ontwerpers';
@@ -833,6 +853,65 @@ class AppLocalizationsNl extends AppLocalizations {
   String get showMore => 'Toon meer';
 
   @override
+  String get segmentedUtilityButtons => 'Gesegmenteerde spelerknoppen';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      'Toon shuffle, herhalen, volgende en songtekst als vier pictogramtegels in de stijl van de afspeelknoppen';
+
+  @override
+  String get qualityBadgeStyle => 'Stijl van kwaliteitsbadge';
+
+  @override
+  String get qualityBadgeStyleDesc =>
+      'Uiterlijk, pictogram, kleuren en details van de audiokwaliteitsbadge';
+
+  @override
+  String get qualityBadgeLook => 'Uiterlijk';
+
+  @override
+  String get qualityBadgeLookPill => 'Gevuld';
+
+  @override
+  String get qualityBadgeLookOutlined => 'Omlijnd';
+
+  @override
+  String get qualityBadgeLookText => 'Tekst';
+
+  @override
+  String get qualityBadgeIcon => 'Pictogram';
+
+  @override
+  String get qualityBadgeColorsByQuality => 'Op kwaliteit';
+
+  @override
+  String get qualityBadgeSeparator => 'Scheidingsteken';
+
+  @override
+  String get qualityBadgeDetails => 'Details';
+
+  @override
+  String get qualityBadgeLevel => 'Kwaliteitsniveau';
+
+  @override
+  String get qualityBadgeLayout => 'Inhoud';
+
+  @override
+  String get qualityBadgeLayoutName => 'Alleen naam';
+
+  @override
+  String get qualityBadgeShape => 'Vorm';
+
+  @override
+  String get qualityBadgeShapePill => 'Pil';
+
+  @override
+  String get qualityBadgeShapeRounded => 'Afgerond';
+
+  @override
+  String get qualityBadgeShapeSquare => 'Vierkant';
+
+  @override
   String get showQualityBadge => 'Kwaliteitsbadge tonen';
 
   @override
@@ -985,6 +1064,12 @@ class AppLocalizationsNl extends AppLocalizations {
       'Sleep de minispeler omhoog om hem in de volledige speler te laten overgaan';
 
   @override
+  String get hapticFeedback => 'Haptische feedback';
+
+  @override
+  String get hapticFeedbackDesc => 'Trillen bij tikken, schakelaars en gebaren';
+
+  @override
   String get viewAll => 'Bekijk alles';
 
   @override
@@ -1032,7 +1117,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      '• Dynamische songtekstsynchronisatie: uitsluitend gebruikt om gesynchroniseerde songteksten (LRC-formaten) veilig op te halen en te downloaden uit online databases. Er worden nooit persoonlijke gegevens, instellingen of mediabestanden geüpload of gedeeld.';
+      '• Songteksten: haalt gesynchroniseerde songteksten op van lrc.red, LyricsPlus, LRCLIB of de gekozen provider. Alleen titel, artiest, album en duur van het nummer worden verstuurd om een match te vinden. Er worden nooit persoonlijke gegevens, instellingen of mediabestanden geüpload of gedeeld.';
 
   @override
   String get whyPermissionsUsed => 'Waarom machtigingen worden gebruikt';
@@ -2119,11 +2204,10 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => 'Gebarentips';
+  String get gestureTips => 'Songteksttips';
 
   @override
-  String get gestureTipsDesc =>
-      'Tikken, lang indrukken, knijpen om te zoomen en meer';
+  String get gestureTipsDesc => 'Gebaren, woordsync, timing en meer';
 
   @override
   String get exportLyrics => 'Songtekst exporteren';
@@ -2150,7 +2234,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get gestureLongPressLineDesc =>
-      'Begin met regels selecteren voor een deelbare songtekstkaart. Tik op meer regels om de selectie uit te breiden.';
+      'Selecteer regels om als songtekstkaart te delen.';
 
   @override
   String get gesturePinch => 'Knijp met twee vingers';
@@ -2167,7 +2251,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Sluit het songtekstscherm en ga terug naar de speler.';
 
   @override
-  String get lyricsGestures => 'Songtekstgebaren';
+  String get lyricsGestures => 'Songteksttips';
 
   @override
   String get lyricsGesturesIntro =>
@@ -2341,6 +2425,155 @@ class AppLocalizationsNl extends AppLocalizations {
   String nyquistKhz(String khz) {
     return 'Nyquist: $khz kHz';
   }
+
+  @override
+  String get qualityHiRes => 'Hi-Res lossless';
+
+  @override
+  String get qualityMono => 'Mono';
+
+  @override
+  String get qualityStereo => 'Stereo';
+
+  @override
+  String get qualitySignalPath => 'Signaalpad';
+
+  @override
+  String get qualityStageSource => 'Bron';
+
+  @override
+  String get qualityStageDecoder => 'Decoder';
+
+  @override
+  String get qualityStageOutput => 'Uitvoer';
+
+  @override
+  String get qualityStageDevice => 'Apparaat';
+
+  @override
+  String get qualityNativeEndToEnd =>
+      'Speelt de hele weg af op de eigen samplefrequentie van het bestand';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return 'Bij uitvoer omgezet van $from naar $to';
+  }
+
+  @override
+  String get qualitySectionSource => 'Bronbestand';
+
+  @override
+  String get qualitySectionEngine => 'Afspeelengine';
+
+  @override
+  String get qualitySectionDevice => 'Uitvoerapparaat';
+
+  @override
+  String get qualitySectionPhone => 'Deze telefoon';
+
+  @override
+  String get qualityOutputFormat => 'Uitvoerformaat';
+
+  @override
+  String get qualityOutputRate => 'Uitvoer-samplefrequentie';
+
+  @override
+  String get qualityOutputChannels => 'Uitvoerkanalen';
+
+  @override
+  String get qualityLiveBitrate => 'Huidige bitrate';
+
+  @override
+  String get qualityGapless => 'Naadloos afspelen';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => 'Nummer';
+
+  @override
+  String get qualityReplayGainAlbum => 'Album';
+
+  @override
+  String get qualitySpeed => 'Snelheid';
+
+  @override
+  String get qualityDeviceName => 'Naam';
+
+  @override
+  String get qualityDeviceType => 'Type';
+
+  @override
+  String get qualityDeviceSpeaker => 'Telefoonspeaker';
+
+  @override
+  String get qualityDeviceWired => 'Bedrade koptelefoon';
+
+  @override
+  String get qualityDeviceBluetooth => 'Bluetooth';
+
+  @override
+  String get qualityDeviceUsb => 'USB-audio';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => 'Hoortoestel';
+
+  @override
+  String get qualityDeviceDock => 'Dock';
+
+  @override
+  String get qualitySupportedRates => 'Ondersteunde frequenties';
+
+  @override
+  String get qualityAnyRate => 'Elke';
+
+  @override
+  String get qualityMaxBitDepth => 'Max. bitdiepte';
+
+  @override
+  String get qualityMaxChannels => 'Max. kanalen';
+
+  @override
+  String get qualityBitPerfect => 'Bit-perfect-modus';
+
+  @override
+  String get qualitySupported => 'Ondersteund';
+
+  @override
+  String get qualityNotSupported => 'Niet ondersteund';
+
+  @override
+  String get qualitySpatialAudio => 'Ruimtelijke audio';
+
+  @override
+  String get qualityDeviceNote =>
+      'Android vertelt apps niet naar welke uitvoer een speler gaat; dit is het apparaat waar muziek normaal naartoe gaat.';
+
+  @override
+  String get qualityPhoneModel => 'Model';
+
+  @override
+  String get qualityAndroidVersion => 'Android-versie';
+
+  @override
+  String get qualityMixerRate => 'Mixer-samplefrequentie';
+
+  @override
+  String get qualityMixerBuffer => 'Mixerbuffer';
+
+  @override
+  String get qualityLowLatency => 'Audio met lage latentie';
+
+  @override
+  String get qualityProAudio => 'Pro-audio';
+
+  @override
+  String get qualityDeviceUnavailable =>
+      'Apparaatdetails zijn alleen beschikbaar op Android.';
 
   @override
   String get qualityLossless => 'Verliesvrij';
@@ -2525,4 +2758,402 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get mono => 'Mono';
+
+  @override
+  String get progressBarStyle => 'Stijl voortgangsbalk';
+
+  @override
+  String get progressBarStyleDesc => 'Golf, dikte, schuifknop en meer';
+
+  @override
+  String get progressBarPreview => 'Voorbeeld';
+
+  @override
+  String get progressWave => 'Golf';
+
+  @override
+  String get progressWaveDesc =>
+      'Het afgespeelde deel van de balk als bewegende golf tonen';
+
+  @override
+  String get progressWaveHeight => 'Golfhoogte';
+
+  @override
+  String get progressWaveLength => 'Golflengte';
+
+  @override
+  String get progressWaveLengthDesc => 'Afstand tussen twee golven';
+
+  @override
+  String get progressWaveSpeed => 'Golfsnelheid';
+
+  @override
+  String get progressWaveFromStart => 'Golf vanaf het begin';
+
+  @override
+  String get progressWaveFromStartDesc =>
+      'Toon de golf meteen in plaats van na het begin van het nummer';
+
+  @override
+  String get progressKeepWavePaused => 'Golf behouden bij pauze';
+
+  @override
+  String get progressKeepWavePausedDesc =>
+      'Golf stilzetten in plaats van plat maken';
+
+  @override
+  String get progressBarThickness => 'Balkdikte';
+
+  @override
+  String get progressThumb => 'Schuifknop';
+
+  @override
+  String get progressThumbPill => 'Pil';
+
+  @override
+  String get progressThumbRound => 'Rond';
+
+  @override
+  String get progressThumbWidth => 'Breedte schuifknop';
+
+  @override
+  String get progressThumbHeight => 'Hoogte schuifknop';
+
+  @override
+  String get progressThumbSize => 'Grootte schuifknop';
+
+  @override
+  String get progressThumbGap => 'Ruimte rond schuifknop';
+
+  @override
+  String get progressTrackOpacity => 'Dekking van niet-afgespeeld deel';
+
+  @override
+  String get progressGrowThumb => 'Schuifknop vergroten tijdens slepen';
+
+  @override
+  String get resetToDefaults => 'Standaardwaarden herstellen';
+
+  @override
+  String get artworkVisualizer => 'Hoesvisualisatie';
+
+  @override
+  String get artworkVisualizerDesc =>
+      'Een effect op de huidige hoes dat op de muziek reageert';
+
+  @override
+  String get visualizerEffect => 'Effect';
+
+  @override
+  String get visualizerAura => 'Aura-gloed';
+
+  @override
+  String get visualizerRing => 'Spectrumring';
+
+  @override
+  String get visualizerWave => 'Golf onderaan';
+
+  @override
+  String get visualizerBars => 'Balken';
+
+  @override
+  String get visualizerBreathing => 'Ademen';
+
+  @override
+  String get visualizerIntensity => 'Intensiteit';
+
+  @override
+  String get visualizerSubtle => 'Subtiel';
+
+  @override
+  String get visualizerNormal => 'Normaal';
+
+  @override
+  String get visualizerStrong => 'Sterk';
+
+  @override
+  String get visualizerColors => 'Kleuren';
+
+  @override
+  String get visualizerColorsArtwork => 'Hoes';
+
+  @override
+  String get visualizerColorsTheme => 'Thema';
+
+  @override
+  String get visualizerColorsWhite => 'Wit';
+
+  @override
+  String get progressTrack => 'Balk';
+
+  @override
+  String get visualizerSync => 'Audiosynchronisatie';
+
+  @override
+  String get visualizerSyncDesc =>
+      'Vertraag het effect zodat het samenvalt met wat je hoort. Verhoog het voor Bluetooth-koptelefoons.';
+
+  @override
+  String get visualizerSyncHint =>
+      'Speel een nummer af om dit op gehoor af te stellen';
+
+  @override
+  String get lyricsHighlightStyle => 'Markeerstijl';
+
+  @override
+  String get lyricsStyleLine => 'Regel';
+
+  @override
+  String get lyricsStyleWord => 'Woord voor woord';
+
+  @override
+  String get lyricsStyleCharacter => 'Letter voor letter';
+
+  @override
+  String get lyricsWordSynced => 'Per woord gesynchroniseerd';
+
+  @override
+  String get lyricsLineSynced => 'Per regel gesynchroniseerd';
+
+  @override
+  String get findWordSyncedLyrics =>
+      'Per woord gesynchroniseerde songtekst zoeken';
+
+  @override
+  String get searchingWordSyncedLyrics => 'Zoeken op lrc.red en LyricsPlus…';
+
+  @override
+  String get wordSyncedLyricsLoaded =>
+      'Per woord gesynchroniseerde songtekst geladen';
+
+  @override
+  String get noWordSyncedLyricsFound =>
+      'Geen per woord gesynchroniseerde songtekst gevonden voor dit nummer';
+
+  @override
+  String get lyricsTiming => 'Timing van songtekst';
+
+  @override
+  String get lyricsTimingDesc =>
+      'Positief toont de songtekst eerder, negatief later. Loopt de tekst voor op het nummer (vaak bij Bluetooth), verlaag de waarde dan.';
+
+  @override
+  String get lyricsTimingEarlier => 'Eerder';
+
+  @override
+  String get lyricsTimingLater => 'Later';
+
+  @override
+  String get lyricsTimingReset => 'Herstellen';
+
+  @override
+  String get themeGroupColors => 'Kleuren';
+
+  @override
+  String get themeGroupBlurBackgrounds => 'Vervaging & achtergronden';
+
+  @override
+  String get themeGroupDarkness => 'Donkerte';
+
+  @override
+  String get themeGroupFonts => 'Lettertypen';
+
+  @override
+  String get themeGroupProfile => 'Profiel';
+
+  @override
+  String get lyricsTipsGestures => 'Gebaren';
+
+  @override
+  String get lyricsTipsMenu => 'In het ⋮-menu';
+
+  @override
+  String get gestureScroll => 'Vrij scrollen';
+
+  @override
+  String get gestureScrollDesc =>
+      'Meevolgen pauzeert terwijl je bladert. Tik op Opnieuw synchroniseren om terug te gaan.';
+
+  @override
+  String get tipFindWordSyncDesc =>
+      'Haal timing per woord op van lrc.red en LyricsPlus.';
+
+  @override
+  String get tipHighlightStyleDesc =>
+      'Regel, woord voor woord of letter voor letter, bij per woord gesynchroniseerde teksten.';
+
+  @override
+  String get tipLyricsTimingDesc =>
+      'Verschuif de tekst eerder of later, handig met Bluetooth.';
+
+  @override
+  String get tipChangeProviderDesc =>
+      'Verkeerde of ontbrekende tekst? Probeer een andere bron.';
+
+  @override
+  String get tipOwnLyrics => 'Je eigen songteksten';
+
+  @override
+  String get tipOwnLyricsDesc =>
+      'Laad een .lrc-bestand of exporteer deze tekst naar je apparaat.';
+
+  @override
+  String get lyricsSources => 'Songtekstbronnen';
+
+  @override
+  String get creditLrcRedDesc =>
+      'Woord-gesynchroniseerde songteksten (standaardprovider)';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      'Woord-gesynchroniseerde songteksten · open-source server van ibratabian17 (Apache-2.0), gehost door binimum';
+
+  @override
+  String get creditLrclibDesc =>
+      'Regel-gesynchroniseerde songteksten · vrije, open songtekstdatabase';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      'Zoekt de ISRC van elk nummer zodat lrc.red het kan koppelen · open muziekdatabase (CC0-gegevens)';
+
+  @override
+  String get creditAmLyricsDesc =>
+      'Inspiratie voor onze woord-gesynchroniseerde songteksten · door binimum (MPL-2.0)';
+
+  @override
+  String get lyricsCopyrightNote =>
+      'Songteksten zijn van hun artiesten en rechthebbenden. Looper haalt ze alleen op voor persoonlijke weergave en bewaart ze op je apparaat.';
+
+  @override
+  String get clearLyricsCache => 'Songtekstcache wissen';
+
+  @override
+  String get clearLyricsCacheDesc =>
+      'Gedownloade songteksten blijven bewaard tot je ze wist. Je eigen bestanden en gekozen .lrc blijven.';
+
+  @override
+  String get clearLyricsCacheConfirm =>
+      'Alle gedownloade songteksten wissen? Nummers zoeken ze bij de volgende keer afspelen opnieuw online.';
+
+  @override
+  String get lyricsCacheCleared => 'Songtekstcache gewist';
+
+  @override
+  String get analyzeYourTopSong => 'Jouw nr. 1-nummer';
+
+  @override
+  String get analyzeHighlights => 'Hoogtepunten';
+
+  @override
+  String get analyzePeakTime => 'Piekmoment';
+
+  @override
+  String get analyzeBusiestDay => 'Drukste dag';
+
+  @override
+  String get analyzeTopGenre => 'Topgenre';
+
+  @override
+  String get analyzeLibraryExplored => 'Bibliotheek verkend';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$played van $total nummers';
+  }
+
+  @override
+  String get analyzeCurrentStreak => 'Huidige reeks';
+
+  @override
+  String get analyzeLongestStreak => 'Langste reeks';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dagen',
+      one: '1 dag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours u $minutes min';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return 'Gemiddeld $avg per dag';
+  }
+
+  @override
+  String get dayPartMorning => 'Ochtend';
+
+  @override
+  String get dayPartAfternoon => 'Middag';
+
+  @override
+  String get dayPartEvening => 'Avond';
+
+  @override
+  String get dayPartNight => 'Nacht';
+
+  @override
+  String get updateNow => 'Bijwerken';
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateInstall => 'Installeren';
+
+  @override
+  String get retry => 'Opnieuw proberen';
+
+  @override
+  String get updateWhatsNew => 'Wat is er nieuw';
+
+  @override
+  String get updateDownloading => 'Update downloaden';
+
+  @override
+  String get updateVerifying => 'Download controleren…';
+
+  @override
+  String get updateWaitingForInstaller =>
+      'Wachten op het installatieprogramma…';
+
+  @override
+  String get updateReadyToInstall => 'Gedownload en klaar om te installeren.';
+
+  @override
+  String get updateErrorNetwork =>
+      'Downloaden mislukt. Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get updateErrorChecksum =>
+      'De download is beschadigd. Probeer het opnieuw.';
+
+  @override
+  String get updateErrorStorage =>
+      'Niet genoeg vrije opslagruimte voor de update.';
+
+  @override
+  String get updateErrorInstall => 'De update kon niet worden geïnstalleerd.';
+
+  @override
+  String get checkForUpdates => 'Controleren op updates';
+
+  @override
+  String get updateUpToDate => 'Je hebt de nieuwste versie.';
+
+  @override
+  String get updateCheckFailed => 'Controleren op updates is mislukt.';
 }

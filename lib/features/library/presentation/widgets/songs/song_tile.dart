@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +9,8 @@ import 'package:looper_player/core/services/storage/db_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/ui/widgets/sheets/song_options_bottom_sheet.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class SongTile extends ConsumerWidget {
   final Song song;
@@ -163,7 +164,7 @@ class SongTile extends ConsumerWidget {
                                   // it wouldn't be visible anyway.
                                   child: TickerMode.of(context)
                                       ? Image.asset(
-                                          'assets/android_icons/Playing.gif',
+                                          AppAssets.playingGif,
                                           width: 24,
                                           height: 24,
                                           color: Colors.white,
@@ -452,7 +453,7 @@ class _SongTileBouncyTapState extends State<_SongTileBouncyTap>
       onLongPress: widget.onLongPress == null
           ? null
           : () {
-              HapticFeedback.mediumImpact();
+              AppHaptics.medium();
               widget.onLongPress!();
             },
       behavior: HitTestBehavior.opaque,

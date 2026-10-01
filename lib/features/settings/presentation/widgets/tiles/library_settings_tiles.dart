@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/library/presentation/providers/library/library_notifier.dart';
+import 'package:looper_player/features/playback/data/lyrics_fetcher.dart';
+import 'package:looper_player/features/playback/presentation/providers/lyrics/lyrics_notifier.dart';
+import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/ui/widgets/common/folder_picker_helper.dart';
 import '../settings_dialogs.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class AddFolderTile extends ConsumerWidget {
   const AddFolderTile({super.key});
@@ -25,7 +28,7 @@ class AddFolderTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () async {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         await FolderPickerHelper.pickFolder(context, ref);
       },
     );
@@ -54,7 +57,7 @@ class ExcludedFoldersTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         _showExcludedFoldersSheet(context, ref, l10n);
       },
     );
@@ -178,11 +181,56 @@ class SyncLyricsOfflineTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () {
-        HapticFeedback.mediumImpact();
+        AppHaptics.medium();
         ref.read(libraryProvider.notifier).prefetchLibraryLyrics();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.downloadingLyricsOffline)));
+      },
+    );
+  }
+}
+
+class ClearLyricsCacheTile extends ConsumerWidget {
+  const ClearLyricsCacheTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    return ListTile(
+      leading: const Icon(LucideIcons.eraser, color: Colors.white70),
+      title: Text(l10n.clearLyricsCache, style: _tileTitleStyle()),
+      subtitle: Text(l10n.clearLyricsCacheDesc, style: _tileSubtitleStyle()),
+      onTap: () async {
+        AppHaptics.medium();
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(l10n.clearLyricsCache),
+            content: Text(l10n.clearLyricsCacheConfirm),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(l10n.clear),
+              ),
+            ],
+          ),
+        );
+        if (confirmed != true) return;
+        final messenger = ScaffoldMessenger.of(context);
+        await LyricsFetcher.clearAll();
+        // The playing song's lyrics were cleared too - look them up again.
+        final song = ref.read(playbackProvider).currentSong;
+        if (song != null) {
+          ref.read(lyricsProvider.notifier).fetchForSong(song, force: true);
+        }
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.lyricsCacheCleared)),
+        );
       },
     );
   }
@@ -203,7 +251,7 @@ class RescanLibraryTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () {
-        HapticFeedback.mediumImpact();
+        AppHaptics.medium();
         ref
             .read(libraryProvider.notifier)
             .scanSavedFolders(fullStorageDiscovery: true);
@@ -233,7 +281,7 @@ class IncludeSystemAndMessagingAudioTile extends ConsumerWidget {
       ),
       value: enabled,
       onChanged: (value) async {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         await ref
             .read(settingsProvider.notifier)
             .updateIncludeSystemAndMessagingAudio(value);
@@ -266,7 +314,7 @@ class ResetLibraryTile extends ConsumerWidget {
         size: 16,
       ),
       onTap: () {
-        HapticFeedback.heavyImpact();
+        AppHaptics.warning();
         showClearDialog(context, l10n);
       },
     );

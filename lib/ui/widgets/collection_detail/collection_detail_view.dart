@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui';
 import 'package:looper_player/core/utils/responsive.dart';
@@ -18,6 +17,7 @@ import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/library/presentation/widgets/library_grids.dart';
 import 'package:looper_player/ui/widgets/sheets/edit_album_sheet.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 part 'collection_header.dart';
 part 'sort_sheet.dart';
 part 'playlist_options.dart';

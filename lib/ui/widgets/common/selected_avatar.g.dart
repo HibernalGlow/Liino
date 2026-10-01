@@ -8,20 +8,20 @@ part of 'selected_avatar.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Every avatar SVG currently bundled under [avatarAssetDir] (filenames
-/// only), discovered from Flutter's asset manifest instead of a hardcoded
-/// list - adding or removing a file from that folder (pubspec.yaml already
-/// bundles the whole android_icons/ tree) just needs a rebuild, nothing
-/// here. Default avatar always sorts first.
+/// Every avatar image (SVG, PNG, JPG or WebP) currently bundled under
+/// [avatarAssetDir] (filenames only), discovered from Flutter's asset
+/// manifest instead of a hardcoded list - adding or removing a file from
+/// that folder (pubspec.yaml already bundles the whole avatars/ folder)
+/// just needs a rebuild, nothing here. Default avatar always sorts first.
 
 @ProviderFor(avatarAssets)
 final avatarAssetsProvider = AvatarAssetsProvider._();
 
-/// Every avatar SVG currently bundled under [avatarAssetDir] (filenames
-/// only), discovered from Flutter's asset manifest instead of a hardcoded
-/// list - adding or removing a file from that folder (pubspec.yaml already
-/// bundles the whole android_icons/ tree) just needs a rebuild, nothing
-/// here. Default avatar always sorts first.
+/// Every avatar image (SVG, PNG, JPG or WebP) currently bundled under
+/// [avatarAssetDir] (filenames only), discovered from Flutter's asset
+/// manifest instead of a hardcoded list - adding or removing a file from
+/// that folder (pubspec.yaml already bundles the whole avatars/ folder)
+/// just needs a rebuild, nothing here. Default avatar always sorts first.
 
 final class AvatarAssetsProvider
     extends
@@ -31,11 +31,11 @@ final class AvatarAssetsProvider
           FutureOr<List<String>>
         >
     with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
-  /// Every avatar SVG currently bundled under [avatarAssetDir] (filenames
-  /// only), discovered from Flutter's asset manifest instead of a hardcoded
-  /// list - adding or removing a file from that folder (pubspec.yaml already
-  /// bundles the whole android_icons/ tree) just needs a rebuild, nothing
-  /// here. Default avatar always sorts first.
+  /// Every avatar image (SVG, PNG, JPG or WebP) currently bundled under
+  /// [avatarAssetDir] (filenames only), discovered from Flutter's asset
+  /// manifest instead of a hardcoded list - adding or removing a file from
+  /// that folder (pubspec.yaml already bundles the whole avatars/ folder)
+  /// just needs a rebuild, nothing here. Default avatar always sorts first.
   AvatarAssetsProvider._()
     : super(
         from: null,
@@ -62,4 +62,4 @@ final class AvatarAssetsProvider
   }
 }
 
-String _$avatarAssetsHash() => r'd12a73ec3bfe2d23a0af6f968598c5b33e68ea18';
+String _$avatarAssetsHash() => r'416140f960bc7f8a760cbc458558560c9554c7cb';

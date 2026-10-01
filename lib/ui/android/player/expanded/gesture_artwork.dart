@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide RepeatMode;
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/services/storage/db_service.dart';
@@ -11,12 +10,14 @@ import 'package:looper_player/features/settings/presentation/providers/settings_
 import 'package:looper_player/core/utils/responsive.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import 'package:looper_player/ui/widgets/common/optimized_image.dart';
+import 'package:looper_player/ui/widgets/player/artwork_visualizer/artwork_visualizer.dart';
 
 import 'player_landscape_layout.dart';
 
 import 'package:looper_player/core/providers/player_expand_provider.dart';
 
 import 'android_expanded_player.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class GestureArtworkWithFeedback extends ConsumerStatefulWidget {
   final Song song;
@@ -342,7 +343,7 @@ class _GestureArtworkWithFeedbackState
               _isNext = true;
               _isSwipeTriggered = true;
             });
-            HapticFeedback.mediumImpact();
+            AppHaptics.medium();
             final start = _dragOffset;
             final end = -slideExtent;
             final animation = Tween<double>(begin: start, end: end).animate(
@@ -383,7 +384,7 @@ class _GestureArtworkWithFeedbackState
               _isNext = false;
               _isSwipeTriggered = true;
             });
-            HapticFeedback.mediumImpact();
+            AppHaptics.medium();
             final start = _dragOffset;
             final end = slideExtent;
             final animation = Tween<double>(begin: start, end: end).animate(
@@ -430,188 +431,195 @@ class _GestureArtworkWithFeedbackState
           duration: animate ? const Duration(milliseconds: 350) : Duration.zero,
           curve: Curves.easeInOutCubic,
           padding: EdgeInsets.all(targetPadding),
-          child: _ArtCarouselFrame(
-            clip: isLandscape,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Background Card for real-time carousel transitions (flat horizontal slide)
-                if (bgSong != null && _dragOffset.abs() > 1.0)
-                  Positioned.fill(
-                    child: Transform.translate(
-                      offset: Offset(
-                        _dragOffset < 0
-                            ? _dragOffset + slideExtent
-                            : _dragOffset - slideExtent,
-                        0,
-                      ),
-                      child: ClipRRect(
-                        // borderRadius: BorderRadius.circular(12),
-                        child: OptimizedImage(
-                          imagePath:
-                              bgSong.artPath != null &&
-                                  !bgSong.artPath!.startsWith('http')
-                              ? bgSong.artPath
-                              : null,
-                          imageUrl:
-                              bgSong.artPath != null &&
-                                  bgSong.artPath!.startsWith('http')
-                              ? bgSong.artPath
-                              : null,
-                          borderRadius: BorderRadius.circular(12),
+          // The music-reactive effect (Artwork visualizer setting) sits
+          // outside the carousel frame so its glow/ring can reach past the
+          // cover; it steps aside while the cover is being swiped.
+          child: ArtworkVisualizer(
+            artPath: widget.song.artPath,
+            suspended: _dragOffset.abs() > 1.0,
+            child: _ArtCarouselFrame(
+              clip: isLandscape,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Background Card for real-time carousel transitions (flat horizontal slide)
+                  if (bgSong != null && _dragOffset.abs() > 1.0)
+                    Positioned.fill(
+                      child: Transform.translate(
+                        offset: Offset(
+                          _dragOffset < 0
+                              ? _dragOffset + slideExtent
+                              : _dragOffset - slideExtent,
+                          0,
+                        ),
+                        child: ClipRRect(
+                          // borderRadius: BorderRadius.circular(12),
+                          child: OptimizedImage(
+                            imagePath:
+                                bgSong.artPath != null &&
+                                    !bgSong.artPath!.startsWith('http')
+                                ? bgSong.artPath
+                                : null,
+                            imageUrl:
+                                bgSong.artPath != null &&
+                                    bgSong.artPath!.startsWith('http')
+                                ? bgSong.artPath
+                                : null,
+                            borderRadius: BorderRadius.circular(12),
 
-                          fit: BoxFit.cover,
-                          cacheWidth: isLandscape
-                              ? computedCacheWidth
-                              : (slideExtent * dpr).toInt(),
+                            fit: BoxFit.cover,
+                            cacheWidth: isLandscape
+                                ? computedCacheWidth
+                                : (slideExtent * dpr).toInt(),
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                // Active Sliding Artwork (flat horizontal slide)
-                Positioned.fill(
-                  child: Transform.translate(
-                    offset: Offset(_dragOffset, 0),
-                    child: enableSlide
-                        ? artworkSwitcher
-                        : Hero(tag: 'album_art', child: artworkSwitcher),
-                  ),
-                ),
-                // Feedback Overlay
-                if (_feedbackType != null)
+                  // Active Sliding Artwork (flat horizontal slide)
                   Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: AnimatedBuilder(
-                        animation: _fadeAnimation,
-                        builder: (context, child) {
-                          final progress = _fadeAnimation.value;
-                          final opacity = (1.0 - progress).clamp(0.0, 1.0);
-                          final scale = 0.8 + (progress * 0.3);
-
-                          Widget feedbackChild;
-                          Alignment alignment = Alignment.center;
-
-                          switch (_feedbackType) {
-                            case 'rewind':
-                              alignment = const Alignment(-0.5, 0.0);
-                              feedbackChild = Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.replay_10_rounded,
-                                    color: Colors.white,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    '-10s',
-                                    style: AppFonts.jostStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              );
-                              break;
-                            case 'forward':
-                              alignment = const Alignment(0.5, 0.0);
-                              feedbackChild = Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.forward_10_rounded,
-                                    color: Colors.white,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    '+10s',
-                                    style: AppFonts.jostStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              );
-                              break;
-                            case 'next':
-                              feedbackChild = Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.skip_next_rounded,
-                                    color: Colors.white,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    l10n.nextLabel,
-                                    style: AppFonts.jostStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              );
-                              break;
-                            case 'previous':
-                              feedbackChild = Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.skip_previous_rounded,
-                                    color: Colors.white,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    l10n.previousLabel,
-                                    style: AppFonts.jostStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              );
-                              break;
-                            default:
-                              feedbackChild = const SizedBox.shrink();
-                          }
-
-                          return Container(
-                            color: Colors.black.withValues(
-                              alpha: 0.35 * opacity,
-                            ),
-                            alignment: alignment,
-                            child: Opacity(
-                              opacity: opacity,
-                              child: Transform.scale(
-                                scale: scale,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black45,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: feedbackChild,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                    child: Transform.translate(
+                      offset: Offset(_dragOffset, 0),
+                      child: enableSlide
+                          ? artworkSwitcher
+                          : Hero(tag: 'album_art', child: artworkSwitcher),
                     ),
                   ),
-              ],
+                  // Feedback Overlay
+                  if (_feedbackType != null)
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: AnimatedBuilder(
+                          animation: _fadeAnimation,
+                          builder: (context, child) {
+                            final progress = _fadeAnimation.value;
+                            final opacity = (1.0 - progress).clamp(0.0, 1.0);
+                            final scale = 0.8 + (progress * 0.3);
+
+                            Widget feedbackChild;
+                            Alignment alignment = Alignment.center;
+
+                            switch (_feedbackType) {
+                              case 'rewind':
+                                alignment = const Alignment(-0.5, 0.0);
+                                feedbackChild = Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.replay_10_rounded,
+                                      color: Colors.white,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      '-10s',
+                                      style: AppFonts.jostStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                                break;
+                              case 'forward':
+                                alignment = const Alignment(0.5, 0.0);
+                                feedbackChild = Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.forward_10_rounded,
+                                      color: Colors.white,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      '+10s',
+                                      style: AppFonts.jostStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                                break;
+                              case 'next':
+                                feedbackChild = Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.skip_next_rounded,
+                                      color: Colors.white,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      l10n.nextLabel,
+                                      style: AppFonts.jostStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                                break;
+                              case 'previous':
+                                feedbackChild = Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.skip_previous_rounded,
+                                      color: Colors.white,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      l10n.previousLabel,
+                                      style: AppFonts.jostStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                                break;
+                              default:
+                                feedbackChild = const SizedBox.shrink();
+                            }
+
+                            return Container(
+                              color: Colors.black.withValues(
+                                alpha: 0.35 * opacity,
+                              ),
+                              alignment: alignment,
+                              child: Opacity(
+                                opacity: opacity,
+                                child: Transform.scale(
+                                  scale: scale,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black45,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: feedbackChild,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

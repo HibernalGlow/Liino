@@ -31,7 +31,7 @@ extension _WelcomeStates on _WelcomeScreenState {
             height: 100.s,
             width: 200.s,
             child: SvgPicture.asset(
-              'assets/main_logo_transparent.svg',
+              AppAssets.logo,
               fit: BoxFit.contain,
               placeholderBuilder: (context) => Icon(
                 LucideIcons.music,

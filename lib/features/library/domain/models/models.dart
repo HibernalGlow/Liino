@@ -159,6 +159,32 @@ class AppSettings {
   bool audioFocusRestartOnGain = true;
   bool disableSquiggle = false;
   bool disableAnimatedDuration = false;
+
+  // Progress bar style (Android player + lyrics screen), see
+  // ProgressBarStyle. Nullable so databases from before these existed read
+  // back as "use the default" - Isar fills a missing double with NaN and a
+  // missing int with its min value, not the Dart initializer.
+  double? progressBarThickness;
+  double? progressWaveHeight;
+  double? progressWaveLength;
+  double? progressWaveSpeed;
+  int? progressThumbStyle;
+  double? progressThumbWidth;
+  double? progressThumbHeight;
+  double? progressThumbGap;
+  double? progressInactiveOpacity;
+  bool progressWaveFromStart = false;
+  bool progressFreezeWhenPaused = false;
+  bool progressGrowThumbOnDrag = false;
+
+  // Now Playing artwork visualizer, see ArtworkVisualizerType. Null means
+  // none / the default intensity / artwork colors.
+  int? artworkVisualizer;
+  int? artworkVisualizerIntensity;
+  int? artworkVisualizerColors;
+  // How long the effect waits after the audio is analysed, to line up
+  // with what's actually heard (output buffers, Bluetooth).
+  int? artworkVisualizerSyncMs;
   bool disableBlur = true;
   // Forces the blur behind bottom sheets on regardless of Dynamic Theming --
   // that toggle changes accent colors/gradients app-wide too, so this gives
@@ -170,11 +196,26 @@ class AppSettings {
   bool includeSystemAndMessagingAudio = false;
   bool keepBackgroundGradient = false;
   bool showQualityBadge = true;
+  // Quality badge style (see QualityBadgeStyle); enum indices, null = default.
+  int? qualityBadgeLook;
+  int? qualityBadgeIcon;
+  int? qualityBadgeColors;
+  int? qualityBadgeSeparator;
+  int? qualityBadgeShape;
+  int? qualityBadgeLayout;
+  // Bitmask of QualityBadgeField indices; null = all details.
+  int? qualityBadgeFields;
   bool enablePlayerGradient = true;
   // Swaps the static player gradient for slow drifting primary/tertiary
   // color blobs with grain that react to the music (FFT). Only takes effect
   // while enablePlayerGradient is on.
   bool animatePlayerGradient = false;
+  // Replaces the player's shuffle/repeat/next up/lyrics pill groups with
+  // four icon-only tiles styled like the prev/play/next transport row.
+  bool segmentedUtilityButtons = false;
+  // Master switch for every haptic (AppHaptics). Stored inverted so rows
+  // saved before it existed read back as "haptics on".
+  bool disableHaptics = false;
   // Same animated gradient on the Home/Songs/Library background. Only takes
   // effect while keepBackgroundGradient is on.
   bool animateBackgroundGradient = false;
@@ -215,6 +256,13 @@ class AppSettings {
   bool resumeOnStart = false;
   bool permanentAudioFocusChange = false; // Unused, see above.
   bool dynamicColorActiveLyrics = true;
+  // 0..1, makes the active lyric line's color more vibrant (0 = as is).
+  // Rows saved before this field existed come back as NaN - treat as 0.
+  double activeLyricsIntensity = 0.0;
+  // "Accent Color Active Line" off: the active lyric line uses the accent
+  // blended with white instead of the pure accent. Stored inverted so the
+  // toggle defaults to on, also for settings saved before it existed.
+  bool activeLyricsSoftColor = false;
   bool ambientColorBackground = true;
   String lyricsAlignment = 'left'; // 'left', 'center', 'right'
   bool dynamicAccentColor = true;
@@ -229,22 +277,22 @@ class AppSettings {
   double songsDarkness = 0.45;
   double libraryDarkness = 0.62;
   double musicDarkness = 0.62;
-  double lyricsDarkness = 0.50;
+  double lyricsDarkness = 0.35;
 
   // Home screen app-bar avatar. Filename only (not a full path) - it's
-  // always resolved against assets/android_icons/avatars/, so renaming that
+  // always resolved against AppAssets.avatarDir, so renaming that
   // folder is a one-place change instead of a data migration.
-  String selectedAvatarAsset = 'looper_player_logo.svg';
+  String selectedAvatarAsset = 'logo_full.svg';
   // Only the default avatar (looper_main.svg) contains the swappable
   // "#C0E200" accent color - see SelectedAvatar's doc comment.
   bool avatarDynamicColor = false;
 
   bool useNewFont = true;
-  String customFontFamily = 'Space Grotesk';
+  String customFontFamily = 'Stack Sans Text';
   int customFontWeight = 400;
   int customFontWeightDelta = 0;
   bool useNewFontLyrics = true;
-  String customFontFamilyLyrics = 'Space Grotesk';
+  String customFontFamilyLyrics = 'Stack Sans Text';
   String customFontWeightLyrics = 'Normal';
   int customFontWeightLyricsDelta = 0;
   int activeLyricsFontWeightDelta = 0;
@@ -257,8 +305,31 @@ class AppSettings {
   int audioCacheSecs = 120;
   int audioBackCacheSizeMB = 100;
   bool exclusiveHardwareMode = false;
-  String lyricsProvider = 'LRCLIB';
+  String lyricsProvider = 'lrc.red';
   bool autoLyricsFallback = true;
+
+  /// One-time move of installs still on the old LRCLIB default to lrc.red
+  /// (word-synced lyrics). Set once so a later deliberate LRCLIB pick sticks.
+  bool lyricsProviderWordSyncMigrated = false;
+
+  /// How the active lyric line is highlighted: 'line' (whole line), 'word'
+  /// (each word lights up as it's sung) or 'char' (smooth wipe through the
+  /// letters). Word/char use real word timing when the lyrics have it and
+  /// approximate it otherwise.
+  String lyricsSyncStyle = 'char';
+
+  /// Shows lyrics earlier (positive) or later (negative), in ms. Negative
+  /// helps when audio reaches the ears late, e.g. over Bluetooth.
+  int lyricsOffsetMs = defaultLyricsOffsetMs;
+  static const int defaultLyricsOffsetMs = 200;
+
+  /// [lyricsOffsetMs] used to mean positive = later; set once stored values
+  /// have been flipped to the positive = earlier meaning.
+  bool lyricsOffsetEarlierMigrated = false;
+
+  /// One-time move of installs still on the old default app font (Space
+  /// Grotesk) to Stack Sans Text. Set once so a later deliberate pick sticks.
+  bool stackSansDefaultMigrated = false;
 
   /// Whether the user has already been shown the one-time "hidden gestures"
   /// tutorial on the Lyrics screen (tap to seek, long-press to select lines

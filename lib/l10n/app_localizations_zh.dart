@@ -224,7 +224,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dynamicColorActiveLyrics => '动态彩色活动线';
 
   @override
-  String get dynamicColorActiveLyricsDesc => '对当前播放的歌词行使用提取的图稿颜色';
+  String get dynamicColorActiveLyricsDesc => '为当前歌词行着色；关闭则保持白色';
+
+  @override
+  String get activeLyricsIntensity => '活动行亮度';
+
+  @override
+  String get activeLyricsIntensityDesc => '当前歌词行显示的颜色浓度';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => '非活动行';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => '活动行';
+
+  @override
+  String get activeLyricsUseAccent => '活动行使用强调色';
+
+  @override
+  String get activeLyricsUseAccentDesc => '使用纯强调色；关闭则与白色混合，呈现更柔和的色调';
 
   @override
   String get dynamicLyricsBg => '动态歌词BG';
@@ -392,7 +410,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lyricsProvider => '歌词提供者';
 
   @override
-  String get lyricsProviderDesc => '在线歌词获取自 lrclib.net (LRCLIB)';
+  String get lyricsProviderDesc => '来自 lrc.red、LyricsPlus、LRCLIB 等的在线歌词';
 
   @override
   String get maintainersAndDesigners => '维护者与设计师';
@@ -769,6 +787,64 @@ class AppLocalizationsZh extends AppLocalizations {
   String get showMore => '显示更多';
 
   @override
+  String get segmentedUtilityButtons => '分段式播放器按钮';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      '将随机播放、循环、待播清单和歌词显示为与播放控制按钮样式相同的四个图标方块';
+
+  @override
+  String get qualityBadgeStyle => '音质徽章样式';
+
+  @override
+  String get qualityBadgeStyleDesc => '音质徽章的外观、图标、颜色和显示内容';
+
+  @override
+  String get qualityBadgeLook => '外观';
+
+  @override
+  String get qualityBadgeLookPill => '填充';
+
+  @override
+  String get qualityBadgeLookOutlined => '描边';
+
+  @override
+  String get qualityBadgeLookText => '文字';
+
+  @override
+  String get qualityBadgeIcon => '图标';
+
+  @override
+  String get qualityBadgeColorsByQuality => '按音质';
+
+  @override
+  String get qualityBadgeSeparator => '分隔符';
+
+  @override
+  String get qualityBadgeDetails => '显示内容';
+
+  @override
+  String get qualityBadgeLevel => '音质等级';
+
+  @override
+  String get qualityBadgeLayout => '内容';
+
+  @override
+  String get qualityBadgeLayoutName => '仅名称';
+
+  @override
+  String get qualityBadgeShape => '形状';
+
+  @override
+  String get qualityBadgeShapePill => '胶囊';
+
+  @override
+  String get qualityBadgeShapeRounded => '圆角';
+
+  @override
+  String get qualityBadgeShapeSquare => '方形';
+
+  @override
   String get showQualityBadge => '显示质量徽章';
 
   @override
@@ -910,6 +986,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fluidPlayerDesc => '向上拖动迷你播放器，将其变换为完整播放器';
 
   @override
+  String get hapticFeedback => '触感反馈';
+
+  @override
+  String get hapticFeedbackDesc => '点按、切换和手势时振动';
+
+  @override
   String get viewAll => '查看全部';
 
   @override
@@ -951,7 +1033,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      '• 动态歌词同步：仅用于从在线数据库安全地获取和下载同步歌词（LRC 格式）。不会上传或共享任何个人数据、设置或媒体文件。';
+      '• 歌词：从 lrc.red、LyricsPlus、LRCLIB 或你选择的来源获取同步歌词。仅发送歌曲名、艺术家、专辑和时长用于匹配。绝不会上传或共享任何个人数据、设置或媒体文件。';
 
   @override
   String get whyPermissionsUsed => '为什么使用权限';
@@ -1980,10 +2062,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => '手势提示';
+  String get gestureTips => '歌词小贴士';
 
   @override
-  String get gestureTipsDesc => '点按、长按、双指缩放等';
+  String get gestureTipsDesc => '手势、逐词同步、时间调整等';
 
   @override
   String get exportLyrics => '导出歌词';
@@ -2008,7 +2090,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gestureLongPressLine => '长按一行';
 
   @override
-  String get gestureLongPressLineDesc => '开始选择歌词行，制作可分享的歌词卡片。点按更多行可扩大选择范围。';
+  String get gestureLongPressLineDesc => '选择歌词行，分享为歌词卡片。';
 
   @override
   String get gesturePinch => '双指缩放';
@@ -2023,7 +2105,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gestureSwipeDownDesc => '关闭歌词界面并返回播放器。';
 
   @override
-  String get lyricsGestures => '歌词手势';
+  String get lyricsGestures => '歌词小贴士';
 
   @override
   String get lyricsGesturesIntro => '这个界面有一些不太显眼的功能：';
@@ -2193,6 +2275,153 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get qualityHiRes => '高解析度无损';
+
+  @override
+  String get qualityMono => '单声道';
+
+  @override
+  String get qualityStereo => '立体声';
+
+  @override
+  String get qualitySignalPath => '信号路径';
+
+  @override
+  String get qualityStageSource => '音源';
+
+  @override
+  String get qualityStageDecoder => '解码器';
+
+  @override
+  String get qualityStageOutput => '输出';
+
+  @override
+  String get qualityStageDevice => '设备';
+
+  @override
+  String get qualityNativeEndToEnd => '全程以文件原始采样率播放';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return '输出时从 $from 重采样为 $to';
+  }
+
+  @override
+  String get qualitySectionSource => '源文件';
+
+  @override
+  String get qualitySectionEngine => '播放引擎';
+
+  @override
+  String get qualitySectionDevice => '输出设备';
+
+  @override
+  String get qualitySectionPhone => '本机';
+
+  @override
+  String get qualityOutputFormat => '输出格式';
+
+  @override
+  String get qualityOutputRate => '输出采样率';
+
+  @override
+  String get qualityOutputChannels => '输出声道';
+
+  @override
+  String get qualityLiveBitrate => '实时码率';
+
+  @override
+  String get qualityGapless => '无缝播放';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => '单曲';
+
+  @override
+  String get qualityReplayGainAlbum => '专辑';
+
+  @override
+  String get qualitySpeed => '速度';
+
+  @override
+  String get qualityDeviceName => '名称';
+
+  @override
+  String get qualityDeviceType => '类型';
+
+  @override
+  String get qualityDeviceSpeaker => '手机扬声器';
+
+  @override
+  String get qualityDeviceWired => '有线耳机';
+
+  @override
+  String get qualityDeviceBluetooth => '蓝牙';
+
+  @override
+  String get qualityDeviceUsb => 'USB 音频';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => '助听器';
+
+  @override
+  String get qualityDeviceDock => '底座';
+
+  @override
+  String get qualitySupportedRates => '支持的采样率';
+
+  @override
+  String get qualityAnyRate => '任意';
+
+  @override
+  String get qualityMaxBitDepth => '最大位深';
+
+  @override
+  String get qualityMaxChannels => '最大声道数';
+
+  @override
+  String get qualityBitPerfect => '比特完美模式';
+
+  @override
+  String get qualitySupported => '支持';
+
+  @override
+  String get qualityNotSupported => '不支持';
+
+  @override
+  String get qualitySpatialAudio => '空间音频';
+
+  @override
+  String get qualityDeviceNote =>
+      'Android 不会告诉应用播放器被路由到哪个输出，因此这里显示的是音乐通常发送到的设备。';
+
+  @override
+  String get qualityPhoneModel => '型号';
+
+  @override
+  String get qualityAndroidVersion => 'Android 版本';
+
+  @override
+  String get qualityMixerRate => '混音器采样率';
+
+  @override
+  String get qualityMixerBuffer => '混音器缓冲区';
+
+  @override
+  String get qualityLowLatency => '低延迟音频';
+
+  @override
+  String get qualityProAudio => '专业音频';
+
+  @override
+  String get qualityDeviceUnavailable => '设备详情仅在 Android 上可用。';
+
+  @override
   String get qualityLossless => '无损';
 
   @override
@@ -2358,4 +2587,376 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mono => '单声道';
+
+  @override
+  String get progressBarStyle => '进度条样式';
+
+  @override
+  String get progressBarStyleDesc => '波浪、粗细、滑块等';
+
+  @override
+  String get progressBarPreview => '预览';
+
+  @override
+  String get progressWave => '波浪';
+
+  @override
+  String get progressWaveDesc => '将已播放部分显示为流动的波浪';
+
+  @override
+  String get progressWaveHeight => '波浪高度';
+
+  @override
+  String get progressWaveLength => '波长';
+
+  @override
+  String get progressWaveLengthDesc => '相邻波峰之间的距离';
+
+  @override
+  String get progressWaveSpeed => '波浪速度';
+
+  @override
+  String get progressWaveFromStart => '从头显示波浪';
+
+  @override
+  String get progressWaveFromStartDesc => '立即显示波浪，而不是在歌曲开头之后';
+
+  @override
+  String get progressKeepWavePaused => '暂停时保留波浪';
+
+  @override
+  String get progressKeepWavePausedDesc => '让波浪静止而不是变平';
+
+  @override
+  String get progressBarThickness => '进度条粗细';
+
+  @override
+  String get progressThumb => '滑块';
+
+  @override
+  String get progressThumbPill => '胶囊';
+
+  @override
+  String get progressThumbRound => '圆形';
+
+  @override
+  String get progressThumbWidth => '滑块宽度';
+
+  @override
+  String get progressThumbHeight => '滑块高度';
+
+  @override
+  String get progressThumbSize => '滑块大小';
+
+  @override
+  String get progressThumbGap => '滑块两侧间距';
+
+  @override
+  String get progressTrackOpacity => '未播放部分不透明度';
+
+  @override
+  String get progressGrowThumb => '拖动时放大滑块';
+
+  @override
+  String get resetToDefaults => '恢复默认';
+
+  @override
+  String get artworkVisualizer => '封面可视化效果';
+
+  @override
+  String get artworkVisualizerDesc => '正在播放封面上随音乐变化的效果';
+
+  @override
+  String get visualizerEffect => '效果';
+
+  @override
+  String get visualizerAura => '光晕';
+
+  @override
+  String get visualizerRing => '频谱环';
+
+  @override
+  String get visualizerWave => '底部波浪';
+
+  @override
+  String get visualizerBars => '柱状';
+
+  @override
+  String get visualizerBreathing => '呼吸';
+
+  @override
+  String get visualizerIntensity => '强度';
+
+  @override
+  String get visualizerSubtle => '柔和';
+
+  @override
+  String get visualizerNormal => '标准';
+
+  @override
+  String get visualizerStrong => '强烈';
+
+  @override
+  String get visualizerColors => '颜色';
+
+  @override
+  String get visualizerColorsArtwork => '封面';
+
+  @override
+  String get visualizerColorsTheme => '主题';
+
+  @override
+  String get visualizerColorsWhite => '白色';
+
+  @override
+  String get progressTrack => '轨道';
+
+  @override
+  String get visualizerSync => '音频同步';
+
+  @override
+  String get visualizerSyncDesc => '延迟效果，使其与听到的声音同步。使用蓝牙耳机时请调高。';
+
+  @override
+  String get visualizerSyncHint => '播放歌曲以凭听感调整';
+
+  @override
+  String get lyricsHighlightStyle => '高亮样式';
+
+  @override
+  String get lyricsStyleLine => '逐行';
+
+  @override
+  String get lyricsStyleWord => '逐词';
+
+  @override
+  String get lyricsStyleCharacter => '逐字';
+
+  @override
+  String get lyricsWordSynced => '逐词同步';
+
+  @override
+  String get lyricsLineSynced => '逐行同步';
+
+  @override
+  String get findWordSyncedLyrics => '查找逐词同步歌词';
+
+  @override
+  String get searchingWordSyncedLyrics => '正在搜索 lrc.red 和 LyricsPlus…';
+
+  @override
+  String get wordSyncedLyricsLoaded => '已加载逐词同步歌词';
+
+  @override
+  String get noWordSyncedLyricsFound => '未找到这首歌的逐词同步歌词';
+
+  @override
+  String get lyricsTiming => '歌词时间';
+
+  @override
+  String get lyricsTimingDesc => '正值让歌词提前显示，负值让歌词延后。如果歌词比歌曲快（使用蓝牙时常见），请调低数值。';
+
+  @override
+  String get lyricsTimingEarlier => '提前';
+
+  @override
+  String get lyricsTimingLater => '延后';
+
+  @override
+  String get lyricsTimingReset => '重置';
+
+  @override
+  String get themeGroupColors => '颜色';
+
+  @override
+  String get themeGroupBlurBackgrounds => '模糊与背景';
+
+  @override
+  String get themeGroupDarkness => '暗度';
+
+  @override
+  String get themeGroupFonts => '字体';
+
+  @override
+  String get themeGroupProfile => '个人资料';
+
+  @override
+  String get lyricsTipsGestures => '手势';
+
+  @override
+  String get lyricsTipsMenu => '在 ⋮ 菜单中';
+
+  @override
+  String get gestureScroll => '自由滚动';
+
+  @override
+  String get gestureScrollDesc => '浏览时自动跟随会暂停，点按“重新同步”即可返回。';
+
+  @override
+  String get tipFindWordSyncDesc => '从 lrc.red 和 LyricsPlus 获取逐词时间。';
+
+  @override
+  String get tipHighlightStyleDesc => '逐词同步的歌词可按行、逐词或逐字高亮。';
+
+  @override
+  String get tipLyricsTimingDesc => '将歌词提前或延后，适合蓝牙耳机。';
+
+  @override
+  String get tipChangeProviderDesc => '歌词错误或缺失？换个来源试试。';
+
+  @override
+  String get tipOwnLyrics => '自己的歌词';
+
+  @override
+  String get tipOwnLyricsDesc => '加载 .lrc 文件，或将当前歌词导出到设备。';
+
+  @override
+  String get lyricsSources => '歌词来源';
+
+  @override
+  String get creditLrcRedDesc => '逐字同步歌词（默认来源）';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      '逐字同步歌词 · ibratabian17 的开源服务器（Apache-2.0），由 binimum 托管';
+
+  @override
+  String get creditLrclibDesc => '逐行同步歌词 · 免费开放的歌词数据库';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      '查找每首歌的 ISRC，以便 lrc.red 匹配 · 开放音乐数据库（CC0 数据）';
+
+  @override
+  String get creditAmLyricsDesc => '启发了我们的逐字同步歌词 · 作者 binimum（MPL-2.0）';
+
+  @override
+  String get lyricsCopyrightNote =>
+      '歌词版权归艺术家及权利人所有。Looper 仅为个人显示而获取歌词，并保存在你的设备上。';
+
+  @override
+  String get clearLyricsCache => '清除歌词缓存';
+
+  @override
+  String get clearLyricsCacheDesc => '下载的歌词会一直保留，直到你清除。你自己的文件和选择的 .lrc 会保留。';
+
+  @override
+  String get clearLyricsCacheConfirm => '清除所有下载的歌词？歌曲下次播放时会重新在线查找。';
+
+  @override
+  String get lyricsCacheCleared => '已清除歌词缓存';
+
+  @override
+  String get analyzeYourTopSong => '你的第 1 名';
+
+  @override
+  String get analyzeHighlights => '亮点';
+
+  @override
+  String get analyzePeakTime => '高峰时段';
+
+  @override
+  String get analyzeBusiestDay => '最活跃的一天';
+
+  @override
+  String get analyzeTopGenre => '最爱流派';
+
+  @override
+  String get analyzeLibraryExplored => '曲库探索';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$total 首中的 $played 首';
+  }
+
+  @override
+  String get analyzeCurrentStreak => '当前连续';
+
+  @override
+  String get analyzeLongestStreak => '最长连续';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours 小时 $minutes 分';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes 分';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return '平均每天 $avg 次';
+  }
+
+  @override
+  String get dayPartMorning => '上午';
+
+  @override
+  String get dayPartAfternoon => '下午';
+
+  @override
+  String get dayPartEvening => '傍晚';
+
+  @override
+  String get dayPartNight => '夜晚';
+
+  @override
+  String get updateNow => '更新';
+
+  @override
+  String get updateLater => '稍后';
+
+  @override
+  String get updateInstall => '安装';
+
+  @override
+  String get retry => '重试';
+
+  @override
+  String get updateWhatsNew => '新功能';
+
+  @override
+  String get updateDownloading => '正在下载更新';
+
+  @override
+  String get updateVerifying => '正在验证下载…';
+
+  @override
+  String get updateWaitingForInstaller => '正在等待安装程序…';
+
+  @override
+  String get updateReadyToInstall => '已下载，可以安装。';
+
+  @override
+  String get updateErrorNetwork => '下载失败。请检查网络连接后重试。';
+
+  @override
+  String get updateErrorChecksum => '下载的文件已损坏，请重试。';
+
+  @override
+  String get updateErrorStorage => '存储空间不足，无法更新。';
+
+  @override
+  String get updateErrorInstall => '无法安装更新。';
+
+  @override
+  String get checkForUpdates => '检查更新';
+
+  @override
+  String get updateUpToDate => '当前已是最新版本。';
+
+  @override
+  String get updateCheckFailed => '无法检查更新。';
 }

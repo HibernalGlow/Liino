@@ -14,6 +14,8 @@ import 'package:mpv_audio_kit/mpv_audio_kit.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/core/providers/providers.dart';
 import 'package:looper_player/features/library/data/scanner/scanner.dart';
+import 'package:looper_player/features/playback/data/lyrics_cache.dart';
+import 'package:looper_player/features/playback/data/lyrics_fetcher.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:looper_player/core/services/storage/db_service.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
@@ -1643,6 +1645,11 @@ class Playback extends _$Playback {
     String? lyrics,
   }) async {
     final originalPath = song.path;
+    final oldArtist = (song.artist ?? 'Unknown Artist').trim();
+    final oldTitle = song.title.trim();
+    // null = lyrics untouched in the sheet. Otherwise the current (possibly
+    // word-synced) lyrics are backed up under their provider first.
+    if (lyrics != null) await LyricsFetcher.backUpBeforeEdit(song);
     final sanitizedTitle = (title != null && title.trim().isNotEmpty)
         ? title.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_').trim()
         : null;
@@ -1713,12 +1720,24 @@ class Playback extends _$Playback {
         if (artPath != null) {
           song.artPath = artPath.trim().isEmpty ? null : artPath.trim();
         }
-        song.lyrics = (lyrics == null || lyrics.trim().isEmpty)
+        // [song] may be a stale queue copy - untouched lyrics come from the
+        // database, so a newer (e.g. word-synced) save isn't overwritten.
+        song.lyrics = lyrics == null
+            ? (await DbService.isar.songs.get(song.id))?.lyrics ?? song.lyrics
+            : lyrics.trim().isEmpty
             ? null
-            : lyrics.trim();
+            : LyricsFetcher.userLyrics(lyrics);
         if (renamedPath != null) song.path = renamedPath;
         await DbService.isar.songs.put(song);
       });
+
+      // The lyrics cache is keyed by artist/title - move it along.
+      await LyricsCache.rename(
+        oldArtist,
+        oldTitle,
+        (song.artist ?? 'Unknown Artist').trim(),
+        song.title.trim(),
+      );
 
       // Update the in-memory playlist
       final idx = _playlist.indexWhere((s) => s.id == song.id);

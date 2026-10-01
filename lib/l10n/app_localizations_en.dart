@@ -236,7 +236,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dynamicColorActiveLyricsDesc =>
-      'Use extracted artwork colors for the currently playing lyrics line';
+      'Color the playing lyrics line; off keeps it white';
+
+  @override
+  String get activeLyricsIntensity => 'Active Line Intensity';
+
+  @override
+  String get activeLyricsIntensityDesc =>
+      'How much color the playing lyrics line shows';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => 'Inactive line';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => 'Active line';
+
+  @override
+  String get activeLyricsUseAccent => 'Accent Color Active Line';
+
+  @override
+  String get activeLyricsUseAccentDesc =>
+      'Use the pure accent color; off blends it with white for a softer tint';
 
   @override
   String get dynamicLyricsBg => 'Dynamic Lyrics BG';
@@ -420,7 +440,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lyricsProviderDesc =>
-      'Online lyrics fetched from lrclib.net (LRCLIB)';
+      'Online lyrics from lrc.red, LyricsPlus, LRCLIB and more';
 
   @override
   String get maintainersAndDesigners => 'Maintainers & Designers';
@@ -822,6 +842,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showMore => 'Show More';
 
   @override
+  String get segmentedUtilityButtons => 'Segmented Player Buttons';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      'Show shuffle, repeat, next up and lyrics as four icon tiles styled like the playback controls';
+
+  @override
+  String get qualityBadgeStyle => 'Quality Badge Style';
+
+  @override
+  String get qualityBadgeStyleDesc =>
+      'Look, icon, colors and details of the audio quality badge';
+
+  @override
+  String get qualityBadgeLook => 'Look';
+
+  @override
+  String get qualityBadgeLookPill => 'Filled';
+
+  @override
+  String get qualityBadgeLookOutlined => 'Outlined';
+
+  @override
+  String get qualityBadgeLookText => 'Text';
+
+  @override
+  String get qualityBadgeIcon => 'Icon';
+
+  @override
+  String get qualityBadgeColorsByQuality => 'By quality';
+
+  @override
+  String get qualityBadgeSeparator => 'Separator';
+
+  @override
+  String get qualityBadgeDetails => 'Details';
+
+  @override
+  String get qualityBadgeLevel => 'Quality level';
+
+  @override
+  String get qualityBadgeLayout => 'Content';
+
+  @override
+  String get qualityBadgeLayoutName => 'Name only';
+
+  @override
+  String get qualityBadgeShape => 'Shape';
+
+  @override
+  String get qualityBadgeShapePill => 'Pill';
+
+  @override
+  String get qualityBadgeShapeRounded => 'Rounded';
+
+  @override
+  String get qualityBadgeShapeSquare => 'Square';
+
+  @override
   String get showQualityBadge => 'Show Quality Badge';
 
   @override
@@ -974,6 +1053,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Drag the mini player up to morph it into the full player';
 
   @override
+  String get hapticFeedback => 'Haptic feedback';
+
+  @override
+  String get hapticFeedbackDesc => 'Vibrate on taps, toggles and gestures';
+
+  @override
   String get viewAll => 'View All';
 
   @override
@@ -1020,7 +1105,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      '• Dynamic Lyrics Syncing: Used solely to securely fetch and download synchronized lyrics (LRC formats) from online databases. No personal data, settings, or media files are ever uploaded or shared.';
+      '• Lyrics: fetches synced lyrics from lrc.red, LyricsPlus, LRCLIB or the provider you choose. Only the song title, artist, album and duration are sent to find a match. No personal data, settings, or media files are ever uploaded or shared.';
 
   @override
   String get whyPermissionsUsed => 'Why Permissions are Used';
@@ -2089,10 +2174,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => 'Gesture Tips';
+  String get gestureTips => 'Lyrics Tips';
 
   @override
-  String get gestureTipsDesc => 'Tap, long-press, pinch to zoom & more';
+  String get gestureTipsDesc => 'Gestures, word sync, timing & more';
 
   @override
   String get exportLyrics => 'Export Lyrics';
@@ -2118,7 +2203,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gestureLongPressLineDesc =>
-      'Start selecting lines to turn into a shareable lyrics card. Tap more lines to extend the selection.';
+      'Select lines to share as a lyrics card.';
 
   @override
   String get gesturePinch => 'Pinch with two fingers';
@@ -2134,7 +2219,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Close the lyrics screen and return to the player.';
 
   @override
-  String get lyricsGestures => 'Lyrics Gestures';
+  String get lyricsGestures => 'Lyrics Tips';
 
   @override
   String get lyricsGesturesIntro =>
@@ -2308,6 +2393,155 @@ class AppLocalizationsEn extends AppLocalizations {
   String nyquistKhz(String khz) {
     return 'Nyquist: $khz kHz';
   }
+
+  @override
+  String get qualityHiRes => 'Hi-Res Lossless';
+
+  @override
+  String get qualityMono => 'Mono';
+
+  @override
+  String get qualityStereo => 'Stereo';
+
+  @override
+  String get qualitySignalPath => 'Signal Path';
+
+  @override
+  String get qualityStageSource => 'Source';
+
+  @override
+  String get qualityStageDecoder => 'Decoder';
+
+  @override
+  String get qualityStageOutput => 'Output';
+
+  @override
+  String get qualityStageDevice => 'Device';
+
+  @override
+  String get qualityNativeEndToEnd =>
+      'Plays at the file\'s own sample rate all the way through';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return 'Resampled from $from to $to on the way out';
+  }
+
+  @override
+  String get qualitySectionSource => 'Source File';
+
+  @override
+  String get qualitySectionEngine => 'Playback Engine';
+
+  @override
+  String get qualitySectionDevice => 'Output Device';
+
+  @override
+  String get qualitySectionPhone => 'This Phone';
+
+  @override
+  String get qualityOutputFormat => 'Output Format';
+
+  @override
+  String get qualityOutputRate => 'Output Sample Rate';
+
+  @override
+  String get qualityOutputChannels => 'Output Channels';
+
+  @override
+  String get qualityLiveBitrate => 'Live Bitrate';
+
+  @override
+  String get qualityGapless => 'Gapless Playback';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => 'Track';
+
+  @override
+  String get qualityReplayGainAlbum => 'Album';
+
+  @override
+  String get qualitySpeed => 'Speed';
+
+  @override
+  String get qualityDeviceName => 'Name';
+
+  @override
+  String get qualityDeviceType => 'Type';
+
+  @override
+  String get qualityDeviceSpeaker => 'Phone speaker';
+
+  @override
+  String get qualityDeviceWired => 'Wired headphones';
+
+  @override
+  String get qualityDeviceBluetooth => 'Bluetooth';
+
+  @override
+  String get qualityDeviceUsb => 'USB audio';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => 'Hearing aid';
+
+  @override
+  String get qualityDeviceDock => 'Dock';
+
+  @override
+  String get qualitySupportedRates => 'Supported Rates';
+
+  @override
+  String get qualityAnyRate => 'Any';
+
+  @override
+  String get qualityMaxBitDepth => 'Max Bit Depth';
+
+  @override
+  String get qualityMaxChannels => 'Max Channels';
+
+  @override
+  String get qualityBitPerfect => 'Bit-perfect Mode';
+
+  @override
+  String get qualitySupported => 'Supported';
+
+  @override
+  String get qualityNotSupported => 'Not supported';
+
+  @override
+  String get qualitySpatialAudio => 'Spatial Audio';
+
+  @override
+  String get qualityDeviceNote =>
+      'Android doesn\'t tell apps which output a player is routed to, so this is the device it normally sends music to.';
+
+  @override
+  String get qualityPhoneModel => 'Model';
+
+  @override
+  String get qualityAndroidVersion => 'Android Version';
+
+  @override
+  String get qualityMixerRate => 'Mixer Sample Rate';
+
+  @override
+  String get qualityMixerBuffer => 'Mixer Buffer';
+
+  @override
+  String get qualityLowLatency => 'Low-latency Audio';
+
+  @override
+  String get qualityProAudio => 'Pro Audio';
+
+  @override
+  String get qualityDeviceUnavailable =>
+      'Device details are only available on Android.';
 
   @override
   String get qualityLossless => 'Lossless';
@@ -2491,4 +2725,396 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mono => 'Mono';
+
+  @override
+  String get progressBarStyle => 'Progress bar style';
+
+  @override
+  String get progressBarStyleDesc => 'Wave, thickness, thumb and more';
+
+  @override
+  String get progressBarPreview => 'Preview';
+
+  @override
+  String get progressWave => 'Wave';
+
+  @override
+  String get progressWaveDesc =>
+      'Draw the played part of the bar as a moving wave';
+
+  @override
+  String get progressWaveHeight => 'Wave height';
+
+  @override
+  String get progressWaveLength => 'Wave length';
+
+  @override
+  String get progressWaveLengthDesc => 'Distance from one wave to the next';
+
+  @override
+  String get progressWaveSpeed => 'Wave speed';
+
+  @override
+  String get progressWaveFromStart => 'Wave from the start';
+
+  @override
+  String get progressWaveFromStartDesc =>
+      'Show the wave right away instead of after the first part of the song';
+
+  @override
+  String get progressKeepWavePaused => 'Keep wave when paused';
+
+  @override
+  String get progressKeepWavePausedDesc =>
+      'Hold the wave still instead of flattening it';
+
+  @override
+  String get progressBarThickness => 'Bar thickness';
+
+  @override
+  String get progressThumb => 'Thumb';
+
+  @override
+  String get progressThumbPill => 'Pill';
+
+  @override
+  String get progressThumbRound => 'Round';
+
+  @override
+  String get progressThumbWidth => 'Thumb width';
+
+  @override
+  String get progressThumbHeight => 'Thumb height';
+
+  @override
+  String get progressThumbSize => 'Thumb size';
+
+  @override
+  String get progressThumbGap => 'Gap around thumb';
+
+  @override
+  String get progressTrackOpacity => 'Unplayed track opacity';
+
+  @override
+  String get progressGrowThumb => 'Grow thumb while dragging';
+
+  @override
+  String get resetToDefaults => 'Reset to defaults';
+
+  @override
+  String get artworkVisualizer => 'Artwork visualizer';
+
+  @override
+  String get artworkVisualizerDesc =>
+      'A music-reactive effect on the Now Playing artwork';
+
+  @override
+  String get visualizerEffect => 'Effect';
+
+  @override
+  String get visualizerAura => 'Aura glow';
+
+  @override
+  String get visualizerRing => 'Spectrum ring';
+
+  @override
+  String get visualizerWave => 'Bottom wave';
+
+  @override
+  String get visualizerBars => 'Bars';
+
+  @override
+  String get visualizerBreathing => 'Breathing';
+
+  @override
+  String get visualizerIntensity => 'Intensity';
+
+  @override
+  String get visualizerSubtle => 'Subtle';
+
+  @override
+  String get visualizerNormal => 'Normal';
+
+  @override
+  String get visualizerStrong => 'Strong';
+
+  @override
+  String get visualizerColors => 'Colors';
+
+  @override
+  String get visualizerColorsArtwork => 'Artwork';
+
+  @override
+  String get visualizerColorsTheme => 'Theme';
+
+  @override
+  String get visualizerColorsWhite => 'White';
+
+  @override
+  String get progressTrack => 'Track';
+
+  @override
+  String get visualizerSync => 'Audio sync';
+
+  @override
+  String get visualizerSyncDesc =>
+      'Delay the effect so it lands with what you hear. Raise it for Bluetooth headphones.';
+
+  @override
+  String get visualizerSyncHint => 'Play a song to tune this by ear';
+
+  @override
+  String get lyricsHighlightStyle => 'Highlight style';
+
+  @override
+  String get lyricsStyleLine => 'Line';
+
+  @override
+  String get lyricsStyleWord => 'Word by word';
+
+  @override
+  String get lyricsStyleCharacter => 'Letter by letter';
+
+  @override
+  String get lyricsWordSynced => 'Word-synced';
+
+  @override
+  String get lyricsLineSynced => 'Line-synced';
+
+  @override
+  String get findWordSyncedLyrics => 'Find word-synced lyrics';
+
+  @override
+  String get searchingWordSyncedLyrics => 'Searching lrc.red and LyricsPlus…';
+
+  @override
+  String get wordSyncedLyricsLoaded => 'Word-synced lyrics loaded';
+
+  @override
+  String get noWordSyncedLyricsFound =>
+      'No word-synced lyrics found for this song';
+
+  @override
+  String get lyricsTiming => 'Lyrics timing';
+
+  @override
+  String get lyricsTimingDesc =>
+      'Positive shows lyrics earlier, negative later. If lyrics run ahead of the song (common with Bluetooth), lower it.';
+
+  @override
+  String get lyricsTimingEarlier => 'Earlier';
+
+  @override
+  String get lyricsTimingLater => 'Later';
+
+  @override
+  String get lyricsTimingReset => 'Reset';
+
+  @override
+  String get themeGroupColors => 'Colors';
+
+  @override
+  String get themeGroupBlurBackgrounds => 'Blur & Backgrounds';
+
+  @override
+  String get themeGroupDarkness => 'Darkness';
+
+  @override
+  String get themeGroupFonts => 'Fonts';
+
+  @override
+  String get themeGroupProfile => 'Profile';
+
+  @override
+  String get lyricsTipsGestures => 'Gestures';
+
+  @override
+  String get lyricsTipsMenu => 'In the ⋮ menu';
+
+  @override
+  String get gestureScroll => 'Scroll freely';
+
+  @override
+  String get gestureScrollDesc =>
+      'Auto-follow pauses while you browse. Tap Re-sync to jump back.';
+
+  @override
+  String get tipFindWordSyncDesc =>
+      'Fetch per-word timing from lrc.red and LyricsPlus.';
+
+  @override
+  String get tipHighlightStyleDesc =>
+      'Line, word by word or letter by letter, for word-synced lyrics.';
+
+  @override
+  String get tipLyricsTimingDesc =>
+      'Shift lyrics earlier or later, handy with Bluetooth.';
+
+  @override
+  String get tipChangeProviderDesc =>
+      'Wrong or missing lyrics? Try another source.';
+
+  @override
+  String get tipOwnLyrics => 'Your own lyrics';
+
+  @override
+  String get tipOwnLyricsDesc =>
+      'Load an .lrc file, or export these lyrics to your device.';
+
+  @override
+  String get lyricsSources => 'Lyrics Sources';
+
+  @override
+  String get creditLrcRedDesc => 'Word-synced lyrics (default provider)';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      'Word-synced lyrics · open-source server by ibratabian17 (Apache-2.0), hosted by binimum';
+
+  @override
+  String get creditLrclibDesc =>
+      'Line-synced lyrics · free, open lyrics database';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      'Finds each song\'s ISRC so lrc.red can match it · open music database (CC0 data)';
+
+  @override
+  String get creditAmLyricsDesc =>
+      'Inspired our word-synced lyrics · by binimum (MPL-2.0)';
+
+  @override
+  String get lyricsCopyrightNote =>
+      'Lyrics belong to their artists and rights holders. Looper only fetches them for personal display, and keeps them on your device.';
+
+  @override
+  String get clearLyricsCache => 'Clear lyrics cache';
+
+  @override
+  String get clearLyricsCacheDesc =>
+      'Downloaded lyrics are kept until you clear them. Your own files and .lrc picks stay.';
+
+  @override
+  String get clearLyricsCacheConfirm =>
+      'Clear all downloaded lyrics? Songs will look them up online again on their next play.';
+
+  @override
+  String get lyricsCacheCleared => 'Lyrics cache cleared';
+
+  @override
+  String get analyzeYourTopSong => 'Your #1 song';
+
+  @override
+  String get analyzeHighlights => 'Highlights';
+
+  @override
+  String get analyzePeakTime => 'Peak time';
+
+  @override
+  String get analyzeBusiestDay => 'Busiest day';
+
+  @override
+  String get analyzeTopGenre => 'Top genre';
+
+  @override
+  String get analyzeLibraryExplored => 'Library explored';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$played of $total songs';
+  }
+
+  @override
+  String get analyzeCurrentStreak => 'Current streak';
+
+  @override
+  String get analyzeLongestStreak => 'Longest streak';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return '$avg per day on average';
+  }
+
+  @override
+  String get dayPartMorning => 'Morning';
+
+  @override
+  String get dayPartAfternoon => 'Afternoon';
+
+  @override
+  String get dayPartEvening => 'Evening';
+
+  @override
+  String get dayPartNight => 'Night';
+
+  @override
+  String get updateNow => 'Update';
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateInstall => 'Install';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get updateWhatsNew => 'What\'s new';
+
+  @override
+  String get updateDownloading => 'Downloading update';
+
+  @override
+  String get updateVerifying => 'Verifying download…';
+
+  @override
+  String get updateWaitingForInstaller => 'Waiting for the installer…';
+
+  @override
+  String get updateReadyToInstall => 'Downloaded and ready to install.';
+
+  @override
+  String get updateErrorNetwork =>
+      'Download failed. Check your connection and try again.';
+
+  @override
+  String get updateErrorChecksum =>
+      'The download was corrupted. Please try again.';
+
+  @override
+  String get updateErrorStorage => 'Not enough free storage for the update.';
+
+  @override
+  String get updateErrorInstall => 'Couldn\'t install the update.';
+
+  @override
+  String get checkForUpdates => 'Check for updates';
+
+  @override
+  String get updateUpToDate => 'You\'re on the latest version.';
+
+  @override
+  String get updateCheckFailed => 'Couldn\'t check for updates.';
 }

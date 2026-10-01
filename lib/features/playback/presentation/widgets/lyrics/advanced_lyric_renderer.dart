@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:looper_player/core/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import '../../../domain/lyric_models.dart';
@@ -14,6 +14,7 @@ import 'package:looper_player/features/playback/presentation/providers/playback/
 import '../../providers/lyrics/lyrics_notifier.dart';
 import '../../providers/lyrics/lyrics_selection_notifier.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class AdvancedLyricRenderer extends ConsumerStatefulWidget {
   final List<LyricLine> lines;
@@ -33,9 +34,22 @@ class AdvancedLyricRenderer extends ConsumerStatefulWidget {
 }
 
 class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
-  final ScrollController _scrollController = ScrollController();
+  // No PageStorage restore: this renderer is rebuilt for every song (the
+  // loading skeleton replaces it in between), and restoring would open the
+  // next song's lyrics at wherever the previous song was scrolled to.
+  final ScrollController _scrollController = ScrollController(
+    keepScrollOffset: false,
+  );
   final Map<int, GlobalKey> _lineKeys = {};
   int _currentLineIndex = -1;
+
+  /// A tapped line stays active for [_tapHold] even while the player still
+  /// reports positions from before the seek (or lands a hair short of the
+  /// line's start) - otherwise the highlight flicks back to the previous
+  /// line for a frame or two.
+  int _tappedIndex = -1;
+  DateTime _tappedAt = DateTime.fromMillisecondsSinceEpoch(0);
+  static const Duration _tapHold = Duration(seconds: 1);
   double _fontScale = 1.0;
   double _baseScale = 1.0;
 
@@ -58,6 +72,9 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        // New lyrics start following from the top even if the user had
+        // scrolled away (re-sync button up) during the previous song.
+        ref.read(lyricsManualScrollProvider.notifier).set(false);
         final currentPos = ref.read(playbackProvider).position;
         _updateActiveLine(currentPos, forceScroll: true);
       }
@@ -107,13 +124,18 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.lines != widget.lines) {
       _currentLineIndex = -1;
+      _tappedIndex = -1;
       _lineKeys.clear();
       // The lines changed (new song, or a different lyrics source/provider
       // was picked) — any in-progress share selection no longer points at
       // the right text, so drop it.
       ref.read(lyricsSelectionProvider.notifier).clear();
+      // Queued before _updateActiveLine's scroll below, so the new lines
+      // start from the top and ease to the active line from there rather
+      // than from the old lyrics' offset.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
+          if (_scrollController.hasClients) _scrollController.jumpTo(0);
           ref.read(lyricsManualScrollProvider.notifier).set(false);
         }
       });
@@ -136,6 +158,18 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
       (line) => position >= line.startTime && position < line.endTime,
     );
 
+    if (_tappedIndex >= 0 && _tappedIndex < widget.lines.length) {
+      final holding = DateTime.now().difference(_tappedAt) < _tapHold;
+      final tapped = widget.lines[_tappedIndex];
+      final inTapped =
+          position >= tapped.startTime && position < tapped.endTime;
+      if (holding && !inTapped) {
+        index = _tappedIndex;
+      } else if (!holding) {
+        _tappedIndex = -1;
+      }
+    }
+
     if (index == -1 && widget.lines.isNotEmpty) {
       if (position < widget.lines.first.startTime) {
         index = 0;
@@ -144,8 +178,15 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
       }
     }
 
-    final isManual = ref.read(lyricsManualScrollProvider);
+    var isManual = ref.read(lyricsManualScrollProvider);
     if (index != -1 && (index != _currentLineIndex || forceScroll)) {
+      // A manual scroll only pauses auto-follow while it actually took the
+      // lyrics away: if the line being left is still on screen (so no
+      // re-sync button), keep following onto the new one.
+      if (isManual && !forceScroll && _canResumeFollow(_currentLineIndex)) {
+        isManual = false;
+        _resumeFollow();
+      }
       _currentLineIndex = index;
       if (!isManual || forceScroll) {
         _scrollToIndex(index, animate: _transitionFinished);
@@ -161,6 +202,56 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _checkActiveLineVisibility(),
     );
+  }
+
+  /// Whether auto-follow can take over again: the line at [index] is on
+  /// screen and the user isn't touching or flinging the list.
+  bool _canResumeFollow(int index) {
+    if (_activePointers.isNotEmpty) return false;
+    if (_scrollController.hasClients &&
+        _scrollController.position.isScrollingNotifier.value) {
+      return false;
+    }
+    return index >= 0 && _isLineOnScreen(index);
+  }
+
+  bool _isLineOnScreen(int index) {
+    final lineBox =
+        _lineKeys[index]?.currentContext?.findRenderObject() as RenderBox?;
+    final viewportBox = context.findRenderObject() as RenderBox?;
+    if (lineBox == null ||
+        viewportBox == null ||
+        !lineBox.attached ||
+        !viewportBox.attached) {
+      return false;
+    }
+    final top = lineBox.localToGlobal(Offset.zero, ancestor: viewportBox).dy;
+    return top + lineBox.size.height > 0 && top < viewportBox.size.height;
+  }
+
+  /// Clears the manual-scroll flag, which also hides the re-sync button;
+  /// the provider listener in build scrolls back to the active line.
+  void _resumeFollow() {
+    _resumeTimer?.cancel();
+    // Can be reached from didUpdateWidget, i.e. mid-build, where providers
+    // can't be modified - flip the flag once this frame is done.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(lyricsManualScrollProvider.notifier).set(false);
+    });
+  }
+
+  /// After the user lets go with the active line still in view, snap back
+  /// to it shortly rather than waiting for the next line (which can be a
+  /// long instrumental away).
+  Timer? _resumeTimer;
+  static const Duration _resumeDelay = Duration(milliseconds: 1500);
+
+  void _scheduleResumeFollow() {
+    _resumeTimer?.cancel();
+    _resumeTimer = Timer(_resumeDelay, () {
+      if (!mounted || !ref.read(lyricsManualScrollProvider)) return;
+      if (_canResumeFollow(_currentLineIndex)) _resumeFollow();
+    });
   }
 
   /// Updates lyricsActiveLineVisibleProvider based on whether the active
@@ -269,6 +360,7 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
   @override
   void dispose() {
     _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
+    _resumeTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -354,6 +446,12 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
           // AndroidLyricsScreen's own ScrollNotification listener (which
           // drives _onUserScrolled/lyricsManualScrollProvider) still see it.
           _checkActiveLineVisibility();
+          if (notification is ScrollStartNotification) {
+            _resumeTimer?.cancel();
+          } else if (notification is ScrollEndNotification &&
+              ref.read(lyricsManualScrollProvider)) {
+            _scheduleResumeFollow();
+          }
           return false;
         },
         child: ListView.builder(
@@ -427,14 +525,17 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
                   // While picking lines for the share card, tapping extends
                   // (or shrinks) the selection instead of seeking.
                   if (selection.isActive) {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selection();
                     ref.read(lyricsSelectionProvider.notifier).extendTo(index);
                   } else {
+                    _tappedIndex = index;
+                    _tappedAt = DateTime.now();
+                    _updateActiveLine(line.startTime);
                     widget.onSeek(line.startTime);
                   }
                 },
                 onLongPress: () {
-                  HapticFeedback.mediumImpact();
+                  AppHaptics.medium();
                   ref
                       .read(lyricsSelectionProvider.notifier)
                       .startSelection(index);

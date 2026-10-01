@@ -192,7 +192,7 @@ extension _LyricsEditorTools on _LyricsEditorBottomSheetState {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       ),
       onPressed: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         _shiftAll(delta);
       },
       child: Text(

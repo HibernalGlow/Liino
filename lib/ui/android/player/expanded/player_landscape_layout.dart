@@ -20,6 +20,7 @@ class PlayerLandscapeMetrics {
     required this.artRect,
     required this.controlsRect,
     required this.transportHeight,
+    required this.utilityHeight,
     required this.sectionGap,
   });
 
@@ -56,6 +57,9 @@ class PlayerLandscapeMetrics {
 
   /// Height of the prev / play / next buttons.
   final double transportHeight;
+
+  /// Height of the segmented shuffle / repeat / next up / lyrics tiles.
+  final double utilityHeight;
 
   /// Vertical gap between the stacked control rows.
   final double sectionGap;
@@ -114,6 +118,7 @@ class PlayerLandscapeMetrics {
         math.max(0, paneHeight - 2 * verticalPadding),
       ),
       transportHeight: compact ? 64 : 80,
+      utilityHeight: compact ? 48 : 56,
       sectionGap: compact ? 12 : 20,
     );
   }

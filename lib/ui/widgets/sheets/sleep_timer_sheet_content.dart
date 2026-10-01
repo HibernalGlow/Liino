@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
@@ -8,6 +7,7 @@ import 'package:looper_player/features/settings/presentation/providers/settings_
 import 'package:looper_player/ui/android/widgets/premium_section.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 void showSleepTimerBottomSheet(BuildContext context, WidgetRef ref) {
   showModalBottomSheet(
@@ -148,7 +148,7 @@ class _SleepTimerSheetContentState
                     children: [
                       IconButton(
                         onPressed: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           if (_customMinutes > 1) {
                             setState(() => _customMinutes--);
                           }
@@ -176,7 +176,7 @@ class _SleepTimerSheetContentState
                       const SizedBox(width: 16),
                       IconButton(
                         onPressed: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           setState(() => _customMinutes++);
                         },
                         icon: const Icon(
@@ -194,7 +194,7 @@ class _SleepTimerSheetContentState
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      HapticFeedback.mediumImpact();
+                      AppHaptics.medium();
                       ref
                           .read(playbackProvider.notifier)
                           .startSleepTimer(
@@ -272,7 +272,7 @@ class _SleepTimerSheetContentState
                     children: [
                       IconButton(
                         onPressed: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           if (_customSongs > 1) {
                             setState(() => _customSongs--);
                           }
@@ -300,7 +300,7 @@ class _SleepTimerSheetContentState
                       const SizedBox(width: 16),
                       IconButton(
                         onPressed: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           setState(() => _customSongs++);
                         },
                         icon: const Icon(
@@ -318,7 +318,7 @@ class _SleepTimerSheetContentState
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      HapticFeedback.mediumImpact();
+                      AppHaptics.medium();
                       ref
                           .read(playbackProvider.notifier)
                           .startSleepTimer(songCount: _customSongs);
@@ -376,7 +376,7 @@ class _SleepTimerSheetContentState
             if (isSleepTimerActive)
               ElevatedButton.icon(
                 onPressed: () {
-                  HapticFeedback.mediumImpact();
+                  AppHaptics.medium();
                   ref.read(playbackProvider.notifier).stopSleepTimer();
                   Navigator.pop(context);
                 },

@@ -23,7 +23,7 @@ extension _EqualizerSettingRows on AndroidEqualizerScreen {
           activeThumbColor: accentColor,
           activeTrackColor: accentColor.withValues(alpha: 0.35),
           onChanged: (val) {
-            HapticFeedback.mediumImpact();
+            AppHaptics.medium();
             onChanged(val);
           },
         ),

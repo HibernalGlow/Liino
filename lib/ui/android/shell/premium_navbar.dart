@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/utils/ui_utils.dart';
@@ -9,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/core/utils/responsive.dart';
 import '../widgets/premium_section.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class PremiumNavbar extends ConsumerWidget {
   final int currentIndex;
@@ -97,7 +97,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     onTap(0);
                   },
                   borderRadius: const BorderRadius.only(
@@ -134,7 +134,7 @@ class PremiumNavbar extends ConsumerWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             onTap(1);
                           },
                           child: Container(
@@ -148,7 +148,7 @@ class PremiumNavbar extends ConsumerWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             onTap(2);
                           },
                           child: Container(
@@ -172,7 +172,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     onTap(0);
                   },
                   borderRadius: const BorderRadius.only(
@@ -196,7 +196,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     onTap(1);
                   },
                   borderRadius: BorderRadius.circular(12),
@@ -215,7 +215,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     onTap(2);
                   },
                   borderRadius: const BorderRadius.only(
@@ -251,7 +251,7 @@ class PremiumNavbar extends ConsumerWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             onTap(0);
                           },
                           child: Container(
@@ -265,7 +265,7 @@ class PremiumNavbar extends ConsumerWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             onTap(1);
                           },
                           child: Container(
@@ -292,7 +292,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     onTap(2);
                   },
                   borderRadius: const BorderRadius.only(

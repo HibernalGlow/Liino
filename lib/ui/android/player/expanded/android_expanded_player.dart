@@ -1,6 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart' hide RepeatMode;
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:flutter_svg/svg.dart';
@@ -20,9 +21,15 @@ import 'package:looper_player/ui/widgets/player/premium_progress_bar.dart';
 import '../../widgets/premium_section.dart';
 import '../lyrics/android_lyrics_screen.dart';
 import 'player_landscape_layout.dart';
+import 'player_portrait_metrics.dart';
+import 'segmented_utility_row.dart';
+import 'quality_details_sheet.dart';
+import 'package:looper_player/features/settings/domain/quality_badge_style.dart';
+import 'package:looper_player/ui/widgets/player/quality_badge.dart';
 import '../../shell/music_bar/fluid_player_motion.dart';
 import 'package:looper_player/ui/widgets/common/scrolling_text.dart';
 import 'package:looper_player/features/playback/data/audio_analyzer.dart';
+import 'package:looper_player/features/playback/data/device_audio_info.dart';
 import 'package:looper_player/core/providers/player_expand_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'position_reporter.dart';
@@ -31,6 +38,7 @@ import 'player_backgrounds.dart';
 import 'sleep_timer_clock.dart';
 import 'favorite_button.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 export 'position_reporter.dart';
 export 'player_backgrounds.dart';
 
@@ -75,21 +83,24 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
       vsync: this,
       duration: const Duration(milliseconds: 250),
     );
+    // Warms DeviceAudioInfo.cached so the quality dialog opens at its
+    // final size even if the fetch on tap runs slow.
+    DeviceAudioInfo.fetch();
   }
 
   Animation<double>? _routeAnimation;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final routeAnimation = ModalRoute.of(context)?.animation;
-    final enableSlide = ref.read(settingsProvider).enableSlideGesture;
-    if (!enableSlide && _routeAnimation != routeAnimation) {
-      _routeAnimation?.removeListener(_onRouteAnimationTick);
-      _routeAnimation = routeAnimation;
-      _routeAnimation?.addListener(_onRouteAnimationTick);
-      _onRouteAnimationTick();
-    }
+  // Handed over by _RouteAnimationProbe. The route used to be read here in
+  // didChangeDependencies, but ModalRoute.of makes its caller depend on the
+  // route's whole status, so every route pushed or popped above the player
+  // (e.g. the quality dialog) re-ran this entire build() on the first
+  // frame of its animation.
+  void _attachRouteAnimation(Animation<double>? routeAnimation) {
+    if (_routeAnimation == routeAnimation) return;
+    _routeAnimation?.removeListener(_onRouteAnimationTick);
+    _routeAnimation = routeAnimation;
+    _routeAnimation?.addListener(_onRouteAnimationTick);
+    _onRouteAnimationTick();
   }
 
   void _onRouteAnimationTick() {
@@ -149,19 +160,8 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
     return UiUtils.formatPlaybackDuration(d);
   }
 
-  String _getFallbackQualityText(Song song) {
-    final ext = song.path.split('.').last.toLowerCase().toUpperCase();
-    if (['FLAC', 'WAV', 'ALAC', 'APE'].contains(ext)) {
-      return '${context.l10n.qualityLossless} • $ext';
-    } else if (ext == 'MP3' || ext == 'M4A' || ext == 'AAC') {
-      return '${context.l10n.qualityHigh} • $ext';
-    } else {
-      return '${context.l10n.qualityHigh} • ${context.l10n.qualityAudio}';
-    }
-  }
-
   void _showLyrics(BuildContext context) {
-    HapticFeedback.lightImpact();
+    AppHaptics.light();
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
@@ -199,81 +199,16 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
 
     // Synchronously check the cache first to avoid any 300ms debounce flickering
     final cachedAnalysis = AudioAnalyzer.getCachedAnalysis(song.path);
-    final String qualityText;
-
-    if (cachedAnalysis != null) {
-      final codecStr = cachedAnalysis.codec.toUpperCase();
-      final bitDepthStr = cachedAnalysis.bitsPerSample > 0
-          ? '${cachedAnalysis.bitsPerSample}-bit'
-          : '';
-      final sampleRateStr = cachedAnalysis.sampleRate > 0
-          ? '${(cachedAnalysis.sampleRate / 1000).toStringAsFixed(1)} kHz'
-          : '';
-      final bitrateStr = cachedAnalysis.bitrate > 0
-          ? '${(cachedAnalysis.bitrate / 1000).round()} kbps'
-          : '';
-
-      final list = <String>[];
-      if (['FLAC', 'WAV', 'ALAC', 'APE'].contains(codecStr)) {
-        list.add(context.l10n.qualityLossless);
-      } else if (['MP3', 'M4A', 'AAC', 'OGG'].contains(codecStr)) {
-        if (cachedAnalysis.bitrate > 0 && cachedAnalysis.bitrate < 192000) {
-          list.add(context.l10n.qualityStandard);
-        } else {
-          list.add(context.l10n.qualityHigh);
-        }
-      } else {
-        list.add(context.l10n.qualityStandard);
-      }
-      list.add(codecStr);
-      if (bitDepthStr.isNotEmpty) list.add(bitDepthStr);
-      if (sampleRateStr.isNotEmpty) list.add(sampleRateStr);
-      if (bitrateStr.isNotEmpty &&
-          !['FLAC', 'WAV', 'ALAC', 'APE'].contains(codecStr)) {
-        list.add(bitrateStr);
-      }
-      qualityText = list.join(' • ');
-    } else {
-      final analysisAsync = ref.watch(currentSongAnalysisProvider);
-      qualityText = analysisAsync.when(
-        data: (analysis) {
-          if (analysis == null) return _getFallbackQualityText(song);
-          final codecStr = analysis.codec.toUpperCase();
-          final bitDepthStr = analysis.bitsPerSample > 0
-              ? '${analysis.bitsPerSample}-bit'
-              : '';
-          final sampleRateStr = analysis.sampleRate > 0
-              ? '${(analysis.sampleRate / 1000).toStringAsFixed(1)} kHz'
-              : '';
-          final bitrateStr = analysis.bitrate > 0
-              ? '${(analysis.bitrate / 1000).round()} kbps'
-              : '';
-
-          final list = <String>[];
-          if (['FLAC', 'WAV', 'ALAC', 'APE'].contains(codecStr)) {
-            list.add(context.l10n.qualityLossless);
-          } else if (['MP3', 'M4A', 'AAC', 'OGG'].contains(codecStr)) {
-            if (analysis.bitrate > 0 && analysis.bitrate < 192000) {
-              list.add(context.l10n.qualityStandard);
-            } else {
-              list.add(context.l10n.qualityHigh);
-            }
-          } else {
-            list.add(context.l10n.qualityStandard);
-          }
-          list.add(codecStr);
-          if (bitDepthStr.isNotEmpty) list.add(bitDepthStr);
-          if (sampleRateStr.isNotEmpty) list.add(sampleRateStr);
-          if (bitrateStr.isNotEmpty &&
-              !['FLAC', 'WAV', 'ALAC', 'APE'].contains(codecStr)) {
-            list.add(bitrateStr);
-          }
-          return list.join(' • ');
-        },
-        loading: () => _getFallbackQualityText(song),
-        error: (_, _) => _getFallbackQualityText(song),
-      );
-    }
+    final QualityInfo qualityInfo = cachedAnalysis != null
+        ? QualityInfo.fromAnalysis(cachedAnalysis)
+        : ref
+                  .watch(currentSongAnalysisProvider)
+                  .whenOrNull(
+                    data: (analysis) => analysis == null
+                        ? null
+                        : QualityInfo.fromAnalysis(analysis),
+                  ) ??
+              QualityInfo.fromPath(song.path);
 
     final settings = ref.watch(settingsProvider);
     final useBlur = settings.enableDynamicTheming;
@@ -288,6 +223,23 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
     final PlayerLandscapeMetrics? landscape = Responsive.isLandscape(screenSize)
         ? PlayerLandscapeMetrics.of(screenSize, MediaQuery.paddingOf(context))
         : null;
+    // Portrait only: at a low display density the top bar and controls are
+    // drawn enlarged (scale 1 at the default density; see
+    // PlayerPortraitMetrics), and the column is capped on wide windows.
+    final PlayerPortraitMetrics? portrait = landscape == null
+        ? PlayerPortraitMetrics.of(screenSize)
+        : null;
+    final double k = portrait?.scale ?? 1.0;
+    Widget scaled(Widget child) => PlayerScaled(scale: k, child: child);
+    // A wide portrait window (tablet, unfolded foldable) centers a column
+    // of at most PlayerPortraitMetrics.maxLayoutWidth (scaled) instead of
+    // stretching the controls edge to edge.
+    Widget capWidth(Widget child) =>
+        portrait == null || portrait.contentWidth >= screenSize.width
+        ? child
+        : Center(
+            child: SizedBox(width: portrait.contentWidth, child: child),
+          );
 
     // contentOpacity is NOT watched here anymore - it used to be
     // (`ref.watch(playerExpandProgressProvider)` at the top of this whole
@@ -306,7 +258,8 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
       if (enableSlide) return child;
       return Hero(
         tag: tag,
-        flightShuttleBuilder: flightShuttleBuilder,
+        flightShuttleBuilder:
+            flightShuttleBuilder ?? (k != 1.0 ? playerScaleAwareShuttle : null),
         child: child,
       );
     }
@@ -359,7 +312,7 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
               backgroundColor: Colors.transparent,
               useBlur: true,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.light();
                 if (enableSlide) {
                   ref.read(playerCollapseTriggerProvider.notifier).bump();
                 } else {
@@ -368,45 +321,46 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
               },
               child: SvgPicture.asset(AppIcons.close, width: 8, height: 8),
             ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (!settings.showQualityBadge)
-                  Text(
-                    l10n.nowPlaying,
-                    style: AppFonts.jostStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                if (settings.showQualityBadge)
-                  Container(
-                    margin: const EdgeInsets.only(top: 6),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Text(
-                      qualityText,
+            // Flexible so a long badge ellipsizes between the two buttons
+            // instead of overflowing the row on narrow phones.
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (!settings.showQualityBadge)
+                    Text(
+                      l10n.nowPlaying,
                       style: AppFonts.jostStyle(
-                        color: Colors.white70,
-                        fontSize: 10,
+                        color: Colors.white,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
                       ),
                     ),
-                  ),
-              ],
+                  if (settings.showQualityBadge)
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        AppHaptics.light();
+                        showQualityDetailsSheet(context, song);
+                      },
+                      // The badge's top margin sits out here so the hero's
+                      // rect is exactly the visible pill.
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Hero(
+                          tag: qualityBadgeHeroTag,
+                          // Grows into the details dialog's card and back.
+                          child: QualityBadge(
+                            info: qualityInfo,
+                            style: QualityBadgeStyle.fromSettings(settings),
+                            margin: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
             Consumer(
               builder: (context, ref, child) {
@@ -531,11 +485,14 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
                             letterSpacing: 0.3,
                           );
 
-                          final fromStyle = _getHeroStyle(
-                            fromHero,
-                            fallbackFrom,
+                          final fromStyle = _scaledHeroStyle(
+                            _getHeroStyle(fromHero, fallbackFrom),
+                            fromHeroContext,
                           );
-                          final toStyle = _getHeroStyle(toHero, fallbackTo);
+                          final toStyle = _scaledHeroStyle(
+                            _getHeroStyle(toHero, fallbackTo),
+                            toHeroContext,
+                          );
 
                           return AnimatedBuilder(
                             animation: animation,
@@ -566,8 +523,12 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
                             },
                           );
                         },
+                    // Line heights locked to the app font so an emoji/CJK
+                    // title or artist can't make this row taller and shift
+                    // it when the song (and artwork) changes.
                     child: ScrollingText(
                       text: song.title,
+                      lockLineHeight: true,
                       style: AppFonts.jostStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -601,11 +562,14 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
                             letterSpacing: 0.2,
                           );
 
-                          final fromStyle = _getHeroStyle(
-                            fromHero,
-                            fallbackFrom,
+                          final fromStyle = _scaledHeroStyle(
+                            _getHeroStyle(fromHero, fallbackFrom),
+                            fromHeroContext,
                           );
-                          final toStyle = _getHeroStyle(toHero, fallbackTo);
+                          final toStyle = _scaledHeroStyle(
+                            _getHeroStyle(toHero, fallbackTo),
+                            toHeroContext,
+                          );
 
                           return AnimatedBuilder(
                             animation: animation,
@@ -672,6 +636,7 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
                         },
                         child: ScrollingText(
                           text: song.artist ?? context.l10n.unknownArtist,
+                          lockLineHeight: true,
                           style: AppFonts.jostStyle(
                             color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 18,
@@ -760,7 +725,7 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
               showBorder: false,
               instantPressFeedback: true,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.light();
                 _prevTapPulse.value++;
                 _afterThisFrame(
                   () => ref.read(playbackProvider.notifier).skipPrevious(),
@@ -800,7 +765,7 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
                       : Theme.of(context).colorScheme.primary,
                   instantPressFeedback: true,
                   onTap: () {
-                    HapticFeedback.mediumImpact();
+                    AppHaptics.medium();
                     ref.read(playbackProvider.notifier).togglePlay();
                   },
                   // A constant 1.1 (the AnimatedScale this replaced never
@@ -838,7 +803,7 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
               showBorder: false,
               instantPressFeedback: true,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.light();
                 _nextTapPulse.value++;
                 _afterThisFrame(
                   () => ref.read(playbackProvider.notifier).skipNext(),
@@ -874,239 +839,265 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
             // device width.
             final bool showLabels = constraints.maxWidth >= 350;
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Shuffle + Repeat
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Consumer(
-                          builder: (context, ref, child) {
-                            final isShuffle = ref.watch(
-                              playbackProvider.select((s) => s.isShuffle),
-                            );
-                            return PremiumSection(
-                              heroTag: 'nav_morph_1',
-                              height: 40,
-                              useExpanded: false,
-                              instantPressFeedback: true,
-                              showBorder: false,
-                              useBlur: useBlur,
-                              showShadow: false,
-                              // forceTransparent: true,
-                              animate: true,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              backgroundColor: isShuffle
-                                  ? Colors.white.withOpacity(0.06)
-                                  : Colors.transparent,
-                              forceNoBlur: true,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                ref
-                                    .read(playbackProvider.notifier)
-                                    .toggleShuffle();
-                              },
-                              borderRadius: BorderRadius.circular(32),
-                              child: SvgPicture.asset(
-                                AppIcons.shuffle,
-                                colorFilter: ColorFilter.mode(
-                                  isShuffle
-                                      ? Colors.white
-                                      : Colors.white.withOpacity(0.5),
-                                  BlendMode.srcIn,
-                                ),
-                                width:
-                                    AppIcons.expandedPlayerSecondaryControl.s,
-                                height:
-                                    AppIcons.expandedPlayerSecondaryControl.s,
-                              ),
-                            );
-                          },
+            // The label cutoff is approximate (the labels' width depends on
+            // the language and font), so a row that still comes out a few
+            // dp too wide - even 0.07dp at the default 411dp phone - is
+            // scaled down to fit instead of overflowing. A row that fits is
+            // laid out exactly as before, spread to the full width.
+            return FittedBox(
+              fit: BoxFit.scaleDown,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: IntrinsicWidth(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Shuffle + Repeat
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.04),
+                          borderRadius: BorderRadius.circular(32),
                         ),
-                        const SizedBox(width: 2),
-                        // Repeat
-                        Consumer(
-                          builder: (context, ref, child) {
-                            final repeatMode = ref.watch(
-                              playbackProvider.select((s) => s.repeatMode),
-                            );
-                            return PremiumSection(
-                              height: 40,
-                              useExpanded: false,
-                              instantPressFeedback: true,
-                              showShadow: false,
-                              useBlur: useBlur,
-                              showBorder: false,
-                              // forceTransparent: true,
-                              animate: true,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                              ),
-                              backgroundColor: repeatMode == RepeatMode.off
-                                  ? Colors.transparent
-                                  : Colors.white.withOpacity(0.06),
-                              forceNoBlur: true,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                ref
-                                    .read(playbackProvider.notifier)
-                                    .nextRepeatMode();
-                              },
-                              borderRadius: BorderRadius.circular(32),
-                              child: SvgPicture.asset(
-                                repeatMode == RepeatMode.off
-                                    ? AppIcons.repeat
-                                    : repeatMode == RepeatMode.one
-                                    ? AppIcons.repeatOne
-                                    : AppIcons.repeatAll,
-                                colorFilter: repeatMode == RepeatMode.off
-                                    ? ColorFilter.mode(
-                                        Colors.white.withOpacity(0.5),
-                                        BlendMode.srcIn,
-                                      )
-                                    : ColorFilter.mode(
-                                        repeatMode != RepeatMode.off
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Consumer(
+                                builder: (context, ref, child) {
+                                  final isShuffle = ref.watch(
+                                    playbackProvider.select((s) => s.isShuffle),
+                                  );
+                                  return PremiumSection(
+                                    heroTag: 'nav_morph_1',
+                                    height: 40,
+                                    useExpanded: false,
+                                    instantPressFeedback: true,
+                                    showBorder: false,
+                                    useBlur: useBlur,
+                                    showShadow: false,
+                                    // forceTransparent: true,
+                                    animate: true,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    backgroundColor: isShuffle
+                                        ? Colors.white.withOpacity(0.06)
+                                        : Colors.transparent,
+                                    forceNoBlur: true,
+                                    onTap: () {
+                                      AppHaptics.selection();
+                                      ref
+                                          .read(playbackProvider.notifier)
+                                          .toggleShuffle();
+                                    },
+                                    borderRadius: BorderRadius.circular(32),
+                                    child: SvgPicture.asset(
+                                      AppIcons.shuffle,
+                                      colorFilter: ColorFilter.mode(
+                                        isShuffle
                                             ? Colors.white
-                                            : Colors.white,
+                                            : Colors.white.withOpacity(0.5),
                                         BlendMode.srcIn,
                                       ),
-                                // Bumped up from the shared expandedPlayerSecondaryControl size (16) --
-                                // the repeat button specifically should read larger than its siblings.
-                                width: AppIcons.miniPlayerIcon.s,
-                                height: AppIcons.miniPlayerIcon.s,
+                                      width: AppIcons
+                                          .expandedPlayerSecondaryControl
+                                          .s,
+                                      height: AppIcons
+                                          .expandedPlayerSecondaryControl
+                                          .s,
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Next Up + Lyrics
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Next Up
-                        PremiumSection(
-                          height: 40,
-                          useExpanded: false,
-                          instantPressFeedback: true,
-                          useBlur: useBlur,
-                          showShadow: false,
-                          heroTag: 'nav_morph_2',
-                          showBorder: false,
-                          forceNoBlur: true,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: showLabels ? 16 : 12,
-                          ),
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            showModalBottomSheet(
-                              context: context,
-                              useRootNavigator: true,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) => const QueueBottomSheet(),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(22),
-                          backgroundColor: Colors.white.withOpacity(0.06),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SvgPicture.asset(
-                                AppIcons.queue,
-                                colorFilter: const ColorFilter.mode(
-                                  Colors.white,
-                                  BlendMode.srcIn,
-                                ),
-                                width:
-                                    AppIcons.expandedPlayerSecondaryControl.s,
-                                height:
-                                    AppIcons.expandedPlayerSecondaryControl.s,
+                              const SizedBox(width: 4),
+                              // Repeat
+                              Consumer(
+                                builder: (context, ref, child) {
+                                  final repeatMode = ref.watch(
+                                    playbackProvider.select(
+                                      (s) => s.repeatMode,
+                                    ),
+                                  );
+                                  return PremiumSection(
+                                    height: 40,
+                                    useExpanded: false,
+                                    instantPressFeedback: true,
+                                    showShadow: false,
+                                    useBlur: useBlur,
+                                    showBorder: false,
+                                    // forceTransparent: true,
+                                    animate: true,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                    ),
+                                    backgroundColor:
+                                        repeatMode == RepeatMode.off
+                                        ? Colors.transparent
+                                        : Colors.white.withOpacity(0.06),
+                                    forceNoBlur: true,
+                                    onTap: () {
+                                      AppHaptics.selection();
+                                      ref
+                                          .read(playbackProvider.notifier)
+                                          .nextRepeatMode();
+                                    },
+                                    borderRadius: BorderRadius.circular(32),
+                                    child: SvgPicture.asset(
+                                      repeatMode == RepeatMode.off
+                                          ? AppIcons.repeat
+                                          : repeatMode == RepeatMode.one
+                                          ? AppIcons.repeatOne
+                                          : AppIcons.repeatAll,
+                                      colorFilter: repeatMode == RepeatMode.off
+                                          ? ColorFilter.mode(
+                                              Colors.white.withOpacity(0.5),
+                                              BlendMode.srcIn,
+                                            )
+                                          : ColorFilter.mode(
+                                              repeatMode != RepeatMode.off
+                                                  ? Colors.white
+                                                  : Colors.white,
+                                              BlendMode.srcIn,
+                                            ),
+                                      // Bumped up from the shared expandedPlayerSecondaryControl size (16) --
+                                      // the repeat button specifically should read larger than its siblings.
+                                      width: AppIcons.miniPlayerIcon.s,
+                                      height: AppIcons.miniPlayerIcon.s,
+                                    ),
+                                  );
+                                },
                               ),
-                              if (showLabels) ...[
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.nextUp,
-                                  style: AppFonts.jostStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
                             ],
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        // Lyrics
-                        PremiumSection(
-                          heroTag: 'nav_morph_3',
-                          height: 40,
-                          useExpanded: false,
-                          instantPressFeedback: true,
-                          showBorder: false,
-                          useBlur: useBlur,
-                          showShadow: false,
-                          forceNoBlur: true,
-                          backgroundColor: Colors.white.withOpacity(0.06),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: showLabels ? 16 : 12,
-                          ),
-                          onTap: () => _showLyrics(context),
-                          borderRadius: BorderRadius.circular(22),
+                      ),
+                      // Minimum gap so the two pill groups never touch when
+                      // the row is tight (spaceBetween adds any spare width).
+                      const SizedBox(width: 2),
+                      // Next Up + Lyrics
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.04),
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SvgPicture.asset(
-                                AppIcons.lyrics,
-                                colorFilter: const ColorFilter.mode(
-                                  Colors.white,
-                                  BlendMode.srcIn,
+                              // Next Up
+                              PremiumSection(
+                                height: 40,
+                                useExpanded: false,
+                                instantPressFeedback: true,
+                                useBlur: useBlur,
+                                showShadow: false,
+                                heroTag: 'nav_morph_2',
+                                showBorder: false,
+                                forceNoBlur: true,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: showLabels ? 16 : 12,
                                 ),
-                                width:
-                                    AppIcons.expandedPlayerSecondaryControl.s,
-                                height:
-                                    AppIcons.expandedPlayerSecondaryControl.s,
+                                onTap: () {
+                                  AppHaptics.medium();
+                                  showModalBottomSheet(
+                                    context: context,
+                                    useRootNavigator: true,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (context) =>
+                                        const QueueBottomSheet(),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(22),
+                                backgroundColor: Colors.white.withOpacity(0.06),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SvgPicture.asset(
+                                      AppIcons.queue,
+                                      colorFilter: const ColorFilter.mode(
+                                        Colors.white,
+                                        BlendMode.srcIn,
+                                      ),
+                                      width: AppIcons
+                                          .expandedPlayerSecondaryControl
+                                          .s,
+                                      height: AppIcons
+                                          .expandedPlayerSecondaryControl
+                                          .s,
+                                    ),
+                                    if (showLabels) ...[
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.nextUp,
+                                        style: AppFonts.jostStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
-                              if (showLabels) ...[
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.lyrics,
-                                  style: AppFonts.jostStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              const SizedBox(width: 4),
+                              // Lyrics
+                              PremiumSection(
+                                heroTag: 'nav_morph_3',
+                                height: 40,
+                                useExpanded: false,
+                                instantPressFeedback: true,
+                                showBorder: false,
+                                useBlur: useBlur,
+                                showShadow: false,
+                                forceNoBlur: true,
+                                backgroundColor: Colors.white.withOpacity(0.06),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: showLabels ? 16 : 12,
                                 ),
-                              ],
+                                onTap: () => _showLyrics(context),
+                                borderRadius: BorderRadius.circular(22),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SvgPicture.asset(
+                                      AppIcons.lyrics,
+                                      colorFilter: const ColorFilter.mode(
+                                        Colors.white,
+                                        BlendMode.srcIn,
+                                      ),
+                                      width: AppIcons
+                                          .expandedPlayerSecondaryControl
+                                          .s,
+                                      height: AppIcons
+                                          .expandedPlayerSecondaryControl
+                                          .s,
+                                    ),
+                                    if (showLabels) ...[
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.lyrics,
+                                        style: AppFonts.jostStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             );
           },
         ),
@@ -1123,6 +1114,17 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
           : Colors.transparent,
       body: Stack(
         children: [
+          // Positioned so it can never size the Stack: in landscape every
+          // other child is positioned, and as the only non-positioned child
+          // this 0x0 probe shrank the Stack (and the whole player) to 0x0.
+          if (!enableSlide)
+            Positioned(
+              left: 0,
+              top: 0,
+              child: _RouteAnimationProbe(
+                onRouteAnimation: _attachRouteAnimation,
+              ),
+            ),
           // Skipped with the gradient on: the panel's background is already
           // opaque then, and this fill would paint over the gradient.
           if (enableSlide && !useBlur && !settings.enablePlayerGradient)
@@ -1205,7 +1207,14 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
                     ),
                     SizedBox(height: landscape.sectionGap),
                     fadeWithSlide(
-                      buildUtilityRow(0),
+                      settings.segmentedUtilityButtons
+                          ? SegmentedUtilityRow(
+                              height: landscape.utilityHeight,
+                              horizontalPadding: 0,
+                              useBlur: useBlur,
+                              onLyrics: () => _showLyrics(context),
+                            )
+                          : buildUtilityRow(0),
                       FluidSectionMotion.utilityRow,
                     ),
                   ],
@@ -1214,69 +1223,84 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
             )
           else
             SafeArea(
-              child: Column(
-                children: [
-                  // Top Bar
-                  fadeWithSlide(
-                    buildTopBar(const EdgeInsets.fromLTRB(16, 8, 16, 0)),
-                    FluidSectionMotion.topBar,
-                  ),
+              child: capWidth(
+                Column(
+                  children: [
+                    // Top Bar
+                    fadeWithSlide(
+                      scaled(
+                        buildTopBar(const EdgeInsets.fromLTRB(16, 8, 16, 0)),
+                      ),
+                      FluidSectionMotion.topBar,
+                    ),
 
-                  // Large Album Art and Lyrics above it
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Active Lyric Line (Moved above art)
-                          AspectRatio(
-                            aspectRatio: 1.0,
-                            child: PositionReporter(
-                              ancestorKey: _playerRootKey,
-                              onPositionChanged: (rect) {
-                                ref
-                                    .read(playerArtworkRectProvider.notifier)
-                                    .set(rect);
-                              },
-                              child: GestureArtworkWithFeedback(
-                                song: song,
-                                onTap: () => _showLyrics(context),
+                    // Large Album Art. The largest square that fits: a
+                    // Column + AspectRatio here always took the full width, so
+                    // on short (16:9) windows the controls overflowed below.
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20 * k),
+                        child: LayoutBuilder(
+                          builder: (context, box) => Center(
+                            child: SizedBox.square(
+                              dimension: math.min(box.maxWidth, box.maxHeight),
+                              child: PositionReporter(
+                                ancestorKey: _playerRootKey,
+                                onPositionChanged: (rect) {
+                                  ref
+                                      .read(playerArtworkRectProvider.notifier)
+                                      .set(rect);
+                                },
+                                child: GestureArtworkWithFeedback(
+                                  song: song,
+                                  onTap: () => _showLyrics(context),
+                                ),
                               ),
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+
+                    scaled(
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          fadeWithSlide(
+                            buildSongInfo(32),
+                            FluidSectionMotion.songInfo,
+                          ),
+                          const SizedBox(height: 32),
+                          fadeWithSlide(
+                            buildSeekBar(28),
+                            FluidSectionMotion.seekBar,
+                          ),
+                          const SizedBox(height: 24),
+                          fadeWithSlide(
+                            buildTransportRow(
+                              height: 80,
+                              horizontalPadding: 24,
+                            ),
+                            FluidSectionMotion.transportRow,
+                          ),
+                          const SizedBox(height: 24),
+                          fadeWithSlide(
+                            settings.segmentedUtilityButtons
+                                ? SegmentedUtilityRow(
+                                    height: 56,
+                                    horizontalPadding: 24,
+                                    useBlur: useBlur,
+                                    onLyrics: () => _showLyrics(context),
+                                  )
+                                : buildUtilityRow(24),
+                            FluidSectionMotion.utilityRow,
+                          ),
+                          const SizedBox(height: 32),
                         ],
                       ),
                     ),
-                  ),
-
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      fadeWithSlide(
-                        buildSongInfo(32),
-                        FluidSectionMotion.songInfo,
-                      ),
-                      const SizedBox(height: 32),
-                      fadeWithSlide(
-                        buildSeekBar(28),
-                        FluidSectionMotion.seekBar,
-                      ),
-                      const SizedBox(height: 24),
-                      fadeWithSlide(
-                        buildTransportRow(height: 80, horizontalPadding: 24),
-                        FluidSectionMotion.transportRow,
-                      ),
-                      const SizedBox(height: 24),
-                      fadeWithSlide(
-                        buildUtilityRow(24),
-                        FluidSectionMotion.utilityRow,
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
         ],
@@ -1288,7 +1312,7 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
         : GestureDetector(
             onVerticalDragEnd: (details) {
               if (details.primaryVelocity! > 300) {
-                HapticFeedback.mediumImpact();
+                AppHaptics.medium();
                 Navigator.of(context).pop();
               }
             },
@@ -1312,4 +1336,27 @@ class _AndroidExpandedPlayerState extends ConsumerState<AndroidExpandedPlayer>
       child: mainContent,
     );
   }
+}
+
+/// Reports the enclosing route's animation to [onRouteAnimation]. The
+/// ModalRoute.of dependency lives here, so a route change above the player
+/// rebuilds only this empty widget.
+class _RouteAnimationProbe extends StatefulWidget {
+  final ValueChanged<Animation<double>?> onRouteAnimation;
+
+  const _RouteAnimationProbe({required this.onRouteAnimation});
+
+  @override
+  State<_RouteAnimationProbe> createState() => _RouteAnimationProbeState();
+}
+
+class _RouteAnimationProbeState extends State<_RouteAnimationProbe> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.onRouteAnimation(ModalRoute.of(context)?.animation);
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

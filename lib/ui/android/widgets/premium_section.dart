@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui';
 
+import 'package:looper_player/ui/widgets/common/player_scale.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 
 class PremiumSection extends ConsumerWidget {
@@ -176,6 +177,11 @@ class PremiumSection extends ConsumerWidget {
     if (heroTag != null) {
       content = Hero(
         tag: heroTag!,
+        // Inside the low-density-scaled player the default shuttle would
+        // land at the unscaled size and snap (see PlayerScaled).
+        flightShuttleBuilder: PlayerScale.of(context) != 1.0
+            ? playerScaleAwareShuttle
+            : null,
         child: Material(type: MaterialType.transparency, child: content),
       );
     }

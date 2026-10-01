@@ -73,6 +73,112 @@ class DynamicColorActiveLyricsTile extends ConsumerWidget {
   }
 }
 
+class ActiveLyricsUseAccentTile extends ConsumerWidget {
+  const ActiveLyricsUseAccentTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final l10n = AppLocalizations.of(context)!;
+    return SwitchListTile(
+      secondary: const Icon(LucideIcons.paintbrush, color: Colors.white70),
+      title: Text(l10n.activeLyricsUseAccent, style: _tileTitleStyle()),
+      subtitle: Text(
+        l10n.activeLyricsUseAccentDesc,
+        style: _tileSubtitleStyle(),
+      ),
+      activeThumbColor: Color(settings.accentColor),
+      value: !settings.activeLyricsSoftColor,
+      onChanged: (value) {
+        ref.read(settingsProvider.notifier).updateActiveLyricsUseAccent(value);
+      },
+    );
+  }
+}
+
+/// Slider for how vibrant the active lyric line is drawn, with a preview of
+/// the current song's active color next to an inactive line.
+class ActiveLyricsIntensityTile extends ConsumerWidget {
+  const ActiveLyricsIntensityTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final intensity = settings.activeLyricsIntensity.isNaN
+        ? 0.0
+        : settings.activeLyricsIntensity;
+    // Same color the lyrics screen uses.
+    final previewColor = activeLyricsColor(
+      settings,
+      accent: Theme.of(context).colorScheme.primary,
+    );
+    final previewStyle = AppFonts.getLyricsStyle(
+      useNewFontLyrics: settings.useNewFontLyrics,
+      family: settings.customFontFamilyLyrics,
+      weightDelta: settings.customFontWeightLyricsDelta,
+      activeWeightDelta: settings.activeLyricsFontWeightDelta,
+      isActive: true,
+      fontSize: 18,
+      height: 1.2,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsSliderTile(
+          icon: LucideIcons.sunMedium,
+          title: l10n.activeLyricsIntensity,
+          subtitle: l10n.activeLyricsIntensityDesc,
+          value: intensity * 100,
+          min: 0.0,
+          max: 100.0,
+          divisions: 100,
+          suffix: '%',
+          onChanged: (val) {
+            ref
+                .read(settingsProvider.notifier)
+                .updateActiveLyricsIntensity(val / 100.0);
+          },
+        ),
+        Container(
+          margin: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.activeLyricsIntensityPreviewInactive,
+                style: previewStyle.copyWith(
+                  color: Colors.white.withValues(alpha: 0.35),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.activeLyricsIntensityPreviewActive,
+                style: previewStyle.copyWith(
+                  color: previewColor,
+                  shadows: [
+                    Shadow(
+                      color: previewColor.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class LyricsAlignmentTile extends ConsumerWidget {
   const LyricsAlignmentTile({super.key});
 
@@ -87,7 +193,7 @@ class LyricsAlignmentTile extends ConsumerWidget {
     final isSelected = currentAlignment == alignment;
     return GestureDetector(
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         ref.read(settingsProvider.notifier).updateLyricsAlignment(alignment);
       },
       child: AnimatedContainer(

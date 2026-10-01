@@ -225,7 +225,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dynamicColorActiveLyrics => '다이나믹 컬러 액티브 라인';
 
   @override
-  String get dynamicColorActiveLyricsDesc => '현재 재생중인 가사라인에 추출된 아트워크 색상을 사용';
+  String get dynamicColorActiveLyricsDesc =>
+      '재생 중인 가사 줄에 색을 입힙니다. 끄면 흰색으로 유지됩니다';
+
+  @override
+  String get activeLyricsIntensity => '활성 줄 밝기';
+
+  @override
+  String get activeLyricsIntensityDesc => '재생 중인 가사 줄에 표시되는 색의 강도';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => '비활성 줄';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => '활성 줄';
+
+  @override
+  String get activeLyricsUseAccent => '활성 줄 강조 색상';
+
+  @override
+  String get activeLyricsUseAccentDesc =>
+      '순수한 강조 색상을 사용합니다. 끄면 흰색과 섞어 더 부드러운 색조가 됩니다';
 
   @override
   String get dynamicLyricsBg => '다이나믹 가사 BG';
@@ -398,7 +418,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get lyricsProvider => '가사 제공자';
 
   @override
-  String get lyricsProviderDesc => 'lrclib.net (LRCLIB)에서 온라인 가사를 가져옵니다';
+  String get lyricsProviderDesc =>
+      'lrc.red, LyricsPlus, LRCLIB 등에서 가져오는 온라인 가사';
 
   @override
   String get maintainersAndDesigners => '유지 관리자 및 디자이너';
@@ -783,6 +804,64 @@ class AppLocalizationsKo extends AppLocalizations {
   String get showMore => '더보기';
 
   @override
+  String get segmentedUtilityButtons => '분할형 플레이어 버튼';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      '셔플, 반복, 다음 곡, 가사를 재생 컨트롤과 같은 스타일의 아이콘 타일 4개로 표시합니다';
+
+  @override
+  String get qualityBadgeStyle => '음질 배지 스타일';
+
+  @override
+  String get qualityBadgeStyleDesc => '음질 배지의 모양, 아이콘, 색상 및 세부 정보';
+
+  @override
+  String get qualityBadgeLook => '모양';
+
+  @override
+  String get qualityBadgeLookPill => '채움';
+
+  @override
+  String get qualityBadgeLookOutlined => '테두리';
+
+  @override
+  String get qualityBadgeLookText => '텍스트';
+
+  @override
+  String get qualityBadgeIcon => '아이콘';
+
+  @override
+  String get qualityBadgeColorsByQuality => '음질별';
+
+  @override
+  String get qualityBadgeSeparator => '구분 기호';
+
+  @override
+  String get qualityBadgeDetails => '세부 정보';
+
+  @override
+  String get qualityBadgeLevel => '음질 등급';
+
+  @override
+  String get qualityBadgeLayout => '내용';
+
+  @override
+  String get qualityBadgeLayoutName => '이름만';
+
+  @override
+  String get qualityBadgeShape => '모양';
+
+  @override
+  String get qualityBadgeShapePill => '알약형';
+
+  @override
+  String get qualityBadgeShapeRounded => '둥근 모서리';
+
+  @override
+  String get qualityBadgeShapeSquare => '사각형';
+
+  @override
   String get showQualityBadge => '품질 배지 표시';
 
   @override
@@ -925,6 +1004,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fluidPlayerDesc => '미니 플레이어를 위로 끌어 전체 플레이어로 전환합니다';
 
   @override
+  String get hapticFeedback => '햅틱 피드백';
+
+  @override
+  String get hapticFeedbackDesc => '탭, 토글, 제스처 시 진동';
+
+  @override
   String get viewAll => '모두 보기';
 
   @override
@@ -970,7 +1055,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      '• 동적 가사 동기화: 온라인 데이터베이스에서 동기화된 가사(LRC 형식)를 안전하게 가져오고 다운로드하는 데에만 사용됩니다. 개인 데이터, 설정 또는 미디어 파일은 업로드되거나 공유되지 않습니다.';
+      '• 가사: lrc.red, LyricsPlus, LRCLIB 또는 선택한 제공자에서 싱크 가사를 가져옵니다. 검색에는 곡 제목, 아티스트, 앨범, 재생 시간만 전송됩니다. 개인 데이터, 설정 또는 미디어 파일은 절대 업로드되거나 공유되지 않습니다.';
 
   @override
   String get whyPermissionsUsed => '권한이 사용되는 이유';
@@ -2010,10 +2095,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => '제스처 팁';
+  String get gestureTips => '가사 팁';
 
   @override
-  String get gestureTipsDesc => '탭, 길게 누르기, 핀치 줌 등';
+  String get gestureTipsDesc => '제스처, 단어 동기화, 타이밍 등';
 
   @override
   String get exportLyrics => '가사 내보내기';
@@ -2038,8 +2123,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gestureLongPressLine => '줄 길게 누르기';
 
   @override
-  String get gestureLongPressLineDesc =>
-      '공유용 가사 카드로 만들 줄을 선택하기 시작합니다. 다른 줄을 탭하면 선택 범위가 늘어납니다.';
+  String get gestureLongPressLineDesc => '줄을 선택해 가사 카드로 공유하세요.';
 
   @override
   String get gesturePinch => '두 손가락으로 핀치';
@@ -2054,7 +2138,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gestureSwipeDownDesc => '가사 화면을 닫고 플레이어로 돌아갑니다.';
 
   @override
-  String get lyricsGestures => '가사 제스처';
+  String get lyricsGestures => '가사 팁';
 
   @override
   String get lyricsGesturesIntro => '이 화면에서 쉽게 눈에 띄지 않는 기능 몇 가지:';
@@ -2224,6 +2308,153 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get qualityHiRes => '하이레조 무손실';
+
+  @override
+  String get qualityMono => '모노';
+
+  @override
+  String get qualityStereo => '스테레오';
+
+  @override
+  String get qualitySignalPath => '신호 경로';
+
+  @override
+  String get qualityStageSource => '소스';
+
+  @override
+  String get qualityStageDecoder => '디코더';
+
+  @override
+  String get qualityStageOutput => '출력';
+
+  @override
+  String get qualityStageDevice => '기기';
+
+  @override
+  String get qualityNativeEndToEnd => '처음부터 끝까지 파일 원래의 샘플 레이트로 재생됩니다';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return '출력 시 $from에서 $to(으)로 리샘플링됨';
+  }
+
+  @override
+  String get qualitySectionSource => '소스 파일';
+
+  @override
+  String get qualitySectionEngine => '재생 엔진';
+
+  @override
+  String get qualitySectionDevice => '출력 기기';
+
+  @override
+  String get qualitySectionPhone => '이 휴대폰';
+
+  @override
+  String get qualityOutputFormat => '출력 형식';
+
+  @override
+  String get qualityOutputRate => '출력 샘플 레이트';
+
+  @override
+  String get qualityOutputChannels => '출력 채널';
+
+  @override
+  String get qualityLiveBitrate => '현재 비트레이트';
+
+  @override
+  String get qualityGapless => '갭리스 재생';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => '트랙';
+
+  @override
+  String get qualityReplayGainAlbum => '앨범';
+
+  @override
+  String get qualitySpeed => '속도';
+
+  @override
+  String get qualityDeviceName => '이름';
+
+  @override
+  String get qualityDeviceType => '유형';
+
+  @override
+  String get qualityDeviceSpeaker => '휴대폰 스피커';
+
+  @override
+  String get qualityDeviceWired => '유선 헤드폰';
+
+  @override
+  String get qualityDeviceBluetooth => '블루투스';
+
+  @override
+  String get qualityDeviceUsb => 'USB 오디오';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => '보청기';
+
+  @override
+  String get qualityDeviceDock => '도크';
+
+  @override
+  String get qualitySupportedRates => '지원 샘플 레이트';
+
+  @override
+  String get qualityAnyRate => '모두';
+
+  @override
+  String get qualityMaxBitDepth => '최대 비트 심도';
+
+  @override
+  String get qualityMaxChannels => '최대 채널';
+
+  @override
+  String get qualityBitPerfect => '비트 퍼펙트 모드';
+
+  @override
+  String get qualitySupported => '지원';
+
+  @override
+  String get qualityNotSupported => '지원 안 함';
+
+  @override
+  String get qualitySpatialAudio => '공간 음향';
+
+  @override
+  String get qualityDeviceNote =>
+      'Android는 플레이어가 어느 출력으로 연결되는지 앱에 알려주지 않으므로, 음악이 보통 전달되는 기기를 표시합니다.';
+
+  @override
+  String get qualityPhoneModel => '모델';
+
+  @override
+  String get qualityAndroidVersion => 'Android 버전';
+
+  @override
+  String get qualityMixerRate => '믹서 샘플 레이트';
+
+  @override
+  String get qualityMixerBuffer => '믹서 버퍼';
+
+  @override
+  String get qualityLowLatency => '저지연 오디오';
+
+  @override
+  String get qualityProAudio => '프로 오디오';
+
+  @override
+  String get qualityDeviceUnavailable => '기기 정보는 Android에서만 볼 수 있습니다.';
+
+  @override
   String get qualityLossless => '무손실';
 
   @override
@@ -2391,4 +2622,380 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get mono => '모노';
+
+  @override
+  String get progressBarStyle => '진행 막대 스타일';
+
+  @override
+  String get progressBarStyleDesc => '물결, 두께, 핸들 등';
+
+  @override
+  String get progressBarPreview => '미리보기';
+
+  @override
+  String get progressWave => '물결';
+
+  @override
+  String get progressWaveDesc => '재생된 부분을 움직이는 물결로 표시';
+
+  @override
+  String get progressWaveHeight => '물결 높이';
+
+  @override
+  String get progressWaveLength => '물결 길이';
+
+  @override
+  String get progressWaveLengthDesc => '물결 사이의 간격';
+
+  @override
+  String get progressWaveSpeed => '물결 속도';
+
+  @override
+  String get progressWaveFromStart => '처음부터 물결 표시';
+
+  @override
+  String get progressWaveFromStartDesc => '곡 초반이 지난 후가 아니라 바로 물결 표시';
+
+  @override
+  String get progressKeepWavePaused => '일시정지 시 물결 유지';
+
+  @override
+  String get progressKeepWavePausedDesc => '평평하게 하지 않고 물결을 멈춘 채 유지';
+
+  @override
+  String get progressBarThickness => '막대 두께';
+
+  @override
+  String get progressThumb => '핸들';
+
+  @override
+  String get progressThumbPill => '알약형';
+
+  @override
+  String get progressThumbRound => '원형';
+
+  @override
+  String get progressThumbWidth => '핸들 너비';
+
+  @override
+  String get progressThumbHeight => '핸들 높이';
+
+  @override
+  String get progressThumbSize => '핸들 크기';
+
+  @override
+  String get progressThumbGap => '핸들 주변 간격';
+
+  @override
+  String get progressTrackOpacity => '재생 전 부분 불투명도';
+
+  @override
+  String get progressGrowThumb => '드래그하는 동안 핸들 확대';
+
+  @override
+  String get resetToDefaults => '기본값으로 재설정';
+
+  @override
+  String get artworkVisualizer => '앨범아트 비주얼라이저';
+
+  @override
+  String get artworkVisualizerDesc => '재생 중인 앨범아트에 음악에 반응하는 효과';
+
+  @override
+  String get visualizerEffect => '효과';
+
+  @override
+  String get visualizerAura => '오라 글로우';
+
+  @override
+  String get visualizerRing => '스펙트럼 링';
+
+  @override
+  String get visualizerWave => '하단 물결';
+
+  @override
+  String get visualizerBars => '막대';
+
+  @override
+  String get visualizerBreathing => '숨쉬기';
+
+  @override
+  String get visualizerIntensity => '강도';
+
+  @override
+  String get visualizerSubtle => '은은하게';
+
+  @override
+  String get visualizerNormal => '보통';
+
+  @override
+  String get visualizerStrong => '강하게';
+
+  @override
+  String get visualizerColors => '색상';
+
+  @override
+  String get visualizerColorsArtwork => '앨범아트';
+
+  @override
+  String get visualizerColorsTheme => '테마';
+
+  @override
+  String get visualizerColorsWhite => '흰색';
+
+  @override
+  String get progressTrack => '트랙';
+
+  @override
+  String get visualizerSync => '오디오 싱크';
+
+  @override
+  String get visualizerSyncDesc => '들리는 소리에 맞도록 효과를 지연합니다. 블루투스 헤드폰에서는 높이세요.';
+
+  @override
+  String get visualizerSyncHint => '곡을 재생하며 귀로 맞춰 보세요';
+
+  @override
+  String get lyricsHighlightStyle => '강조 스타일';
+
+  @override
+  String get lyricsStyleLine => '줄';
+
+  @override
+  String get lyricsStyleWord => '단어별';
+
+  @override
+  String get lyricsStyleCharacter => '글자별';
+
+  @override
+  String get lyricsWordSynced => '단어 동기화';
+
+  @override
+  String get lyricsLineSynced => '줄 동기화';
+
+  @override
+  String get findWordSyncedLyrics => '단어 동기화 가사 찾기';
+
+  @override
+  String get searchingWordSyncedLyrics => 'lrc.red와 LyricsPlus에서 검색 중…';
+
+  @override
+  String get wordSyncedLyricsLoaded => '단어 동기화 가사를 불러왔습니다';
+
+  @override
+  String get noWordSyncedLyricsFound => '이 곡의 단어 동기화 가사를 찾지 못했습니다';
+
+  @override
+  String get lyricsTiming => '가사 타이밍';
+
+  @override
+  String get lyricsTimingDesc =>
+      '양수는 가사를 더 일찍, 음수는 더 늦게 표시합니다. 가사가 노래보다 앞서면(블루투스에서 흔함) 값을 낮추세요.';
+
+  @override
+  String get lyricsTimingEarlier => '더 빠르게';
+
+  @override
+  String get lyricsTimingLater => '더 늦게';
+
+  @override
+  String get lyricsTimingReset => '초기화';
+
+  @override
+  String get themeGroupColors => '색상';
+
+  @override
+  String get themeGroupBlurBackgrounds => '블러 및 배경';
+
+  @override
+  String get themeGroupDarkness => '어둡기';
+
+  @override
+  String get themeGroupFonts => '글꼴';
+
+  @override
+  String get themeGroupProfile => '프로필';
+
+  @override
+  String get lyricsTipsGestures => '제스처';
+
+  @override
+  String get lyricsTipsMenu => '⋮ 메뉴에서';
+
+  @override
+  String get gestureScroll => '자유롭게 스크롤';
+
+  @override
+  String get gestureScrollDesc => '둘러보는 동안 자동 따라가기가 멈춥니다. 다시 동기화를 눌러 돌아가세요.';
+
+  @override
+  String get tipFindWordSyncDesc => 'lrc.red와 LyricsPlus에서 단어별 타이밍을 가져옵니다.';
+
+  @override
+  String get tipHighlightStyleDesc => '단어 동기화 가사에서 줄, 단어별, 글자별로 표시합니다.';
+
+  @override
+  String get tipLyricsTimingDesc => '가사를 앞당기거나 늦추세요. 블루투스 사용 시 유용합니다.';
+
+  @override
+  String get tipChangeProviderDesc => '가사가 틀리거나 없나요? 다른 소스를 시도해 보세요.';
+
+  @override
+  String get tipOwnLyrics => '내 가사';
+
+  @override
+  String get tipOwnLyricsDesc => '.lrc 파일을 불러오거나 이 가사를 기기에 내보내세요.';
+
+  @override
+  String get lyricsSources => '가사 출처';
+
+  @override
+  String get creditLrcRedDesc => '단어 단위 싱크 가사 (기본 제공자)';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      '단어 단위 싱크 가사 · ibratabian17의 오픈 소스 서버 (Apache-2.0), binimum 호스팅';
+
+  @override
+  String get creditLrclibDesc => '줄 단위 싱크 가사 · 무료 공개 가사 데이터베이스';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      'lrc.red가 곡을 찾을 수 있도록 각 곡의 ISRC를 조회 · 공개 음악 데이터베이스(CC0 데이터)';
+
+  @override
+  String get creditAmLyricsDesc =>
+      '단어 단위 싱크 가사에 영감을 준 프로젝트 · binimum 제작 (MPL-2.0)';
+
+  @override
+  String get lyricsCopyrightNote =>
+      '가사의 권리는 아티스트와 권리자에게 있습니다. Looper는 개인적인 표시 용도로만 가져오며 기기에 보관합니다.';
+
+  @override
+  String get clearLyricsCache => '가사 캐시 지우기';
+
+  @override
+  String get clearLyricsCacheDesc =>
+      '다운로드한 가사는 지울 때까지 보관됩니다. 내 파일과 선택한 .lrc는 유지됩니다.';
+
+  @override
+  String get clearLyricsCacheConfirm =>
+      '다운로드한 가사를 모두 지울까요? 다음 재생 시 온라인에서 다시 찾습니다.';
+
+  @override
+  String get lyricsCacheCleared => '가사 캐시를 지웠습니다';
+
+  @override
+  String get analyzeYourTopSong => '나의 1위 곡';
+
+  @override
+  String get analyzeHighlights => '하이라이트';
+
+  @override
+  String get analyzePeakTime => '가장 많이 듣는 시간';
+
+  @override
+  String get analyzeBusiestDay => '가장 많이 들은 날';
+
+  @override
+  String get analyzeTopGenre => '최애 장르';
+
+  @override
+  String get analyzeLibraryExplored => '라이브러리 탐색';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$total곡 중 $played곡';
+  }
+
+  @override
+  String get analyzeCurrentStreak => '현재 연속 기록';
+
+  @override
+  String get analyzeLongestStreak => '최장 연속 기록';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours시간 $minutes분';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes분';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return '하루 평균 $avg회';
+  }
+
+  @override
+  String get dayPartMorning => '아침';
+
+  @override
+  String get dayPartAfternoon => '오후';
+
+  @override
+  String get dayPartEvening => '저녁';
+
+  @override
+  String get dayPartNight => '밤';
+
+  @override
+  String get updateNow => '업데이트';
+
+  @override
+  String get updateLater => '나중에';
+
+  @override
+  String get updateInstall => '설치';
+
+  @override
+  String get retry => '다시 시도';
+
+  @override
+  String get updateWhatsNew => '새로운 기능';
+
+  @override
+  String get updateDownloading => '업데이트 다운로드 중';
+
+  @override
+  String get updateVerifying => '다운로드 확인 중…';
+
+  @override
+  String get updateWaitingForInstaller => '설치 프로그램을 기다리는 중…';
+
+  @override
+  String get updateReadyToInstall => '다운로드가 완료되어 설치할 수 있습니다.';
+
+  @override
+  String get updateErrorNetwork => '다운로드에 실패했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get updateErrorChecksum => '다운로드한 파일이 손상되었습니다. 다시 시도하세요.';
+
+  @override
+  String get updateErrorStorage => '업데이트에 필요한 저장 공간이 부족합니다.';
+
+  @override
+  String get updateErrorInstall => '업데이트를 설치할 수 없습니다.';
+
+  @override
+  String get checkForUpdates => '업데이트 확인';
+
+  @override
+  String get updateUpToDate => '최신 버전을 사용 중입니다.';
+
+  @override
+  String get updateCheckFailed => '업데이트를 확인할 수 없습니다.';
 }

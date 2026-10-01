@@ -4,7 +4,7 @@ targets:
     app_name: Looper Player
     bundle_name: looper_player
     executable_name: looper_player
-    icon: assets/icon.png
+    icon: assets/branding/linux_icon.png
     build_args:
       --release:
     makers:

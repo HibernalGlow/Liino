@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show listEquals;
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/utils/responsive.dart';
 import 'package:looper_player/features/playback/presentation/providers/equalizer/equalizer_notifier.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class InteractiveEqualizerGraph extends ConsumerStatefulWidget {
   final EqualizerState eqState;
@@ -44,7 +44,7 @@ class _InteractiveEqualizerGraphState
           behavior: HitTestBehavior.opaque,
           onPointerDown: (event) {
             if (!widget.eqState.enabled) return;
-            HapticFeedback.selectionClick();
+            AppHaptics.selection();
             final localPos = event.localPosition;
             final index = (localPos.dx / colWidth).floor().clamp(0, 17);
             setState(() {

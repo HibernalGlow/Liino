@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:looper_player/features/playback/presentation/widgets/lyrics/advanced_lyric_line/advanced_lyric_line.dart'
+    show activeLyricsIsWhite;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/features/library/data/services/saf_folder_service.dart';
@@ -15,6 +16,10 @@ import 'package:looper_player/core/providers/providers.dart';
 import 'package:looper_player/ui/android/player/equalizer/android_equalizer_screen.dart';
 import 'package:looper_player/ui/widgets/common/folder_picker_helper.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/utils/app_links.dart';
+import 'package:looper_player/features/settings/presentation/widgets/tiles/about_settings_tiles.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 part 'settings_rows.dart';
 part 'library_folders_list.dart';
 part 'maintainer_section.dart';
@@ -63,7 +68,7 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.adaptColorsArtwork,
                       value: settings.enableDynamicTheming,
                       onChanged: (value) {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(settingsProvider.notifier)
                             .updateDynamicTheming(value);
@@ -77,7 +82,7 @@ class SettingsView extends ConsumerWidget {
                         subtitle: l10n.turnOffBlursOptimize,
                         value: settings.disableBlur,
                         onChanged: (value) {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(settingsProvider.notifier)
                               .updateDisableBlur(value);
@@ -91,7 +96,7 @@ class SettingsView extends ConsumerWidget {
                         subtitle: l10n.dynamicAccentColorDesc,
                         value: settings.dynamicAccentColor,
                         onChanged: (value) {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(settingsProvider.notifier)
                               .updateDynamicAccentColor(value);
@@ -117,7 +122,7 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.pureBlackOledDesc,
                       value: settings.darkTheme,
                       onChanged: (value) {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(settingsProvider.notifier)
                             .updateDarkTheme(value);
@@ -130,25 +135,56 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.dynamicLyricsBgDesc,
                       value: settings.dynamicLyrics,
                       onChanged: (value) {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(settingsProvider.notifier)
                             .updateDynamicLyrics(value);
                       },
                       isLast: false,
                     ),
-                    if (settings.enableDynamicTheming || settings.dynamicLyrics)
+                    _PremiumSwitchRow(
+                      icon: LucideIcons.palette,
+                      title: l10n.dynamicColorActiveLyrics,
+                      subtitle: l10n.dynamicColorActiveLyricsDesc,
+                      value: settings.dynamicColorActiveLyrics,
+                      onChanged: (value) {
+                        AppHaptics.light();
+                        ref
+                            .read(settingsProvider.notifier)
+                            .updateDynamicColorActiveLyrics(value);
+                      },
+                      isLast: false,
+                    ),
+                    if (!activeLyricsIsWhite(settings))
                       _PremiumSwitchRow(
-                        icon: LucideIcons.palette,
-                        title: l10n.dynamicColorActiveLyrics,
-                        subtitle: l10n.dynamicColorActiveLyricsDesc,
-                        value: settings.dynamicColorActiveLyrics,
+                        icon: LucideIcons.paintbrush,
+                        title: l10n.activeLyricsUseAccent,
+                        subtitle: l10n.activeLyricsUseAccentDesc,
+                        value: !settings.activeLyricsSoftColor,
                         onChanged: (value) {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(settingsProvider.notifier)
-                              .updateDynamicColorActiveLyrics(value);
+                              .updateActiveLyricsUseAccent(value);
                         },
+                        isLast: false,
+                      ),
+                    if (!activeLyricsIsWhite(settings))
+                      _PremiumSliderRow(
+                        icon: LucideIcons.sunMedium,
+                        title: l10n.activeLyricsIntensity,
+                        subtitle: l10n.activeLyricsIntensityDesc,
+                        value:
+                            (settings.activeLyricsIntensity.isNaN
+                                ? 0.0
+                                : settings.activeLyricsIntensity) *
+                            100,
+                        min: 0,
+                        max: 100,
+                        suffix: '%',
+                        onChanged: (val) => ref
+                            .read(settingsProvider.notifier)
+                            .updateActiveLyricsIntensity(val / 100.0),
                         isLast: false,
                       ),
                     _PremiumDropdownRow<String>(
@@ -168,7 +204,7 @@ class SettingsView extends ConsumerWidget {
                       ],
                       onChanged: (align) {
                         if (align != null) {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(settingsProvider.notifier)
                               .updateLyricsAlignment(align);
@@ -182,7 +218,7 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.disableSquigglyProgressBar,
                       value: settings.disableSquiggle,
                       onChanged: (value) {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(settingsProvider.notifier)
                             .updateDisableSquiggle(value);
@@ -195,7 +231,7 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.useStaticTextTimestamps,
                       value: settings.disableAnimatedDuration,
                       onChanged: (value) {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(settingsProvider.notifier)
                             .updateDisableAnimatedDuration(value);
@@ -209,7 +245,7 @@ class SettingsView extends ConsumerWidget {
                         subtitle: l10n.fluidPlayerDesc,
                         value: settings.enableSlideGesture,
                         onChanged: (value) {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(settingsProvider.notifier)
                               .updateEnableSlideGesture(value);
@@ -223,7 +259,7 @@ class SettingsView extends ConsumerWidget {
                         subtitle: l10n.stopServiceOnAppDismissalDesc,
                         value: settings.stopOnTaskRemoved,
                         onChanged: (value) {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(settingsProvider.notifier)
                               .updateStopOnTaskRemoved(value);
@@ -279,7 +315,7 @@ class SettingsView extends ConsumerWidget {
                       ],
                       onChanged: (lang) {
                         if (lang != null) {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(settingsProvider.notifier)
                               .updateLanguage(lang);
@@ -305,7 +341,7 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.fadePlayPauseStopDesc,
                       value: settings.fadePlayPauseStop,
                       onChanged: (value) {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(settingsProvider.notifier)
                             .updateFadePlayPauseStop(value);
@@ -360,7 +396,7 @@ class SettingsView extends ConsumerWidget {
                         subtitle: l10n.manageAudioFocusDesc,
                         value: settings.audioFocus,
                         onChanged: (value) {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(settingsProvider.notifier)
                               .updateAudioFocus(value);
@@ -374,7 +410,7 @@ class SettingsView extends ConsumerWidget {
                           subtitle: l10n.resumeAfterCallDesc,
                           value: settings.resumeAfterCall,
                           onChanged: (value) {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             ref
                                 .read(settingsProvider.notifier)
                                 .updateResumeAfterCall(value);
@@ -387,7 +423,7 @@ class SettingsView extends ConsumerWidget {
                           subtitle: l10n.resumeOnStartDesc,
                           value: settings.resumeOnStart,
                           onChanged: (value) {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             ref
                                 .read(settingsProvider.notifier)
                                 .updateResumeOnStart(value);
@@ -414,7 +450,7 @@ class SettingsView extends ConsumerWidget {
                       title: l10n.addFolder,
                       subtitle: l10n.selectFolderIndex,
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         FolderPickerHelper.pickFolder(context, ref);
                       },
                       isLast: false,
@@ -424,7 +460,7 @@ class SettingsView extends ConsumerWidget {
                       title: l10n.rescanLibrary,
                       subtitle: l10n.updateLibraryIndexing,
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(libraryProvider.notifier)
                             .scanSavedFolders(fullStorageDiscovery: true);
@@ -440,7 +476,7 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.includeOtherDeviceAudioAlarmsDesc,
                       value: settings.includeSystemAndMessagingAudio,
                       onChanged: (value) async {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         await ref
                             .read(settingsProvider.notifier)
                             .updateIncludeSystemAndMessagingAudio(value);
@@ -456,7 +492,7 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.enableNetworkLyricsArt,
                       value: settings.enableInternet,
                       onChanged: (value) {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(settingsProvider.notifier)
                             .updateEnableInternet(value);
@@ -469,7 +505,7 @@ class SettingsView extends ConsumerWidget {
                       textColor: Colors.redAccent,
                       subtitle: l10n.resetLibraryDesc,
                       onTap: () {
-                        HapticFeedback.heavyImpact();
+                        AppHaptics.heavy();
                         _showClearDialog(context, l10n);
                       },
                       isLast: true,
@@ -512,7 +548,11 @@ class SettingsView extends ConsumerWidget {
                       title: l10n.lyricsProvider,
                       subtitle: l10n.lyricsProviderDesc,
                       onTap: () async {
-                        final url = Uri.parse('https://lrclib.net');
+                        final url = Uri.parse(
+                          AppLinks.lyricsProviderUrls[settings
+                                  .lyricsProvider] ??
+                              AppLinks.lrcRedWeb,
+                        );
                         if (await canLaunchUrl(url)) {
                           await launchUrl(
                             url,
@@ -538,6 +578,50 @@ class SettingsView extends ConsumerWidget {
                         }
                       },
                       isLast: true,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Lyrics Sources (credits)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: _Section(
+                  title: l10n.lyricsSources,
+                  children: [
+                    for (final (i, credit) in lyricsCredits(l10n).indexed)
+                      _PremiumActionRow(
+                        icon: LucideIcons.music,
+                        title: credit.name,
+                        subtitle: credit.description,
+                        trailing: const Icon(
+                          LucideIcons.externalLink,
+                          color: Colors.white38,
+                          size: 16,
+                        ),
+                        onTap: () async {
+                          final url = Uri.parse(credit.url);
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(
+                              url,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          }
+                        },
+                        isLast: i == lyricsCredits(l10n).length - 1,
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                      child: Text(
+                        l10n.lyricsCopyrightNote,
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 12,
+                          height: 1.5,
+                        ),
+                      ),
                     ),
                   ],
                 ),

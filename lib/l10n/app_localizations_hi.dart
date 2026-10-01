@@ -236,7 +236,27 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dynamicColorActiveLyricsDesc =>
-      'वर्तमान में चल रही लिरिक्स लाइन के लिए आर्टवर्क से निकाले गए रंगों का उपयोग करें';
+      'चल रही लिरिक्स लाइन को रंगें; बंद करने पर वह सफ़ेद रहती है';
+
+  @override
+  String get activeLyricsIntensity => 'सक्रिय लाइन की तीव्रता';
+
+  @override
+  String get activeLyricsIntensityDesc =>
+      'चल रही लिरिक्स लाइन में कितना रंग दिखे';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => 'निष्क्रिय लाइन';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => 'सक्रिय लाइन';
+
+  @override
+  String get activeLyricsUseAccent => 'सक्रिय लाइन के लिए एक्सेंट रंग';
+
+  @override
+  String get activeLyricsUseAccentDesc =>
+      'शुद्ध एक्सेंट रंग इस्तेमाल करें; बंद करने पर हल्के रंग के लिए सफ़ेद के साथ मिलाया जाता है';
 
   @override
   String get dynamicLyricsBg => 'डायनामिक बोल बैकग्राउंड';
@@ -421,7 +441,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get lyricsProviderDesc =>
-      'ऑनलाइन बोल lrclib.net (LRCLIB) से लिए गए हैं';
+      'lrc.red, LyricsPlus, LRCLIB और अन्य से ऑनलाइन बोल';
 
   @override
   String get maintainersAndDesigners => 'रखरखावकर्ता और डिजाइनर';
@@ -828,6 +848,65 @@ class AppLocalizationsHi extends AppLocalizations {
   String get showMore => 'अधिक दिखाएं';
 
   @override
+  String get segmentedUtilityButtons => 'सेगमेंटेड प्लेयर बटन';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      'शफ़ल, रिपीट, आगे आने वाले और लिरिक्स को प्लेबैक कंट्रोल जैसी चार आइकन टाइलों के रूप में दिखाएँ';
+
+  @override
+  String get qualityBadgeStyle => 'क्वालिटी बैज स्टाइल';
+
+  @override
+  String get qualityBadgeStyleDesc =>
+      'ऑडियो क्वालिटी बैज का रूप, आइकन, रंग और विवरण';
+
+  @override
+  String get qualityBadgeLook => 'रूप';
+
+  @override
+  String get qualityBadgeLookPill => 'भरा हुआ';
+
+  @override
+  String get qualityBadgeLookOutlined => 'आउटलाइन';
+
+  @override
+  String get qualityBadgeLookText => 'टेक्स्ट';
+
+  @override
+  String get qualityBadgeIcon => 'आइकन';
+
+  @override
+  String get qualityBadgeColorsByQuality => 'क्वालिटी के अनुसार';
+
+  @override
+  String get qualityBadgeSeparator => 'विभाजक';
+
+  @override
+  String get qualityBadgeDetails => 'विवरण';
+
+  @override
+  String get qualityBadgeLevel => 'क्वालिटी स्तर';
+
+  @override
+  String get qualityBadgeLayout => 'सामग्री';
+
+  @override
+  String get qualityBadgeLayoutName => 'केवल नाम';
+
+  @override
+  String get qualityBadgeShape => 'आकार';
+
+  @override
+  String get qualityBadgeShapePill => 'पिल';
+
+  @override
+  String get qualityBadgeShapeRounded => 'गोल कोने';
+
+  @override
+  String get qualityBadgeShapeSquare => 'चौकोर';
+
+  @override
   String get showQualityBadge => 'क्वालिटी बैज दिखाएं';
 
   @override
@@ -982,6 +1061,12 @@ class AppLocalizationsHi extends AppLocalizations {
       'मिनी प्लेयर को ऊपर खींचकर पूरे प्लेयर में बदलें';
 
   @override
+  String get hapticFeedback => 'हैप्टिक फ़ीडबैक';
+
+  @override
+  String get hapticFeedbackDesc => 'टैप, टॉगल और जेस्चर पर वाइब्रेट करें';
+
+  @override
   String get viewAll => 'सभी देखें';
 
   @override
@@ -1028,7 +1113,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      '• डायनामिक बोल सिंक: ऑनलाइन डेटाबेस से गानों के सिंक किए गए बोल (LRC प्रारूप) को सुरक्षित रूप से खोजने और डाउनलोड करने के लिए किया जाता है। कोई भी व्यक्तिगत डेटा, सेटिंग्स या मीडिया फाइलें कभी भी अपलोड या साझा नहीं की जाती हैं।';
+      '• बोल: lrc.red, LyricsPlus, LRCLIB या आपके चुने हुए प्रदाता से सिंक किए गए बोल लाता है। मिलान खोजने के लिए केवल गाने का नाम, कलाकार, एल्बम और अवधि भेजी जाती है। कोई भी व्यक्तिगत डेटा, सेटिंग्स या मीडिया फाइलें कभी भी अपलोड या साझा नहीं की जाती हैं।';
 
   @override
   String get whyPermissionsUsed => 'अनुमतियों का उपयोग क्यों किया जाता है';
@@ -2104,11 +2189,10 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => 'जेस्चर टिप्स';
+  String get gestureTips => 'बोल टिप्स';
 
   @override
-  String get gestureTipsDesc =>
-      'टैप, लंबा दबाएं, ज़ूम के लिए पिंच करें और भी बहुत कुछ';
+  String get gestureTipsDesc => 'जेस्चर, शब्द-सिंक, टाइमिंग और बहुत कुछ';
 
   @override
   String get exportLyrics => 'बोल एक्सपोर्ट करें';
@@ -2134,7 +2218,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get gestureLongPressLineDesc =>
-      'शेयर करने लायक बोल कार्ड बनाने के लिए पंक्तियां चुनना शुरू करें। चुनाव बढ़ाने के लिए और पंक्तियों पर टैप करें।';
+      'बोल कार्ड के रूप में शेयर करने के लिए पंक्तियाँ चुनें।';
 
   @override
   String get gesturePinch => 'दो उंगलियों से पिंच करें';
@@ -2149,7 +2233,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gestureSwipeDownDesc => 'बोल की स्क्रीन बंद करके प्लेयर पर लौटें।';
 
   @override
-  String get lyricsGestures => 'बोल के जेस्चर';
+  String get lyricsGestures => 'बोल टिप्स';
 
   @override
   String get lyricsGesturesIntro =>
@@ -2321,6 +2405,155 @@ class AppLocalizationsHi extends AppLocalizations {
   String nyquistKhz(String khz) {
     return 'नाइक्विस्ट: $khz kHz';
   }
+
+  @override
+  String get qualityHiRes => 'हाई-रेज़ लॉसलेस';
+
+  @override
+  String get qualityMono => 'मोनो';
+
+  @override
+  String get qualityStereo => 'स्टीरियो';
+
+  @override
+  String get qualitySignalPath => 'सिग्नल पथ';
+
+  @override
+  String get qualityStageSource => 'स्रोत';
+
+  @override
+  String get qualityStageDecoder => 'डिकोडर';
+
+  @override
+  String get qualityStageOutput => 'आउटपुट';
+
+  @override
+  String get qualityStageDevice => 'डिवाइस';
+
+  @override
+  String get qualityNativeEndToEnd =>
+      'पूरे रास्ते फ़ाइल की अपनी सैंपल रेट पर चलता है';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return 'आउटपुट पर $from से $to में बदला गया';
+  }
+
+  @override
+  String get qualitySectionSource => 'स्रोत फ़ाइल';
+
+  @override
+  String get qualitySectionEngine => 'प्लेबैक इंजन';
+
+  @override
+  String get qualitySectionDevice => 'आउटपुट डिवाइस';
+
+  @override
+  String get qualitySectionPhone => 'यह फ़ोन';
+
+  @override
+  String get qualityOutputFormat => 'आउटपुट फ़ॉर्मैट';
+
+  @override
+  String get qualityOutputRate => 'आउटपुट सैंपल रेट';
+
+  @override
+  String get qualityOutputChannels => 'आउटपुट चैनल';
+
+  @override
+  String get qualityLiveBitrate => 'लाइव बिटरेट';
+
+  @override
+  String get qualityGapless => 'गैपलेस प्लेबैक';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => 'ट्रैक';
+
+  @override
+  String get qualityReplayGainAlbum => 'एल्बम';
+
+  @override
+  String get qualitySpeed => 'गति';
+
+  @override
+  String get qualityDeviceName => 'नाम';
+
+  @override
+  String get qualityDeviceType => 'प्रकार';
+
+  @override
+  String get qualityDeviceSpeaker => 'फ़ोन स्पीकर';
+
+  @override
+  String get qualityDeviceWired => 'वायर्ड हेडफ़ोन';
+
+  @override
+  String get qualityDeviceBluetooth => 'ब्लूटूथ';
+
+  @override
+  String get qualityDeviceUsb => 'USB ऑडियो';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => 'श्रवण यंत्र';
+
+  @override
+  String get qualityDeviceDock => 'डॉक';
+
+  @override
+  String get qualitySupportedRates => 'समर्थित रेट';
+
+  @override
+  String get qualityAnyRate => 'कोई भी';
+
+  @override
+  String get qualityMaxBitDepth => 'अधिकतम बिट डेप्थ';
+
+  @override
+  String get qualityMaxChannels => 'अधिकतम चैनल';
+
+  @override
+  String get qualityBitPerfect => 'बिट-परफ़ेक्ट मोड';
+
+  @override
+  String get qualitySupported => 'समर्थित';
+
+  @override
+  String get qualityNotSupported => 'समर्थित नहीं';
+
+  @override
+  String get qualitySpatialAudio => 'स्पेशियल ऑडियो';
+
+  @override
+  String get qualityDeviceNote =>
+      'Android ऐप्स को नहीं बताता कि प्लेयर किस आउटपुट पर जा रहा है, इसलिए यह वह डिवाइस है जिस पर आम तौर पर संगीत जाता है।';
+
+  @override
+  String get qualityPhoneModel => 'मॉडल';
+
+  @override
+  String get qualityAndroidVersion => 'Android संस्करण';
+
+  @override
+  String get qualityMixerRate => 'मिक्सर सैंपल रेट';
+
+  @override
+  String get qualityMixerBuffer => 'मिक्सर बफ़र';
+
+  @override
+  String get qualityLowLatency => 'लो-लेटेंसी ऑडियो';
+
+  @override
+  String get qualityProAudio => 'प्रो ऑडियो';
+
+  @override
+  String get qualityDeviceUnavailable =>
+      'डिवाइस विवरण केवल Android पर उपलब्ध हैं।';
 
   @override
   String get qualityLossless => 'लॉसलेस';
@@ -2504,4 +2737,397 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get mono => 'मोनो';
+
+  @override
+  String get progressBarStyle => 'प्रोग्रेस बार स्टाइल';
+
+  @override
+  String get progressBarStyleDesc => 'वेव, मोटाई, थंब और बहुत कुछ';
+
+  @override
+  String get progressBarPreview => 'प्रीव्यू';
+
+  @override
+  String get progressWave => 'वेव';
+
+  @override
+  String get progressWaveDesc =>
+      'बार के चले हुए हिस्से को चलती वेव की तरह दिखाएं';
+
+  @override
+  String get progressWaveHeight => 'वेव की ऊंचाई';
+
+  @override
+  String get progressWaveLength => 'वेव की लंबाई';
+
+  @override
+  String get progressWaveLengthDesc => 'एक वेव से अगली वेव की दूरी';
+
+  @override
+  String get progressWaveSpeed => 'वेव की गति';
+
+  @override
+  String get progressWaveFromStart => 'शुरुआत से वेव';
+
+  @override
+  String get progressWaveFromStartDesc =>
+      'गाने के शुरुआती हिस्से के बाद नहीं, तुरंत वेव दिखाएं';
+
+  @override
+  String get progressKeepWavePaused => 'रोकने पर वेव रखें';
+
+  @override
+  String get progressKeepWavePausedDesc =>
+      'वेव को सपाट करने के बजाय स्थिर रखें';
+
+  @override
+  String get progressBarThickness => 'बार की मोटाई';
+
+  @override
+  String get progressThumb => 'थंब';
+
+  @override
+  String get progressThumbPill => 'पिल';
+
+  @override
+  String get progressThumbRound => 'गोल';
+
+  @override
+  String get progressThumbWidth => 'थंब की चौड़ाई';
+
+  @override
+  String get progressThumbHeight => 'थंब की ऊंचाई';
+
+  @override
+  String get progressThumbSize => 'थंब का आकार';
+
+  @override
+  String get progressThumbGap => 'थंब के आसपास की जगह';
+
+  @override
+  String get progressTrackOpacity => 'न चले हिस्से की अपारदर्शिता';
+
+  @override
+  String get progressGrowThumb => 'खींचते समय थंब बड़ा करें';
+
+  @override
+  String get resetToDefaults => 'डिफ़ॉल्ट पर रीसेट करें';
+
+  @override
+  String get artworkVisualizer => 'आर्टवर्क विज़ुअलाइज़र';
+
+  @override
+  String get artworkVisualizerDesc =>
+      'चल रहे गाने के आर्टवर्क पर संगीत के साथ चलने वाला इफ़ेक्ट';
+
+  @override
+  String get visualizerEffect => 'इफ़ेक्ट';
+
+  @override
+  String get visualizerAura => 'ऑरा ग्लो';
+
+  @override
+  String get visualizerRing => 'स्पेक्ट्रम रिंग';
+
+  @override
+  String get visualizerWave => 'नीचे की वेव';
+
+  @override
+  String get visualizerBars => 'बार्स';
+
+  @override
+  String get visualizerBreathing => 'ब्रीदिंग';
+
+  @override
+  String get visualizerIntensity => 'तीव्रता';
+
+  @override
+  String get visualizerSubtle => 'हल्का';
+
+  @override
+  String get visualizerNormal => 'सामान्य';
+
+  @override
+  String get visualizerStrong => 'तेज़';
+
+  @override
+  String get visualizerColors => 'रंग';
+
+  @override
+  String get visualizerColorsArtwork => 'आर्टवर्क';
+
+  @override
+  String get visualizerColorsTheme => 'थीम';
+
+  @override
+  String get visualizerColorsWhite => 'सफ़ेद';
+
+  @override
+  String get progressTrack => 'ट्रैक';
+
+  @override
+  String get visualizerSync => 'ऑडियो सिंक';
+
+  @override
+  String get visualizerSyncDesc =>
+      'इफ़ेक्ट को देर से दिखाएं ताकि वह सुनाई देने वाली आवाज़ से मेल खाए। ब्लूटूथ हेडफ़ोन के लिए बढ़ाएं।';
+
+  @override
+  String get visualizerSyncHint => 'इसे सुनकर सेट करने के लिए कोई गाना चलाएं';
+
+  @override
+  String get lyricsHighlightStyle => 'हाइलाइट शैली';
+
+  @override
+  String get lyricsStyleLine => 'लाइन';
+
+  @override
+  String get lyricsStyleWord => 'शब्द-दर-शब्द';
+
+  @override
+  String get lyricsStyleCharacter => 'अक्षर-दर-अक्षर';
+
+  @override
+  String get lyricsWordSynced => 'शब्द-सिंक';
+
+  @override
+  String get lyricsLineSynced => 'लाइन-सिंक';
+
+  @override
+  String get findWordSyncedLyrics => 'शब्द-सिंक बोल खोजें';
+
+  @override
+  String get searchingWordSyncedLyrics =>
+      'lrc.red और LyricsPlus पर खोज रहे हैं…';
+
+  @override
+  String get wordSyncedLyricsLoaded => 'शब्द-सिंक बोल लोड हो गए';
+
+  @override
+  String get noWordSyncedLyricsFound =>
+      'इस गाने के लिए शब्द-सिंक बोल नहीं मिले';
+
+  @override
+  String get lyricsTiming => 'बोल की टाइमिंग';
+
+  @override
+  String get lyricsTimingDesc =>
+      'धनात्मक मान लिरिक्स पहले दिखाता है, ऋणात्मक बाद में। अगर लिरिक्स गाने से आगे चल रहे हैं (ब्लूटूथ पर आम), तो इसे घटाएँ।';
+
+  @override
+  String get lyricsTimingEarlier => 'पहले';
+
+  @override
+  String get lyricsTimingLater => 'बाद में';
+
+  @override
+  String get lyricsTimingReset => 'रीसेट';
+
+  @override
+  String get themeGroupColors => 'रंग';
+
+  @override
+  String get themeGroupBlurBackgrounds => 'ब्लर और बैकग्राउंड';
+
+  @override
+  String get themeGroupDarkness => 'गहरापन';
+
+  @override
+  String get themeGroupFonts => 'फ़ॉन्ट';
+
+  @override
+  String get themeGroupProfile => 'प्रोफ़ाइल';
+
+  @override
+  String get lyricsTipsGestures => 'जेस्चर';
+
+  @override
+  String get lyricsTipsMenu => '⋮ मेन्यू में';
+
+  @override
+  String get gestureScroll => 'खुलकर स्क्रॉल करें';
+
+  @override
+  String get gestureScrollDesc =>
+      'ब्राउज़ करते समय ऑटो-फ़ॉलो रुक जाता है। वापस जाने के लिए फिर से सिंक करें पर टैप करें।';
+
+  @override
+  String get tipFindWordSyncDesc =>
+      'lrc.red और LyricsPlus से हर शब्द की टाइमिंग लाएँ।';
+
+  @override
+  String get tipHighlightStyleDesc =>
+      'शब्द-सिंक बोलों के लिए पंक्ति, शब्द-दर-शब्द या अक्षर-दर-अक्षर।';
+
+  @override
+  String get tipLyricsTimingDesc =>
+      'बोल पहले या बाद में खिसकाएँ, Bluetooth के साथ काम का।';
+
+  @override
+  String get tipChangeProviderDesc =>
+      'बोल गलत या नहीं मिले? कोई दूसरा स्रोत आज़माएँ।';
+
+  @override
+  String get tipOwnLyrics => 'अपने बोल';
+
+  @override
+  String get tipOwnLyricsDesc =>
+      'कोई .lrc फ़ाइल लोड करें, या ये बोल डिवाइस पर एक्सपोर्ट करें।';
+
+  @override
+  String get lyricsSources => 'बोल के स्रोत';
+
+  @override
+  String get creditLrcRedDesc => 'शब्द-सिंक बोल (डिफ़ॉल्ट प्रदाता)';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      'शब्द-सिंक बोल · ibratabian17 का ओपन-सोर्स सर्वर (Apache-2.0), binimum द्वारा होस्ट किया गया';
+
+  @override
+  String get creditLrclibDesc => 'पंक्ति-सिंक बोल · मुफ़्त, खुला बोल डेटाबेस';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      'हर गाने का ISRC ढूँढता है ताकि lrc.red उसे मिला सके · खुला संगीत डेटाबेस (CC0 डेटा)';
+
+  @override
+  String get creditAmLyricsDesc =>
+      'हमारे शब्द-सिंक बोल की प्रेरणा · binimum द्वारा (MPL-2.0)';
+
+  @override
+  String get lyricsCopyrightNote =>
+      'बोल उनके कलाकारों और अधिकार धारकों के हैं। Looper उन्हें केवल निजी रूप से दिखाने के लिए लाता है और आपके डिवाइस पर ही रखता है।';
+
+  @override
+  String get clearLyricsCache => 'बोल कैश साफ़ करें';
+
+  @override
+  String get clearLyricsCacheDesc =>
+      'डाउनलोड किए गए बोल तब तक रखे जाते हैं जब तक आप उन्हें साफ़ न करें। आपकी अपनी फ़ाइलें और चुनी गई .lrc बनी रहती हैं।';
+
+  @override
+  String get clearLyricsCacheConfirm =>
+      'सभी डाउनलोड किए गए बोल साफ़ करें? अगली बार चलाने पर गाने उन्हें फिर से ऑनलाइन खोजेंगे।';
+
+  @override
+  String get lyricsCacheCleared => 'बोल कैश साफ़ किया गया';
+
+  @override
+  String get analyzeYourTopSong => 'आपका नंबर 1 गाना';
+
+  @override
+  String get analyzeHighlights => 'खास बातें';
+
+  @override
+  String get analyzePeakTime => 'सबसे ज़्यादा सुनने का समय';
+
+  @override
+  String get analyzeBusiestDay => 'सबसे व्यस्त दिन';
+
+  @override
+  String get analyzeTopGenre => 'टॉप जॉनर';
+
+  @override
+  String get analyzeLibraryExplored => 'लाइब्रेरी में से सुना';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$total में से $played गाने';
+  }
+
+  @override
+  String get analyzeCurrentStreak => 'मौजूदा सिलसिला';
+
+  @override
+  String get analyzeLongestStreak => 'सबसे लंबा सिलसिला';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count दिन',
+      one: '1 दिन',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours घं $minutes मि';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes मि';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return 'औसतन $avg प्रति दिन';
+  }
+
+  @override
+  String get dayPartMorning => 'सुबह';
+
+  @override
+  String get dayPartAfternoon => 'दोपहर';
+
+  @override
+  String get dayPartEvening => 'शाम';
+
+  @override
+  String get dayPartNight => 'रात';
+
+  @override
+  String get updateNow => 'अपडेट करें';
+
+  @override
+  String get updateLater => 'बाद में';
+
+  @override
+  String get updateInstall => 'इंस्टॉल करें';
+
+  @override
+  String get retry => 'फिर से कोशिश करें';
+
+  @override
+  String get updateWhatsNew => 'नया क्या है';
+
+  @override
+  String get updateDownloading => 'अपडेट डाउनलोड हो रहा है';
+
+  @override
+  String get updateVerifying => 'डाउनलोड की जाँच हो रही है…';
+
+  @override
+  String get updateWaitingForInstaller => 'इंस्टॉलर का इंतज़ार है…';
+
+  @override
+  String get updateReadyToInstall => 'डाउनलोड हो गया, इंस्टॉल के लिए तैयार है।';
+
+  @override
+  String get updateErrorNetwork =>
+      'डाउनलोड नहीं हो सका। अपना कनेक्शन जाँचें और फिर से कोशिश करें।';
+
+  @override
+  String get updateErrorChecksum =>
+      'डाउनलोड की गई फ़ाइल खराब है। कृपया फिर से कोशिश करें।';
+
+  @override
+  String get updateErrorStorage =>
+      'अपडेट के लिए पर्याप्त खाली स्टोरेज नहीं है।';
+
+  @override
+  String get updateErrorInstall => 'अपडेट इंस्टॉल नहीं हो सका।';
+
+  @override
+  String get checkForUpdates => 'अपडेट की जाँच करें';
+
+  @override
+  String get updateUpToDate => 'आपके पास सबसे नया वर्शन है।';
+
+  @override
+  String get updateCheckFailed => 'अपडेट की जाँच नहीं हो सकी।';
 }

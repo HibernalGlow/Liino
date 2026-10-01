@@ -1,6 +1,6 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:isar_community/isar.dart';
@@ -22,9 +22,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../widgets/empty_library_view.dart';
 import '../../widgets/enrichment_indicator.dart';
+import '../../widgets/library_skeletons.dart';
 import '../../widgets/premium_loading_view.dart';
 import '../../widgets/premium_section.dart';
 import '../library/categories/library_categories_views.dart';
+
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 part 'home_sections.dart';
 
 class AndroidHomeTab extends ConsumerStatefulWidget {
@@ -190,12 +194,26 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
         break;
     }
 
-    if (!isInitialized || (isScanning && songs.isEmpty)) {
-      return const PremiumLoadingView();
+    // Reopening the app: the saved library is still loading from the
+    // database - show the layout it's about to fill.
+    if (!isInitialized) {
+      return const LoadStateSwitcher(state: 'loading', child: HomeSkeleton());
+    }
+
+    // First scan of an empty library can take minutes; keep the animated
+    // view with its rotating progress messages for that.
+    if (isScanning && songs.isEmpty) {
+      return const LoadStateSwitcher(
+        state: 'scanning',
+        child: PremiumLoadingView(),
+      );
     }
 
     if (songs.isEmpty) {
-      return SafeArea(child: EmptyLibraryView(title: l10n.noSongsFound));
+      return LoadStateSwitcher(
+        state: 'empty',
+        child: SafeArea(child: EmptyLibraryView(title: l10n.noSongsFound)),
+      );
     }
 
     // Quick Picks (most played, up to 18 for 3 pages of 6) and Recently
@@ -220,10 +238,17 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(
+                  // Square avatars sit centered in a 40dp slot as before; a
+                  // wide logo keeps the 38dp height and grows to the right
+                  // (capped so it stays clear of the centered indicator).
+                  SizedBox(
                     height: 38,
-                    width: 40,
-                    child: SelectedAvatar(),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 40),
+                      child: const Center(
+                        child: SelectedAvatar(size: 38, maxWidth: 130),
+                      ),
+                    ),
                   ),
                   Row(
                     children: [
@@ -241,7 +266,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
                         forceNoBlur: true,
                         backgroundColor: Colors.white.withValues(alpha: 0.04),
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(appNavigationProvider.notifier)
                               .setItem(NavItem.search);
@@ -267,7 +292,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
                         backgroundColor: Colors.white.withValues(alpha: 0.04),
                         forceNoBlur: true,
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(appNavigationProvider.notifier)
                               .setItem(NavItem.settings);
@@ -331,7 +356,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
                     forceNoBlur: true,
                     onTap: () {
                       if (allQuickPicks.isNotEmpty) {
-                        HapticFeedback.mediumImpact();
+                        AppHaptics.medium();
                         final shuffledPicks = List<Song>.from(allQuickPicks)
                           ..shuffle();
                         ref
@@ -443,7 +468,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
                                         );
                                   },
                                   onLongPress: () {
-                                    HapticFeedback.mediumImpact();
+                                    AppHaptics.medium();
                                     _showSongOptions(context, song);
                                   },
                                   child: ClipRRect(
@@ -520,7 +545,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
                                                 ),
                                                 child: Center(
                                                   child: Image.asset(
-                                                    'assets/android_icons/Playing.gif',
+                                                    AppAssets.playingGif,
                                                     width: 32,
                                                     height: 32,
                                                     color: Colors.white,
@@ -593,7 +618,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
                     forceNoBlur: true,
                     backgroundColor: Colors.white.withValues(alpha: 0.04),
                     onTap: () {
-                      HapticFeedback.lightImpact();
+                      AppHaptics.light();
                       ref
                           .read(appNavigationProvider.notifier)
                           .setItem(NavItem.songs);
@@ -651,7 +676,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
               title: l10n.artists,
               actionText: l10n.viewAll,
               onActionTap: () {
-                HapticFeedback.mediumImpact();
+                AppHaptics.medium();
                 ref
                     .read(appNavigationProvider.notifier)
                     .setItem(NavItem.artists);
@@ -670,7 +695,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
               title: l10n.albums,
               actionText: l10n.viewAll,
               onActionTap: () {
-                HapticFeedback.mediumImpact();
+                AppHaptics.medium();
                 ref
                     .read(appNavigationProvider.notifier)
                     .setItem(NavItem.albums);
@@ -689,7 +714,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
               title: l10n.genres,
               actionText: l10n.viewAll,
               onActionTap: () {
-                HapticFeedback.mediumImpact();
+                AppHaptics.medium();
                 ref
                     .read(appNavigationProvider.notifier)
                     .setItem(NavItem.genres);
@@ -731,7 +756,7 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
                       forceNoBlur: true,
                       backgroundColor: Colors.white.withValues(alpha: 0.04),
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(appNavigationProvider.notifier)
                             .setItem(NavItem.history);
@@ -773,16 +798,19 @@ class _AndroidHomeTabState extends ConsumerState<AndroidHomeTab> {
 
     orderedSlivers.add(const SliverToBoxAdapter(child: SizedBox(height: 200)));
 
-    return SafeArea(
-      child: AppRefreshIndicator(
-        onRefresh: () => ref
-            .read(libraryProvider.notifier)
-            .scanSavedFolders(showVisualIndicator: true),
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
+    return LoadStateSwitcher(
+      state: 'content',
+      child: SafeArea(
+        child: AppRefreshIndicator(
+          onRefresh: () => ref
+              .read(libraryProvider.notifier)
+              .scanSavedFolders(showVisualIndicator: true),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            slivers: orderedSlivers,
           ),
-          slivers: orderedSlivers,
         ),
       ),
     );

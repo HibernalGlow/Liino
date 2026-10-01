@@ -29,6 +29,9 @@ class _EditSongSheetState extends ConsumerState<EditSongSheet> {
   late final TextEditingController _genreCtrl;
   late final TextEditingController _lyricsCtrl;
 
+  /// The lyrics text the sheet opened with, to tell an edit from none.
+  late final String _shownLyrics;
+
   String? _pickedArtPath; // null = unchanged, '' = cleared, '/path' = new path
   bool _isSaving = false;
 
@@ -47,6 +50,7 @@ class _EditSongSheetState extends ConsumerState<EditSongSheet> {
     _lyricsCtrl = TextEditingController(
       text: LrcParser.stripSourceTag(widget.song.lyrics) ?? '',
     );
+    _shownLyrics = _lyricsCtrl.text;
     _pickedArtPath = null; // unchanged
   }
 
@@ -87,7 +91,11 @@ class _EditSongSheetState extends ConsumerState<EditSongSheet> {
       year: int.tryParse(_yearCtrl.text) ?? 0,
       genre: _genreCtrl.text,
       artPath: _pickedArtPath, // null = unchanged
-      lyrics: _lyricsCtrl.text,
+      // null = untouched: the saved lyrics (maybe newer and word-synced
+      // than this sheet's copy) are kept as they are.
+      lyrics: _lyricsCtrl.text.trim() == _shownLyrics.trim()
+          ? null
+          : _lyricsCtrl.text,
     );
 
     if (mounted) {

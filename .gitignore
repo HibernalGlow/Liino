@@ -72,7 +72,7 @@ test_svg.png
 # docs/ADS_ANALYTICS_SETUP.md; committed *.example templates document the
 # expected shape without real values.
 env.json
-assets/adi-registration.properties
+android/app/src/main/assets/adi-registration.properties
 
 # Code-analysis tool cache output - not part of the project source.
 graphify-out/

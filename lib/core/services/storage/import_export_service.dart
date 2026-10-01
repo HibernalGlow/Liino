@@ -12,6 +12,7 @@ import 'local_json_store.dart';
 import 'package:looper_player/features/library/presentation/providers/library/library_notifier.dart';
 import 'package:looper_player/features/playback/presentation/providers/equalizer/equalizer_notifier.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class ImportExportService {
   // Bumped from 1 -> 2 to add play stats, custom EQ presets and excluded
@@ -124,6 +125,7 @@ class ImportExportService {
         e,
         stack,
       );
+      AppHaptics.error();
       messenger.showSnackBar(
         SnackBar(
           content: Text(currentL10n().backupExportFailed),
@@ -178,6 +180,7 @@ class ImportExportService {
           .read(libraryProvider.notifier)
           .scanSavedFolders(showVisualIndicator: false);
 
+      AppHaptics.success();
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -197,6 +200,7 @@ class ImportExportService {
         e,
         stack,
       );
+      AppHaptics.error();
       messenger.showSnackBar(
         SnackBar(
           content: Text(currentL10n().backupImportFailed),

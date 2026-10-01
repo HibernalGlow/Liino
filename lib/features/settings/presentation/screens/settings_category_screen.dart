@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:looper_player/core/services/update/apk_installer.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/utils/app_links.dart';
 import 'package:looper_player/core/providers/providers.dart';
@@ -20,6 +20,8 @@ import '../widgets/tiles/audio_playback_settings_tiles.dart';
 import '../widgets/tiles/library_settings_tiles.dart';
 import '../widgets/tiles/about_settings_tiles.dart';
 import '../widgets/tiles/backup_logs_settings_tiles.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class SettingsCategoryScreen extends ConsumerWidget {
   final String categoryId;
@@ -38,108 +40,100 @@ class SettingsCategoryScreen extends ConsumerWidget {
     final useBlur = settings.enableDynamicTheming && !settings.disableBlur;
 
     List<Widget> children = [];
+    // Theme is split into titled cards; other categories use one card.
+    List<({String title, List<Widget> tiles})> sections = [];
     if (categoryId == 'theme') {
-      children = [
-        const DynamicThemingTile(),
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const SelectAvatarsTile(),
-        if (settings.enableDynamicTheming) ...[
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const DisableBlurTile(),
-        ],
-        if (!settings.enableDynamicTheming) ...[
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const DynamicAccentColorTile(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const PureBlackOledTile(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const AlwaysBlurSheetsTile(),
-          if (!settings.dynamicAccentColor) ...[
-            const Divider(height: 1, indent: 72, color: Colors.white10),
-            const AccentColorTile(),
-            const Divider(height: 1, indent: 72, color: Colors.white10),
-            const CustomAccentColorTile(),
+      final dynamicTheming = settings.enableDynamicTheming;
+      sections = [
+        (
+          title: l10n.themeGroupColors,
+          tiles: [
+            const DynamicThemingTile(),
+            if (!dynamicTheming) ...[
+              const DynamicAccentColorTile(),
+              if (!settings.dynamicAccentColor) ...[
+                const AccentColorTile(),
+                const CustomAccentColorTile(),
+              ],
+              const PureBlackOledTile(),
+            ],
           ],
-        ],
-        // if (!settings.enableDynamicTheming) ...[
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const AmbientLyricsBgTile(),
-        // ],
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const BlurredArtworkLyricsTile(),
-        if (settings.enableDynamicTheming ||
-            settings.ambientColorBackground) ...[
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const DynamicColorActiveLyricsTile(),
-        ],
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const LyricsAlignmentTile(),
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const LyricsProviderTile(),
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const FlatProgressBarTile(),
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const PlainTimestampsTile(),
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const ShowQualityBadgeTile(),
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const EnablePlayerGradientTile(),
-        if (settings.enablePlayerGradient) ...[
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const AnimatePlayerGradientTile(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const KeepBackgroundGradientTile(),
-          if (settings.keepBackgroundGradient) ...[
-            const Divider(height: 1, indent: 72, color: Colors.white10),
-            const AnimateBackgroundGradientTile(),
+        ),
+        (
+          title: l10n.themeGroupBlurBackgrounds,
+          tiles: [
+            if (dynamicTheming) const DisableBlurTile(),
+            if (!dynamicTheming) const AlwaysBlurSheetsTile(),
+            const EnablePlayerGradientTile(),
+            if (settings.enablePlayerGradient) ...[
+              const AnimatePlayerGradientTile(),
+              const KeepBackgroundGradientTile(),
+              if (settings.keepBackgroundGradient)
+                const AnimateBackgroundGradientTile(),
+            ],
           ],
-        ],
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const UseNewFontTile(),
-        if (settings.useNewFont) ...[
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const FontFamilySelectionTile(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const FontWeightSelectionTile(),
-        ],
-        const Divider(height: 1, indent: 72, color: Colors.white10),
-        const UseNewFontLyricsTile(),
-        if (settings.useNewFontLyrics) ...[
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const LyricsFontFamilySelectionTile(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const LyricsFontWeightSelectionTile(),
-        ],
-        // Darkness sliders
-        if (settings.enableDynamicTheming) ...[
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const HomeDarknessSlider(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const SongsDarknessSlider(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const LibraryDarknessSlider(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const MusicDarknessSlider(),
-          const Divider(height: 1, indent: 72, color: Colors.white10),
-          const LyricsDarknessSlider(),
-        ] else ...[
-          if (settings.keepBackgroundGradient) ...[
-            const Divider(height: 1, indent: 72, color: Colors.white10),
-            const HomeDarknessSlider(),
+        ),
+        (
+          title: l10n.themeGroupDarkness,
+          tiles: [
+            if (dynamicTheming || settings.keepBackgroundGradient)
+              const HomeDarknessSlider(),
+            if (dynamicTheming) ...[
+              const SongsDarknessSlider(),
+              const LibraryDarknessSlider(),
+            ],
+            if (dynamicTheming || settings.enablePlayerGradient)
+              const MusicDarknessSlider(),
+            if (dynamicTheming ||
+                settings.ambientColorBackground ||
+                settings.keepBackgroundGradient ||
+                settings.blurredArtworkForLyrics)
+              const LyricsDarknessSlider(),
           ],
-          if (settings.enablePlayerGradient) ...[
-            const Divider(height: 1, indent: 72, color: Colors.white10),
-            const MusicDarknessSlider(),
+        ),
+        (
+          title: l10n.nowPlaying,
+          tiles: [
+            const ProgressBarStyleTile(),
+            const ArtworkVisualizerTile(),
+            const PlainTimestampsTile(),
+            const ShowQualityBadgeTile(),
+            if (settings.showQualityBadge) const QualityBadgeStyleTile(),
+            const SegmentedUtilityButtonsTile(),
           ],
-          if (settings.ambientColorBackground ||
-              settings.keepBackgroundGradient ||
-              settings.blurredArtworkForLyrics) ...[
-            const Divider(height: 1, indent: 72, color: Colors.white10),
-            const LyricsDarknessSlider(),
+        ),
+        (
+          title: l10n.lyrics,
+          tiles: [
+            const AmbientLyricsBgTile(),
+            const BlurredArtworkLyricsTile(),
+            const DynamicColorActiveLyricsTile(),
+            // Both do nothing while the active line is plain white.
+            if (!activeLyricsIsWhite(settings)) ...[
+              const ActiveLyricsUseAccentTile(),
+              const ActiveLyricsIntensityTile(),
+            ],
+            const LyricsAlignmentTile(),
+            const LyricsProviderTile(),
           ],
-        ],
-        //const PerformanceOptimizerTile(),
-      ];
+        ),
+        (
+          title: l10n.themeGroupFonts,
+          tiles: [
+            const UseNewFontTile(),
+            if (settings.useNewFont) ...[
+              const FontFamilySelectionTile(),
+              const FontWeightSelectionTile(),
+            ],
+            const UseNewFontLyricsTile(),
+            if (settings.useNewFontLyrics) ...[
+              const LyricsFontFamilySelectionTile(),
+              const LyricsFontWeightSelectionTile(),
+            ],
+          ],
+        ),
+        (title: l10n.themeGroupProfile, tiles: const [SelectAvatarsTile()]),
+      ].where((section) => section.tiles.isNotEmpty).toList();
     } else if (categoryId == 'dashboard') {
       children = [
         const ShowArtistsRowTile(),
@@ -160,6 +154,8 @@ class SettingsCategoryScreen extends ConsumerWidget {
           const FluidPlayerTile(),
         ],
         if (Platform.isAndroid) ...[
+          const Divider(height: 1, indent: 72, color: Colors.white10),
+          const HapticFeedbackTile(),
           const Divider(height: 1, indent: 72, color: Colors.white10),
           const StopServiceTile(),
         ],
@@ -209,6 +205,8 @@ class SettingsCategoryScreen extends ConsumerWidget {
         const Divider(height: 1, indent: 72, color: Colors.white10),
         const SyncLyricsOfflineTile(),
         const Divider(height: 1, indent: 72, color: Colors.white10),
+        const ClearLyricsCacheTile(),
+        const Divider(height: 1, indent: 72, color: Colors.white10),
         const IncludeSystemAndMessagingAudioTile(),
         const Divider(height: 1, indent: 72, color: Colors.white10),
         const ExcludedFoldersTile(),
@@ -235,7 +233,7 @@ class SettingsCategoryScreen extends ConsumerWidget {
           //3
           name: 'Nilesh Suthar',
           role: l10n.creatorAndMaintainer,
-          avatar: 'assets/about/maintainer_avatar.png',
+          avatar: AppAssets.maintainerAvatar,
           github: AppLinks.nileshGithub,
           telegram: AppLinks.nileshTelegram,
         ),
@@ -244,7 +242,7 @@ class SettingsCategoryScreen extends ConsumerWidget {
           //5
           name: 'Krn.',
           role: l10n.designerAndMaintainer,
-          avatar: 'assets/about/designer_avatar.png',
+          avatar: AppAssets.designerAvatar,
           github: AppLinks.karanGithub,
           telegram: AppLinks.karanTelegram,
         ),
@@ -253,13 +251,13 @@ class SettingsCategoryScreen extends ConsumerWidget {
           //7
           name: 'Madan Suthar',
           role: 'Free Rider',
-          avatar: 'assets/about/free_rider_avatar.png',
+          avatar: AppAssets.freeRiderAvatar,
           github: AppLinks.madanGithub,
           telegram: AppLinks.madanTelegram,
         ),
         const Divider(height: 1, indent: 72, color: Colors.white10), //8
         Padding(
-          //11
+          //9
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,6 +298,8 @@ class SettingsCategoryScreen extends ConsumerWidget {
             ],
           ),
         ),
+        const Divider(height: 1, indent: 72, color: Colors.white10), //10
+        LyricsCreditsSection(accentColor: Color(settings.accentColor)), //11
       ];
     }
 
@@ -328,7 +328,7 @@ class SettingsCategoryScreen extends ConsumerWidget {
                     forceNoBlur: true,
                     useExpanded: false,
                     onTap: () {
-                      HapticFeedback.lightImpact();
+                      AppHaptics.light();
                       // Go through appNavigationProvider (not a raw Navigator
                       // pop) so its logical history stays in sync with the
                       // physical route stack -- see showSettingsCategory's
@@ -381,7 +381,7 @@ class SettingsCategoryScreen extends ConsumerWidget {
                           child: Row(
                             children: [
                               SvgPicture.asset(
-                                'assets/main_logo_transparent.svg',
+                                AppAssets.logo,
                                 height: 36,
                                 fit: BoxFit.contain,
                               ),
@@ -416,7 +416,7 @@ class SettingsCategoryScreen extends ConsumerWidget {
                               const SizedBox(width: 8),
                               GestureDetector(
                                 onTap: () async {
-                                  HapticFeedback.lightImpact();
+                                  AppHaptics.light();
                                   final Uri uri = Uri.parse(
                                     AppLinks.githubRepo,
                                   );
@@ -432,7 +432,7 @@ class SettingsCategoryScreen extends ConsumerWidget {
                                   height: 32,
                                   child: Center(
                                     child: SvgPicture.asset(
-                                      'assets/about/github_icon.svg',
+                                      AppAssets.github,
                                       width: 32,
                                       height: 32,
                                     ),
@@ -445,6 +445,7 @@ class SettingsCategoryScreen extends ConsumerWidget {
                         const SizedBox(height: 12),
                         // Give Star on Github Card
                         const GitHubStarTile(),
+                        if (ApkInstaller.supported) const CheckForUpdatesTile(),
 
                         const SizedBox(height: 32),
                         // Maintainers Header
@@ -495,23 +496,40 @@ class SettingsCategoryScreen extends ConsumerWidget {
                             horizontal: 20,
                             vertical: 20,
                           ),
-                          child: children.last,
+                          child: Column(
+                            children: children.sublist(8, 11), //.sublist(5, 10)
+                          ),
                         ),
                         const SizedBox(height: 120),
                         const OpenSourceLicensesTile(),
                       ]
-                    : [
-                        PremiumSection(
-                          useBlur: useBlur,
-                          forceNoBlur: true,
-                          borderRadius: BorderRadius.circular(24),
-                          useExpanded: false,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: children,
+                    : sections.isNotEmpty
+                    ? [
+                        for (final section in sections) ...[
+                          _SectionHeader(
+                            title: section.title,
+                            color: Color(settings.accentColor),
                           ),
-                        ),
+                          _SettingsCard(
+                            useBlur: useBlur,
+                            children: [
+                              for (final (i, tile)
+                                  in section.tiles.indexed) ...[
+                                if (i > 0)
+                                  const Divider(
+                                    height: 1,
+                                    indent: 72,
+                                    color: Colors.white10,
+                                  ),
+                                tile,
+                              ],
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 120),
+                      ]
+                    : [
+                        _SettingsCard(useBlur: useBlur, children: children),
                         const SizedBox(height: 120),
                       ],
               ),
@@ -519,6 +537,50 @@ class SettingsCategoryScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Small accent-colored label above a group of settings.
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final Color color;
+
+  const _SectionHeader({required this.title, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+      child: Text(
+        title.toUpperCase(),
+        style: AppFonts.jostStyle(
+          color: color.withValues(alpha: 0.8),
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.0,
+        ),
+      ),
+    );
+  }
+}
+
+/// Rounded card holding a list of settings tiles.
+class _SettingsCard extends StatelessWidget {
+  final bool useBlur;
+  final List<Widget> children;
+
+  const _SettingsCard({required this.useBlur, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumSection(
+      useBlur: useBlur,
+      forceNoBlur: true,
+      borderRadius: BorderRadius.circular(24),
+      useExpanded: false,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }

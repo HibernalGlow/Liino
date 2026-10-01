@@ -101,6 +101,53 @@ Color readableOnDark(Color color, {double minTone = 58}) {
   return Color(Hct.from(hct.hue, hct.chroma, minTone).toInt());
 }
 
+/// The active lyric line's color: [readableOnDark], but guaranteed to stand
+/// out from the inactive lines (white at ~35% alpha over a dark background).
+///
+/// [intensity] (0..1, the user's slider) makes the color more vibrant: it
+/// pushes chroma towards the most saturated version of the same hue at the
+/// same tone, so the color keeps its look instead of washing out to white.
+/// Colors with no real hue (chroma under 4) have nothing to saturate.
+///
+/// A (still) near-grey color only lifted to tone 58 ends up as bright as the
+/// inactive lines, so it's pushed towards a tinted white instead; the fade
+/// between chroma 4 and 10 avoids a visible jump between songs. Everything
+/// more colorful than that keeps its tone.
+Color lyricsActiveColor(Color color, {double intensity = 0}) {
+  final double t = intensity.isNaN ? 0 : intensity.clamp(0.0, 1.0);
+  Hct hct = Hct.fromInt(readableOnDark(color).toARGB32());
+  if (t > 0 && hct.chroma >= 4) {
+    // Hct.from clamps to the most chroma this hue/tone can show on screen;
+    // scale towards that so the whole slider range does something.
+    final double maxChroma = Hct.from(hct.hue, 200, hct.tone).chroma;
+    if (maxChroma > hct.chroma) {
+      hct = Hct.from(
+        hct.hue,
+        hct.chroma + (maxChroma - hct.chroma) * t,
+        hct.tone,
+      );
+    }
+  }
+  final double greyness = ((10 - hct.chroma) / 6).clamp(0.0, 1.0);
+  final double minTone = 58 + (88 - 58) * greyness;
+  if (hct.tone < minTone) {
+    hct = Hct.from(hct.hue, hct.chroma, minTone);
+  }
+  return Color(hct.toInt());
+}
+
+/// The softer active lyric line color: [color] blended towards white by
+/// lifting its tone (hue kept), for when the pure accent isn't wanted.
+/// [intensity] (0..1, the user's slider) brings back more of the color:
+/// 0 is a light tint (tone 90), 1 stops at tone 70.
+Color lyricsSoftActiveColor(Color color, {double intensity = 0}) {
+  final double t = intensity.isNaN ? 0 : intensity.clamp(0.0, 1.0);
+  final Hct hct = Hct.fromInt(readableOnDark(color).toARGB32());
+  final double tone = 90 - 20 * t;
+  if (hct.tone >= tone) return color;
+  return Color(Hct.from(hct.hue, hct.chroma, tone).toInt());
+}
+
 /// Returns `[primary, secondary, dominant, ...accents]` as ARGB ints, or null
 /// for an empty image. Runs on a background isolate.
 Future<List<int>?> _extract(Uint8List rgba) async {

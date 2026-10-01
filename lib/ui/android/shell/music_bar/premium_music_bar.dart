@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
@@ -24,6 +23,8 @@ import 'fluid_player_motion.dart';
 import '../../widgets/premium_section.dart';
 
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 part 'mini_player_content.dart';
 
 class PremiumMusicBar extends ConsumerStatefulWidget {
@@ -117,7 +118,7 @@ class _PremiumMusicBarState extends ConsumerState<PremiumMusicBar>
   }
 
   void _triggerHaptic() {
-    HapticFeedback.lightImpact();
+    AppHaptics.light();
   }
 
   void _pushExpandedPlayer(BuildContext context, dynamic settings) async {
@@ -184,7 +185,7 @@ class _PremiumMusicBarState extends ConsumerState<PremiumMusicBar>
             final dy = _dragOffset.dy;
 
             if (dy > 70 && dy.abs() > dx.abs()) {
-              HapticFeedback.heavyImpact();
+              AppHaptics.heavy();
               ref.read(playbackProvider.notifier).clearQueue();
             } else if (dy < -70 && dy.abs() > dx.abs()) {
               _pushExpandedPlayer(context, settings);
@@ -210,7 +211,7 @@ class _PremiumMusicBarState extends ConsumerState<PremiumMusicBar>
             final width = box.size.width;
 
             if (localX > width * 0.75) {
-              HapticFeedback.lightImpact();
+              AppHaptics.light();
               ref.read(playbackProvider.notifier).togglePlay();
             } else {
               _pushExpandedPlayer(context, settings);
@@ -323,7 +324,7 @@ class _PremiumMusicBarState extends ConsumerState<PremiumMusicBar>
       onTapUp: (details) {
         if (_isDragging) return;
         if (details.localPosition.dx > _geometry(windowSize).miniWidth * 0.75) {
-          HapticFeedback.lightImpact();
+          AppHaptics.light();
           ref.read(playbackProvider.notifier).togglePlay();
         } else {
           _pushExpandedPlayer(context, settings);
@@ -403,7 +404,7 @@ class _PremiumMusicBarState extends ConsumerState<PremiumMusicBar>
       // ticking is paused (e.g. mid route transition).
       morphPlayingIcon = TickerMode.of(context)
           ? Image.asset(
-              'assets/android_icons/Playing.gif',
+              AppAssets.playingGif,
               width: 24,
               height: 24,
               color: Colors.white,

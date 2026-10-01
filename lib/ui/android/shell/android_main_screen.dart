@@ -573,6 +573,12 @@ class _AndroidMainScreenState extends ConsumerState<AndroidMainScreen>
                   return PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
                         _buildTabStack(),
+                    // The tab stack gets the same covered/uncovered parallax
+                    // as pushed pages, so popping back to it eases it in
+                    // instead of snapping it on in the last frame.
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) =>
+                            _coveredTransition(secondaryAnimation, child),
                   );
                 },
               ),
@@ -814,6 +820,31 @@ class _AndroidMainScreenState extends ConsumerState<AndroidMainScreen>
     );
   }
 
+  /// How a page moves while another page covers it (push) or uncovers it
+  /// (pop). The push keeps its original curve. On pop the page waits out
+  /// the first 40% - while the leaving page and its backdrop clear - then
+  /// decelerates back into place.
+  static Widget _coveredTransition(
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final covered = CurvedAnimation(
+      parent: secondaryAnimation,
+      curve: Curves.easeInCubic,
+      reverseCurve: const Interval(0.0, 0.6, curve: Curves.easeInCubic),
+    );
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset.zero,
+        end: const Offset(-0.06, 0),
+      ).animate(covered),
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 1, end: 0).animate(covered),
+        child: child,
+      ),
+    );
+  }
+
   Route _createPremiumRoute(Widget page) {
     return PageRouteBuilder(
       opaque: true,
@@ -825,14 +856,29 @@ class _AndroidMainScreenState extends ConsumerState<AndroidMainScreen>
           parent: animation,
           curve: Curves.easeOutCubic,
         );
-        final exit = CurvedAnimation(
-          parent: secondaryAnimation,
-          curve: Curves.easeInCubic,
+        // Forward curves are unchanged. Reverse used to keep the solid
+        // backdrop until the route was removed: the page faded out onto
+        // near-black and the screen below snapped in on the last frame (the
+        // "black flash"). Now on pop the backdrop clears in the first half,
+        // the content fades out a little behind it, and the page below
+        // eases in (see _coveredTransition).
+        final backdrop = CurvedAnimation(
+          parent: animation,
+          curve: const Threshold(0.0),
+          reverseCurve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+        );
+        final content = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: const Interval(0.4, 1.0, curve: Curves.easeOut),
         );
         return Stack(
           children: [
             Positioned.fill(
-              child: ColoredBox(color: Theme.of(context).colorScheme.surface),
+              child: FadeTransition(
+                opacity: backdrop,
+                child: ColoredBox(color: Theme.of(context).colorScheme.surface),
+              ),
             ),
             SlideTransition(
               position: Tween<Offset>(
@@ -840,17 +886,8 @@ class _AndroidMainScreenState extends ConsumerState<AndroidMainScreen>
                 end: Offset.zero,
               ).animate(enter),
               child: FadeTransition(
-                opacity: enter,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: Offset.zero,
-                    end: const Offset(-0.06, 0),
-                  ).animate(exit),
-                  child: FadeTransition(
-                    opacity: Tween<double>(begin: 1, end: 0).animate(exit),
-                    child: child,
-                  ),
-                ),
+                opacity: content,
+                child: _coveredTransition(secondaryAnimation, child),
               ),
             ),
           ],

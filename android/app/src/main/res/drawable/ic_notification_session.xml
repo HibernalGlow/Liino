@@ -3,7 +3,7 @@
     android:height="24dp"
     android:viewportWidth="256"
     android:viewportHeight="256">
-    <!-- Traced from AppIcons.musicIconSession (assets/android_icons/music_icon_session.png)
+    <!-- Traced from (AppAssets.sessionIcon, assets/images/session_icon.png)
          so the media notification's status-bar icon matches the in-app session glyph,
          instead of being re-derived from the launcher icon. -->
     <path

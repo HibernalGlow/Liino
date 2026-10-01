@@ -33,12 +33,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import '../widgets/common/global_search_bar.dart';
 import 'package:looper_player/features/playback/presentation/widgets/lyrics/overlay_lyrics_widget.dart';
-import 'package:looper_player/core/services/update_service.dart';
+import 'package:looper_player/core/services/update/update_service.dart';
+import 'package:looper_player/core/services/update/apk_installer.dart';
+import 'package:looper_player/core/services/update/apk_update_notifier.dart';
+import 'package:looper_player/ui/widgets/sheets/apk_update_sheet.dart';
 
 import '../android/shell/android_main_screen.dart';
 import '../android/widgets/empty_library_view.dart';
 import 'custom_title_bar.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
 part 'sidebar.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -59,7 +63,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final settings = ref.read(settingsProvider);
 
       // Check for application updates on GitHub
-      UpdateService.checkForUpdates();
+      _checkForUpdates();
 
       // Handle file passed via CLI arguments
       final initialFile = ref.read(startupFileProvider);
@@ -68,6 +72,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return;
       }
     });
+  }
+
+  /// The github APK downloads and installs the release itself, so it gets
+  /// the update sheet; every other build is pointed at its store or the
+  /// release page.
+  Future<void> _checkForUpdates() async {
+    if (!ApkInstaller.supported) return UpdateService.checkForUpdates();
+    final prompt = await ref.read(apkUpdateProvider.notifier).checkOnLaunch();
+    if (prompt && mounted) showApkUpdateSheet(context);
   }
 
   @override

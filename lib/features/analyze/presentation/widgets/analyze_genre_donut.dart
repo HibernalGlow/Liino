@@ -1,8 +1,9 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/analyze/domain/analyze_models.dart';
-import 'package:looper_player/ui/android/widgets/premium_section.dart';
+import 'package:looper_player/features/analyze/presentation/widgets/analyze_common.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 
 /// Genre breakdown: an animated donut ring (hand-painted, no chart
@@ -17,20 +18,9 @@ class AnalyzeGenreDonut extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.genreBreakdown,
-          style: AppFonts.jostStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        PremiumSection(
-          borderRadius: BorderRadius.circular(20),
-          useExpanded: false,
+        AnalyzeSectionHeader(title: context.l10n.genreBreakdown),
+        AnalyzeCard(
           padding: const EdgeInsets.all(18),
-          useCenter: false,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -39,8 +29,8 @@ class AnalyzeGenreDonut extends StatelessWidget {
                 duration: const Duration(milliseconds: 900),
                 curve: Curves.easeOutCubic,
                 builder: (context, progress, _) => SizedBox(
-                  width: 108,
-                  height: 108,
+                  width: 116,
+                  height: 116,
                   child: CustomPaint(
                     painter: _DonutPainter(genres: genres, progress: progress),
                     child: Center(
@@ -59,7 +49,7 @@ class AnalyzeGenreDonut extends StatelessWidget {
                           ),
                           if (genres.isNotEmpty)
                             Text(
-                              _genreLabel(context, genres.first.name),
+                              genreLabel(context, genres.first.name),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppFonts.jostStyle(
@@ -96,34 +86,48 @@ class _LegendRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 9,
-            height: 9,
-            decoration: BoxDecoration(
-              color: genre.color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _genreLabel(context, genre.name),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppFonts.jostStyle(
-                color: Colors.white.withValues(alpha: 0.85),
-                fontSize: 12.5,
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: genre.color,
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  genreLabel(context, genre.name),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppFonts.jostStyle(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 12.5,
+                  ),
+                ),
+              ),
+              Text(
+                '${(genre.fraction * 100).round()}%',
+                style: AppFonts.jostStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-          Text(
-            '${(genre.fraction * 100).round()}%',
-            style: AppFonts.jostStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: genre.fraction.clamp(0.02, 1.0),
+              minHeight: 2.5,
+              backgroundColor: Colors.white.withValues(alpha: 0.06),
+              valueColor: AlwaysStoppedAnimation(genre.color),
             ),
           ),
         ],
@@ -172,8 +176,3 @@ class _DonutPainter extends CustomPainter {
   bool shouldRepaint(covariant _DonutPainter oldDelegate) =>
       oldDelegate.progress != progress || oldDelegate.genres != genres;
 }
-
-/// The analyzer groups small genres under the English sentinel 'Other';
-/// show it in the app's language.
-String _genreLabel(BuildContext context, String name) =>
-    name == 'Other' ? context.l10n.otherGenre : name;

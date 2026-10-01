@@ -1,6 +1,6 @@
+import 'package:looper_player/features/playback/data/lyrics_fetcher.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/utils/ui_utils.dart';
@@ -10,6 +10,7 @@ import 'package:looper_player/core/services/storage/db_service.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 part 'timestamp_editing.dart';
 part 'lrc_export.dart';
 part 'editor_views.dart';
@@ -185,7 +186,7 @@ class _LyricsEditorBottomSheetState
   }
 
   void _togglePlayPause() {
-    HapticFeedback.lightImpact();
+    AppHaptics.light();
     ref.read(playbackProvider.notifier).togglePlay();
   }
 
@@ -216,20 +217,24 @@ class _LyricsEditorBottomSheetState
       return;
     }
 
-    final lrcContent = _buildLrcContent(normalizedLines);
+    // Tagged as the user's own lyrics, so no rescan, upgrade or cache
+    // clear replaces them; the lyrics being replaced (word timing included)
+    // are first kept under their provider, where the lyrics menu finds them.
+    final plainLrc = _buildLrcContent(normalizedLines);
+    final lrcContent = LyricsFetcher.userLyrics(plainLrc);
+    await LyricsFetcher.backUpBeforeEdit(widget.song);
 
     setState(() {
       _isSaving = true;
     });
 
     try {
-      await DbService.isar.writeTxn(() async {
-        final dbSong = await DbService.isar.songs.get(widget.song.id);
-        if (dbSong != null) {
-          dbSong.lyrics = lrcContent;
-          await DbService.isar.songs.put(dbSong);
-        }
-      });
+      await LyricsFetcher.store(
+        widget.song,
+        (widget.song.artist ?? 'Unknown Artist').trim(),
+        widget.song.title.trim(),
+        lrcContent,
+      );
 
       ref
           .read(playbackProvider.notifier)
@@ -241,7 +246,7 @@ class _LyricsEditorBottomSheetState
         try {
           final file = File(sidecarPath);
           await file.parent.create(recursive: true);
-          await file.writeAsString(lrcContent);
+          await file.writeAsString(plainLrc);
           savedSidecar = true;
         } catch (e) {
           debugPrint('Could not write sidecar file: $e');

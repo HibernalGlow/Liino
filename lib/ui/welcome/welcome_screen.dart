@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:looper_player/core/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -16,6 +15,8 @@ import '../../features/settings/presentation/providers/settings_notifier.dart';
 import '../../features/playback/presentation/providers/playback/playback_notifier.dart';
 import '../widgets/common/folder_picker_helper.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 part 'welcome_screen.g.dart';
 part 'glow_orb.dart';
@@ -111,7 +112,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
   }
 
   Future<void> _requestNotificationPermission() async {
-    HapticFeedback.lightImpact();
+    AppHaptics.light();
     if (!Platform.isAndroid) return;
     try {
       await Permission.notification.request();
@@ -121,7 +122,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
   }
 
   Future<void> _requestAudioPermission() async {
-    HapticFeedback.lightImpact();
+    AppHaptics.light();
     if (!Platform.isAndroid) return;
     try {
       await Permission.audio.request();
@@ -131,7 +132,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
   }
 
   Future<void> _requestAllFilesPermission() async {
-    HapticFeedback.lightImpact();
+    AppHaptics.light();
     await StorageAccess.requestAllFilesAccess();
     await _checkPermissionStatus();
   }

@@ -21,7 +21,7 @@ extension _SettingsCategoryGroup on _SettingsViewState {
           padding: EdgeInsets.zero,
           child: InkWell(
             onTap: () {
-              HapticFeedback.lightImpact();
+              AppHaptics.light();
               if (id == 'support_us') {
                 _showSupportUsDialog(context, colorScheme, useBlur);
                 return;

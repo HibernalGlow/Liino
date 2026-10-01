@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/providers/navigation_provider.dart';
 import 'package:looper_player/features/library/presentation/providers/library/library_notifier.dart';
@@ -11,6 +10,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/library/domain/models/models.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class AndroidLibraryTab extends ConsumerWidget {
   const AndroidLibraryTab({super.key});
@@ -41,7 +41,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                   useBlur: true,
                   backgroundColor: Colors.white.withValues(alpha: 0.04),
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     ref
                         .read(appNavigationProvider.notifier)
                         .setItem(NavItem.search);
@@ -74,7 +74,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                   useExpanded: false,
                   useBlur: true,
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     ref
                         .read(appNavigationProvider.notifier)
                         .setItem(NavItem.settings);
@@ -192,7 +192,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.star,
                               title: 'Favorites',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.favorites);
@@ -205,7 +205,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.disc,
                               title: 'Albums',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.albums);
@@ -218,7 +218,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.users,
                               title: 'Artists',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.artists);
@@ -231,7 +231,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.listMusic,
                               title: 'Playlists',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.playlists);
@@ -262,7 +262,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.folder,
                               title: 'Folders',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.folders);
@@ -275,7 +275,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.music,
                               title: 'Genres',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.genres);
@@ -288,7 +288,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.list,
                               title: 'Queue',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.queue);
@@ -301,7 +301,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.history,
                               title: 'History',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.history);
@@ -314,7 +314,7 @@ class AndroidLibraryTab extends ConsumerWidget {
                               icon: LucideIcons.barChart3,
                               title: 'Looper Analyze',
                               onTap: () {
-                                HapticFeedback.lightImpact();
+                                AppHaptics.light();
                                 ref
                                     .read(appNavigationProvider.notifier)
                                     .setItem(NavItem.analyze);
@@ -426,7 +426,7 @@ class AndroidLibraryTab extends ConsumerWidget {
         borderRadius: BorderRadius.circular(36),
         useExpanded: false,
         onTap: () {
-          HapticFeedback.lightImpact();
+          AppHaptics.light();
           ref
               .read(playbackProvider.notifier)
               .setPlaylist(recentSongs, initialIndex: index);

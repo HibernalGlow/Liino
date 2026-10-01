@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
 
 class AppLoadingIndicator extends StatelessWidget {
   final double size;
@@ -11,7 +12,7 @@ class AppLoadingIndicator extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: Lottie.asset('assets/loading.json', fit: BoxFit.contain),
+        child: Lottie.asset(AppAssets.loadingAnimation, fit: BoxFit.contain),
       ),
     );
   }

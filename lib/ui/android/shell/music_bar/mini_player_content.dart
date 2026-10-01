@@ -88,7 +88,7 @@ extension _MiniPlayerContent on _PremiumMusicBarState {
                                           // transition).
                                           child: TickerMode.of(context)
                                               ? Image.asset(
-                                                  'assets/android_icons/Playing.gif',
+                                                  AppAssets.playingGif,
                                                   width: 24,
                                                   height: 24,
                                                   color: Colors.white,

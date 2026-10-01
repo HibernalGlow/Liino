@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/ui/widgets/sheets/app_bottom_sheet.dart';
 import 'package:looper_player/ui/widgets/common/selected_avatar.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 void showAvatarPickerSheet(BuildContext context) {
   showModalBottomSheet(
@@ -63,7 +63,7 @@ class _AvatarPickerSheetContent extends ConsumerWidget {
                           ? Theme.of(context).colorScheme.primary
                           : null,
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         ref
                             .read(settingsProvider.notifier)
                             .updateSelectedAvatar(asset);
@@ -137,7 +137,16 @@ class _AvatarOption extends StatelessWidget {
           ),
         ),
         padding: const EdgeInsets.all(16),
-        child: AvatarIcon(assetFileName: asset, accent: accent),
+        // A wide (logo-style) avatar uses the tile's whole width.
+        child: LayoutBuilder(
+          builder: (context, constraints) => Center(
+            child: AvatarIcon(
+              assetFileName: asset,
+              accent: accent,
+              maxWidth: constraints.maxWidth,
+            ),
+          ),
+        ),
       ),
     );
   }

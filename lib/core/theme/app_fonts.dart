@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../utils/ui_utils.dart';
 
 class AppFonts {
-  static String activeFontFamily = 'DM Sans';
+  static String activeFontFamily = 'Stack Sans Text';
+  static const String stackSansText = 'Stack Sans Text';
 
   static const String jost = 'Jost';
   static const String dmSans = 'DMSans';
@@ -12,6 +13,37 @@ class AppFonts {
   static const String sora = 'Sora';
   static const String googleSans = 'Google Sans';
   static const String plusJakartaSans = 'Plus Jakarta Sans';
+
+  static const String poppins = 'Poppins';
+  static const String notoSansDevanagari = 'Noto Sans Devanagari';
+
+  /// Fonts used per glyph when [family] lacks one, so mixed Hindi/English
+  /// text keeps [family] for Latin. Stack Sans and most pickable families
+  /// are Latin-only, so Hindi goes to a bundled Devanagari font closest in
+  /// shape: Noto Sans Devanagari for Stack Sans (the user's chosen Hindi
+  /// lyrics look), Poppins for the round geometric families, Google Sans
+  /// for the grotesques. Google Sans always comes last because it also
+  /// covers Bengali, Gurmukhi, Tamil and other Indic scripts.
+  static List<String> scriptFallbackFor(String? family) => switch (family) {
+    googleSans => const [],
+    poppins => const [googleSans],
+    stackSansText => const [notoSansDevanagari, googleSans],
+    jost || 'DM Sans' || sora || plusJakartaSans => const [poppins, googleSans],
+    _ => const [googleSans],
+  };
+
+  /// Families offered by both the app and lyrics font pickers. Each must
+  /// be declared under `fonts:` in pubspec.yaml.
+  static const List<String> selectableFamilies = [
+    'Jost',
+    'Stack Sans Text',
+    'DM Sans',
+    'Poppins',
+    'Space Grotesk',
+    'Plus Jakarta Sans',
+    'Sora',
+    'Google Sans',
+  ];
 
   // Centrally managed Font Weights (updated dynamically based on delta)
   static int appFontWeightDelta = 0;
@@ -161,6 +193,7 @@ class AppFonts {
 
     TextStyle baseStyle = TextStyle(
       fontFamily: activeFontFamily,
+      fontFamilyFallback: scriptFallbackFor(activeFontFamily),
       color: color,
       backgroundColor: backgroundColor,
       fontSize: fontSize,
@@ -228,6 +261,7 @@ class AppFonts {
 
     TextStyle style = TextStyle(
       fontFamily: fontFamily,
+      fontFamilyFallback: scriptFallbackFor(fontFamily),
       color: color,
       backgroundColor: backgroundColor,
       fontSize: fontSize,
@@ -448,26 +482,8 @@ class AppFonts {
     double? height,
     List<Shadow>? shadows,
   }) {
-    TextStyle style;
-    final activeFamily = useNewFontLyrics ? family : 'Sora';
-    switch (activeFamily) {
-      case 'Space Grotesk':
-        style = spaceGroteskStyle();
-        break;
-      case 'Google Sans':
-        style = googleSansStyle();
-        break;
-      case 'Plus Jakarta Sans':
-        style = plusJakartaSansStyle();
-        break;
-      case 'Jost':
-        style = jostStyle();
-        break;
-      case 'Sora':
-      default:
-        style = soraStyle();
-        break;
-    }
+    final activeFamily = useNewFontLyrics ? family : stackSansText;
+    final style = _customTextStyle(fontFamily: activeFamily);
 
     FontWeight weight;
     // Use a uniform weight (w600/SemiBold) to completely eliminate text wrapping jumps and layout transition glitches

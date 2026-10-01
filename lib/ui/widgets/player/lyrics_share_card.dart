@@ -4,6 +4,7 @@ import 'package:looper_player/features/library/domain/models/models.dart';
 import 'package:looper_player/features/playback/domain/lyric_models.dart';
 import 'package:looper_player/ui/widgets/common/optimized_image.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
 
 /// A shareable "lyrics card" image — album art + title/artist header
 /// followed by the selected lyric lines in the song's accent color, in the
@@ -92,7 +93,7 @@ class LyricsShareCard extends StatelessWidget {
               // of the header, same spot as the "now playing" glyph on the
               // reference card this design is matched against.
               Image.asset(
-                'assets/android_icons/music_icon_session.png',
+                AppAssets.sessionIcon,
                 width: 18,
                 height: 18,
                 fit: BoxFit.contain,

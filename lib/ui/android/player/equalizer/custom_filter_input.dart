@@ -59,7 +59,7 @@ class _CustomFilterInputState extends State<_CustomFilterInput> {
         const SizedBox(width: 8),
         IconButton(
           onPressed: () {
-            HapticFeedback.mediumImpact();
+            AppHaptics.medium();
             widget.onSubmitted(_controller.text);
           },
           icon: Icon(LucideIcons.check, color: widget.accentColor),

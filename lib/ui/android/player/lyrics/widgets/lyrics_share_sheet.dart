@@ -16,6 +16,7 @@ import 'package:looper_player/features/playback/presentation/widgets/lyrics/adva
 import 'package:looper_player/ui/widgets/sheets/app_bottom_sheet.dart';
 import 'package:looper_player/ui/widgets/player/lyrics_share_card.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 /// Opens the "Share Lyrics" preview sheet for [lines] of [song]. Pre-caches
 /// the album art first so the card's first paint (the one that gets
@@ -165,7 +166,7 @@ class _LyricsShareSheetContentState
   Future<void> _onShare() async {
     if (_isSharing) return;
     setState(() => _isSharing = true);
-    HapticFeedback.mediumImpact();
+    AppHaptics.medium();
     try {
       final bytes = await _captureCard();
       if (bytes == null) {
@@ -199,7 +200,7 @@ class _LyricsShareSheetContentState
   Future<void> _onSaveToGallery() async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
-    HapticFeedback.mediumImpact();
+    AppHaptics.medium();
     try {
       final bytes = await _captureCard();
       if (bytes == null) {
@@ -220,12 +221,14 @@ class _LyricsShareSheetContentState
         name: 'lyrics_${safeTitle}_${DateTime.now().millisecondsSinceEpoch}',
       );
       if (mounted) {
+        AppHaptics.success();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(context.l10n.savedToGallery)));
       }
     } on GalException catch (e) {
       if (mounted) {
+        AppHaptics.error();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -238,6 +241,7 @@ class _LyricsShareSheetContentState
       }
     } catch (_) {
       if (mounted) {
+        AppHaptics.error();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.couldNotSaveToGallery)),
         );
@@ -249,9 +253,9 @@ class _LyricsShareSheetContentState
 
   @override
   Widget build(BuildContext context) {
-    final artworkColorAsync = ref.watch(artworkColorProvider);
     final accentColor =
-        artworkColorAsync.value ?? Theme.of(context).colorScheme.primary;
+        ref.watch(artworkColorProvider) ??
+        Theme.of(context).colorScheme.primary;
     final effectiveTextColor = _textColor ?? accentColor;
     final colorSwatches = [
       ..._dynamicColors(context, accentColor.withValues(alpha: 0.5)),
@@ -328,7 +332,7 @@ class _LyricsShareSheetContentState
                   color: color,
                   selected: color == _backgroundColor,
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selection();
                     setState(() => _backgroundColor = color);
                   },
                 );
@@ -360,7 +364,7 @@ class _LyricsShareSheetContentState
                   color: color,
                   selected: color == effectiveTextColor,
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selection();
                     setState(() => _textColor = color);
                   },
                 );

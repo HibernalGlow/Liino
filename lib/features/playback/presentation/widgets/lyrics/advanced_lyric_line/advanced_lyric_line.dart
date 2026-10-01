@@ -3,14 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/utils/artwork_colors.dart';
+import 'package:looper_player/features/library/domain/models/models.dart'
+    show AppSettings;
 import '../../../providers/playback/playback_notifier.dart';
 import '../../../providers/lyrics/lyrics_search_provider.dart';
 import '../../../../domain/lyric_models.dart';
 import '../../../screens/lyrics_view.dart';
 import '../../../../../settings/presentation/providers/settings_notifier.dart';
+import 'word_synced_lyric_text.dart';
 part 'pulsing_instrumental_icon.dart';
 
-final artworkColorProvider = FutureProvider<Color?>((ref) async {
+/// The current artwork's raw primary color, extracted once per song.
+final artworkRawColorProvider = FutureProvider<Color?>((ref) async {
   final currentSong = ref.watch(playbackProvider.select((s) => s.currentSong));
   final artPath = currentSong?.artPath;
   if (artPath == null) return null;
@@ -20,10 +24,38 @@ final artworkColorProvider = FutureProvider<Color?>((ref) async {
 
   try {
     final colors = await ArtworkColors.fromProvider(FileImage(file));
-    if (colors != null) return readableOnDark(colors.primary);
+    if (colors != null) return colors.primary;
   } catch (e) {}
   return null;
 });
+
+/// The artwork color, lifted to read on a dark background (lyrics share
+/// card). Separate from [artworkRawColorProvider] so it's extracted once.
+final artworkColorProvider = Provider<Color?>((ref) {
+  final raw = ref.watch(artworkRawColorProvider).value;
+  return raw == null ? null : readableOnDark(raw);
+});
+
+/// Whether the active lyric line is plain white ("Dynamic Color Active
+/// Line" off). The accent toggle and intensity slider do nothing then.
+bool activeLyricsIsWhite(AppSettings settings) =>
+    !settings.dynamicColorActiveLyrics;
+
+/// The active lyric line's color, from the app [accent] (theme primary,
+/// which already follows the artwork with dynamic theming):
+/// - "Accent Color Active Line" on: the accent itself, made more saturated
+///   by the intensity slider ([lyricsActiveColor]).
+/// - off: the accent blended with white, the slider bringing back more of
+///   the color ([lyricsSoftActiveColor]).
+Color activeLyricsColor(AppSettings settings, {required Color accent}) {
+  if (activeLyricsIsWhite(settings)) return Colors.white;
+  return !settings.activeLyricsSoftColor
+      ? lyricsActiveColor(accent, intensity: settings.activeLyricsIntensity)
+      : lyricsSoftActiveColor(
+          accent,
+          intensity: settings.activeLyricsIntensity,
+        );
+}
 
 class AdvancedLyricLine extends ConsumerWidget {
   final LyricLine line;
@@ -53,21 +85,32 @@ class AdvancedLyricLine extends ConsumerWidget {
     this.fontScale = 1.0,
   });
 
-  bool _isHindi(String text) {
-    return RegExp(r'[\u0900-\u097F]').hasMatch(text);
-  }
+  /// Word/char styles only apply to lines with real word timing; anything
+  /// else is shown line by line, whatever style is picked.
+  bool get usesWordTiming => mode != LyricsSyncMode.line && line.hasWordTiming;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Only watch position if this line is active and in word/char sync modes, avoiding rebuilds of all other lines
-    final needsPosition =
-        isActive &&
-        (mode == LyricsSyncMode.word || mode == LyricsSyncMode.char);
-    final currentPosition = needsPosition
+    final needsPosition = isActive && usesWordTiming;
+    final reportedPosition = needsPosition
         ? ref.watch(playbackProvider.select((s) => s.position))
         : Duration.zero;
+    // Right after tapping a line it's active before the seek lands, so the
+    // position can still be from elsewhere in the song - show it unsung
+    // rather than flashing it fully sung.
+    final currentPosition =
+        needsPosition &&
+            (reportedPosition < line.startTime ||
+                reportedPosition > line.endTime + const Duration(seconds: 1))
+        ? line.startTime
+        : reportedPosition;
+    // Word-timed lines also need it while inactive: a line that just
+    // finished keeps its last word running while it settles.
+    final isPlaying = usesWordTiming
+        ? ref.watch(playbackProvider.select((s) => s.isPlaying))
+        : false;
 
-    final progress = line.getProgress(currentPosition);
     final isPast = isActive
         ? false
         : (ref.read(playbackProvider).position > line.endTime);
@@ -89,11 +132,17 @@ class AdvancedLyricLine extends ConsumerWidget {
     }
 
     final settings = ref.watch(settingsProvider);
-    final alignmentString = settings.lyricsAlignment;
-    final useDynamicColor =
-        (settings.dynamicColorActiveLyrics &&
-            (settings.enableDynamicTheming || settings.dynamicLyrics)) ||
-        settings.blurredArtworkForLyrics;
+    // Duet partner lines sit on the opposite side (centered stays centered).
+    final alignmentString = switch ((
+      line.isOppositeSide,
+      settings.lyricsAlignment,
+    )) {
+      (true, 'left') => 'right',
+      (true, 'right') => 'left',
+      (_, final alignment) => alignment,
+    };
+    // Glow for colored active lines, not plain white.
+    final useDynamicColor = !activeLyricsIsWhite(settings);
 
     final textAlign = alignmentString == 'left'
         ? TextAlign.left
@@ -107,32 +156,16 @@ class AdvancedLyricLine extends ConsumerWidget {
         ? Alignment.centerRight
         : Alignment.center;
 
-    final wrapAlignment = alignmentString == 'left'
-        ? WrapAlignment.start
-        : alignmentString == 'right'
-        ? WrapAlignment.end
-        : WrapAlignment.center;
+    final activeColor = activeLyricsColor(
+      settings,
+      accent: Theme.of(context).colorScheme.primary,
+    );
 
-    // Extract dynamic color from artwork or fallback to Theme primary / white
-    final artworkColorAsync = ref.watch(artworkColorProvider);
-    final artworkColor = artworkColorAsync.value;
-
-    // useDynamicColor already covers every case where dynamicColorActiveLyrics
-    // is meaningfully "on" (it requires enableDynamicTheming, dynamicLyrics, or
-    // blurredArtworkForLyrics to actually have a dynamic source). So once we're
-    // here, dynamicColorActiveLyrics being true with nothing dynamic active
-    // (e.g. blurred artwork turned off) must still fall back to the accent
-    // color, not white -- white is only correct while dynamicLyrics' own
-    // visual mode is genuinely active and needs contrast against it.
-    final activeColor = useDynamicColor
-        ? (artworkColor ?? Theme.of(context).colorScheme.primary)
-        : (settings.dynamicLyrics ? Colors.white : Color(settings.accentColor));
-
-    // Language-aware font selection
-    final bool isHindiText = _isHindi(line.text);
+    // Hindi and other Indic text falls back per glyph to a bundled font that
+    // matches the chosen one (see AppFonts.scriptFallbackFor).
     final baseStyle = AppFonts.getLyricsStyle(
       useNewFontLyrics: settings.useNewFontLyrics,
-      family: isHindiText ? 'Google Sans' : settings.customFontFamilyLyrics,
+      family: settings.customFontFamilyLyrics,
       weightDelta: settings.customFontWeightLyricsDelta,
       activeWeightDelta: settings.activeLyricsFontWeightDelta,
       isActive: isActive,
@@ -144,13 +177,13 @@ class AdvancedLyricLine extends ConsumerWidget {
       shadows: isActive && useDynamicColor
           ? [
               Shadow(
-                color: activeColor.withValues(alpha: 0.01),
+                color: activeColor.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
             ]
           : null,
-    ).copyWith(letterSpacing: isHindiText ? 0.95 : 0);
+    );
 
     // Unified animation duration and easeInOutCubic curve for a buttery-smooth transition
     final animDuration = const Duration(milliseconds: 400);
@@ -161,14 +194,14 @@ class AdvancedLyricLine extends ConsumerWidget {
 
     final childWidget = _buildModeContent(
       context,
-      progress,
       isPast,
       baseStyle,
       activeColor,
       searchQuery,
       textAlign,
       iconAlignment,
-      wrapAlignment,
+      currentPosition,
+      isPlaying,
     );
 
     // Optimization: If the line is far from the active line (distance > 1),
@@ -241,14 +274,14 @@ class AdvancedLyricLine extends ConsumerWidget {
 
   Widget _buildModeContent(
     BuildContext context,
-    double progress,
     bool isPast,
     TextStyle baseStyle,
     Color activeColor,
     String searchQuery,
     TextAlign textAlign,
     Alignment iconAlignment,
-    WrapAlignment wrapAlignment,
+    Duration position,
+    bool isPlaying,
   ) {
     final String text = line.text;
     final bool isInstrumental =
@@ -261,6 +294,46 @@ class AdvancedLyricLine extends ConsumerWidget {
     final bool isSearchMatch =
         searchQuery.isNotEmpty && text.toLowerCase().contains(searchQuery);
 
+    // Word/char styles follow the singer's real word timing (lrc.red,
+    // LyricsPlus, enhanced LRC). The word-synced text stays up across the
+    // hand-off in both directions: swapping it for plain text the frame
+    // the line changed dropped the lifted words, cut the glow and faded
+    // through a milky accent-to-white mix. Instead lift, glow and colour
+    // settle together, and plain text takes over only once it looks the
+    // same.
+    if (!isInstrumental && usesWordTiming) {
+      return TweenAnimationBuilder<double>(
+        tween: Tween(end: isActive ? 1.0 : 0.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+        builder: (context, emphasis, _) => !isActive && emphasis <= 0
+            ? _inactiveText(
+                isPast,
+                baseStyle,
+                activeColor,
+                isSearchMatch,
+                textAlign,
+              )
+            : WordSyncedLyricText(
+                wipe: mode == LyricsSyncMode.char,
+                line: line,
+                position: position,
+                isPlaying: isPlaying,
+                style: baseStyle,
+                activeColor: activeColor,
+                // Upcoming words wear the plain inactive-line color (and a
+                // settling line ends on exactly that color).
+                unsungColor: isActive
+                    ? Colors.white.withValues(alpha: 0.35)
+                    : (baseStyle.color ?? Colors.white.withValues(alpha: 0.85)),
+                textAlign: textAlign,
+                fontScale: fontScale,
+                active: isActive,
+                emphasis: emphasis,
+              ),
+      );
+    }
+
     if (!isActive && !isPast) {
       return isInstrumental
           ? Align(
@@ -270,16 +343,12 @@ class AdvancedLyricLine extends ConsumerWidget {
                 style: baseStyle.copyWith(color: Colors.white24),
               ),
             )
-          : Text(
-              text,
-              style: isSearchMatch
-                  ? baseStyle.copyWith(
-                      color: activeColor.withValues(alpha: 0.9),
-                    )
-                  : null,
-              textAlign: textAlign,
-              softWrap: true,
-              overflow: TextOverflow.visible,
+          : _inactiveText(
+              isPast,
+              baseStyle,
+              activeColor,
+              isSearchMatch,
+              textAlign,
             );
     }
 
@@ -292,141 +361,91 @@ class AdvancedLyricLine extends ConsumerWidget {
                 style: baseStyle.copyWith(color: Colors.white10),
               ),
             )
-          : Text(
-              text,
-              textAlign: textAlign,
-              softWrap: true,
-              overflow: TextOverflow.visible,
+          : _inactiveText(
+              isPast,
+              baseStyle,
+              activeColor,
+              isSearchMatch,
+              textAlign,
             );
     }
 
     // For active line, add music symbols if it's instrumental
     final displayText = isInstrumental ? '♫' : text;
 
-    switch (mode) {
-      case LyricsSyncMode.line:
-        return isInstrumental
-            ? Align(
-                alignment: iconAlignment,
-                // Same "♫" glyph as the not-active/past instrumental symbol
-                // above - only the animation (see _PulsingInstrumentalIcon)
-                // marks this one out as the active line, not a symbol swap.
-                child: _PulsingInstrumentalIcon(
-                  color: activeColor,
-                  style: baseStyle,
-                ),
-              )
-            : Text(
-                displayText,
-                textAlign: textAlign,
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                style: baseStyle,
-              );
-
-      case LyricsSyncMode.word:
-        return _buildWordMode(
-          displayText,
-          progress,
-          baseStyle,
-          activeColor,
-          wrapAlignment,
-        );
-
-      case LyricsSyncMode.char:
-        return _buildCharMode(
-          displayText,
-          progress,
-          baseStyle,
-          activeColor,
-          textAlign,
-        );
-    }
+    // Line style, or an instrumental break in any style.
+    return isInstrumental
+        ? Align(
+            alignment: iconAlignment,
+            // Same "♫" glyph as the not-active/past instrumental symbol
+            // above - only the animation (see _PulsingInstrumentalIcon)
+            // marks this one out as the active line, not a symbol swap.
+            child: _PulsingInstrumentalIcon(
+              color: activeColor,
+              style: baseStyle,
+            ),
+          )
+        : Text(
+            displayText,
+            textAlign: textAlign,
+            softWrap: true,
+            overflow: TextOverflow.visible,
+            style: baseStyle,
+          );
   }
 
-  Widget _buildWordMode(
-    String text,
-    double progress,
+  /// The plain text of a line that isn't current (upcoming lines can carry
+  /// a search highlight; past ones never do).
+  Widget _inactiveText(
+    bool isPast,
     TextStyle baseStyle,
     Color activeColor,
-    WrapAlignment wrapAlignment,
+    bool isSearchMatch,
+    TextAlign textAlign,
   ) {
-    final words = text.split(' ');
-    if (words.isEmpty) return const SizedBox.shrink();
-
-    // Estimate progress per word
-    final wordCount = words.length;
-    final activeWordIndex = (progress * wordCount).floor();
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Wrap(
-            alignment: wrapAlignment,
-            spacing: 12 * fontScale,
-            children: List.generate(words.length, (index) {
-              final isWordActive = index <= activeWordIndex;
-              return AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                style: baseStyle.copyWith(
-                  color: isWordActive
-                      ? activeColor
-                      : baseStyle.color?.withValues(alpha: 0.5),
-                  shadows: isWordActive
-                      ? [
-                          Shadow(
-                            color: activeColor.withValues(alpha: 0.3),
-                            blurRadius: 16 * fontScale,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Text(words[index]),
-              );
-            }),
-          ),
-        ),
-      ],
+    return _withBackgroundVocals(
+      Text(
+        line.text,
+        style: !isPast && isSearchMatch
+            ? baseStyle.copyWith(color: activeColor.withValues(alpha: 0.9))
+            : null,
+        textAlign: textAlign,
+        softWrap: true,
+        overflow: TextOverflow.visible,
+      ),
+      baseStyle,
+      textAlign,
     );
   }
 
-  Widget _buildCharMode(
-    String text,
-    double progress,
+  /// Background vocals as a smaller, dimmer line under [main] (inactive and
+  /// past lines; the active line's are animated by WordSyncedLyricText).
+  Widget _withBackgroundVocals(
+    Widget main,
     TextStyle baseStyle,
-    Color activeColor,
     TextAlign textAlign,
   ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final background = line.backgroundText;
+    if (background.isEmpty) return main;
+    return Column(
+      crossAxisAlignment: switch (textAlign) {
+        TextAlign.left => CrossAxisAlignment.start,
+        TextAlign.right => CrossAxisAlignment.end,
+        _ => CrossAxisAlignment.center,
+      },
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: ShaderMask(
-            blendMode: BlendMode.srcIn,
-            shaderCallback: (bounds) {
-              const gradientWidth = 0.01;
-              final start = (progress - gradientWidth).clamp(0.0, 1.0);
-              final end = (progress + gradientWidth).clamp(0.0, 1.0);
-
-              return LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  activeColor,
-                  activeColor.withValues(alpha: 0.8),
-                  baseStyle.color ?? Colors.white24,
-                ],
-                stops: [start, progress, end],
-              ).createShader(bounds);
-            },
-            child: Text(
-              text,
-              style: baseStyle.copyWith(color: Colors.white),
-              textAlign: textAlign,
-              softWrap: true,
-              overflow: TextOverflow.visible,
+        main,
+        SizedBox(height: 4 * fontScale),
+        Text(
+          background,
+          textAlign: textAlign,
+          softWrap: true,
+          style: baseStyle.copyWith(
+            fontSize: (baseStyle.fontSize ?? 30) * 0.62,
+            height: 1.2,
+            color: (baseStyle.color ?? Colors.white).withValues(
+              alpha: (baseStyle.color?.a ?? 1) * 0.7,
             ),
           ),
         ),

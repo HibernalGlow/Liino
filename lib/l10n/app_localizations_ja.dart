@@ -225,7 +225,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dynamicColorActiveLyrics => 'ダイナミックカラーアクティブライン';
 
   @override
-  String get dynamicColorActiveLyricsDesc => '現在再生中の歌詞ラインに抽出されたアートワークの色を使用します';
+  String get dynamicColorActiveLyricsDesc => '再生中の歌詞行に色を付けます。オフにすると白のままです';
+
+  @override
+  String get activeLyricsIntensity => 'アクティブ行の明るさ';
+
+  @override
+  String get activeLyricsIntensityDesc => '再生中の歌詞行に表示する色の強さ';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => '非アクティブ行';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => 'アクティブ行';
+
+  @override
+  String get activeLyricsUseAccent => 'アクティブ行にアクセントカラー';
+
+  @override
+  String get activeLyricsUseAccentDesc =>
+      'アクセントカラーをそのまま使います。オフにすると白と混ぜた柔らかい色合いになります';
 
   @override
   String get dynamicLyricsBg => 'ダイナミックリリックBG';
@@ -397,7 +416,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lyricsProvider => '歌詞プロバイダー';
 
   @override
-  String get lyricsProviderDesc => 'オンライン歌詞は lrclib.net (LRCLIB) から取得されています';
+  String get lyricsProviderDesc => 'lrc.red、LyricsPlus、LRCLIB などからのオンライン歌詞';
 
   @override
   String get maintainersAndDesigners => 'メンテナーとデザイナー';
@@ -782,6 +801,64 @@ class AppLocalizationsJa extends AppLocalizations {
   String get showMore => 'もっと見る';
 
   @override
+  String get segmentedUtilityButtons => 'セグメント型プレーヤーボタン';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      'シャッフル、リピート、次に再生、歌詞を再生コントロールと同じスタイルの4つのアイコンタイルで表示します';
+
+  @override
+  String get qualityBadgeStyle => '音質バッジのスタイル';
+
+  @override
+  String get qualityBadgeStyleDesc => '音質バッジの見た目、アイコン、色、表示項目';
+
+  @override
+  String get qualityBadgeLook => '見た目';
+
+  @override
+  String get qualityBadgeLookPill => '塗りつぶし';
+
+  @override
+  String get qualityBadgeLookOutlined => 'アウトライン';
+
+  @override
+  String get qualityBadgeLookText => 'テキスト';
+
+  @override
+  String get qualityBadgeIcon => 'アイコン';
+
+  @override
+  String get qualityBadgeColorsByQuality => '音質別';
+
+  @override
+  String get qualityBadgeSeparator => '区切り文字';
+
+  @override
+  String get qualityBadgeDetails => '表示項目';
+
+  @override
+  String get qualityBadgeLevel => '音質レベル';
+
+  @override
+  String get qualityBadgeLayout => '内容';
+
+  @override
+  String get qualityBadgeLayoutName => '名前のみ';
+
+  @override
+  String get qualityBadgeShape => '形';
+
+  @override
+  String get qualityBadgeShapePill => 'ピル';
+
+  @override
+  String get qualityBadgeShapeRounded => '角丸';
+
+  @override
+  String get qualityBadgeShapeSquare => '四角';
+
+  @override
   String get showQualityBadge => '品質バッジを表示する';
 
   @override
@@ -924,6 +1001,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get fluidPlayerDesc => 'ミニプレーヤーを上にドラッグしてフルプレーヤーに切り替えます';
 
   @override
+  String get hapticFeedback => '触覚フィードバック';
+
+  @override
+  String get hapticFeedbackDesc => 'タップ、切り替え、ジェスチャーで振動します';
+
+  @override
   String get viewAll => 'すべて見る';
 
   @override
@@ -970,7 +1053,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      '• 動的歌詞同期: オンライン データベースから同期された歌詞 (LRC 形式) を安全にフェッチし、ダウンロードするためにのみ使用されます。個人データ、設定、メディア ファイルがアップロードまたは共有されることはありません。';
+      '• 歌詞：lrc.red、LyricsPlus、LRCLIB または選択した提供元から同期歌詞を取得します。検索に送信されるのは曲名、アーティスト、アルバム、再生時間のみです。個人データ、設定、メディアファイルがアップロードや共有されることはありません。';
 
   @override
   String get whyPermissionsUsed => '権限が使用される理由';
@@ -2012,10 +2095,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => 'ジェスチャーのヒント';
+  String get gestureTips => '歌詞のヒント';
 
   @override
-  String get gestureTipsDesc => 'タップ、長押し、ピンチでズームなど';
+  String get gestureTipsDesc => 'ジェスチャー、単語同期、タイミングなど';
 
   @override
   String get exportLyrics => '歌詞をエクスポート';
@@ -2040,8 +2123,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gestureLongPressLine => '行を長押し';
 
   @override
-  String get gestureLongPressLineDesc =>
-      '共有用の歌詞カードにする行の選択を開始します。ほかの行をタップすると選択範囲を広げられます。';
+  String get gestureLongPressLineDesc => '行を選んで歌詞カードとして共有します。';
 
   @override
   String get gesturePinch => '2 本指でピンチ';
@@ -2056,7 +2138,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gestureSwipeDownDesc => '歌詞画面を閉じてプレーヤーに戻ります。';
 
   @override
-  String get lyricsGestures => '歌詞画面のジェスチャー';
+  String get lyricsGestures => '歌詞のヒント';
 
   @override
   String get lyricsGesturesIntro => 'この画面でできる、気づきにくい操作をご紹介します:';
@@ -2224,6 +2306,153 @@ class AppLocalizationsJa extends AppLocalizations {
   String nyquistKhz(String khz) {
     return 'ナイキスト: $khz kHz';
   }
+
+  @override
+  String get qualityHiRes => 'ハイレゾロスレス';
+
+  @override
+  String get qualityMono => 'モノラル';
+
+  @override
+  String get qualityStereo => 'ステレオ';
+
+  @override
+  String get qualitySignalPath => '信号経路';
+
+  @override
+  String get qualityStageSource => 'ソース';
+
+  @override
+  String get qualityStageDecoder => 'デコーダー';
+
+  @override
+  String get qualityStageOutput => '出力';
+
+  @override
+  String get qualityStageDevice => 'デバイス';
+
+  @override
+  String get qualityNativeEndToEnd => '最初から最後までファイル本来のサンプルレートで再生されています';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return '出力時に$fromから$toへリサンプリングされています';
+  }
+
+  @override
+  String get qualitySectionSource => 'ソースファイル';
+
+  @override
+  String get qualitySectionEngine => '再生エンジン';
+
+  @override
+  String get qualitySectionDevice => '出力デバイス';
+
+  @override
+  String get qualitySectionPhone => 'このスマートフォン';
+
+  @override
+  String get qualityOutputFormat => '出力フォーマット';
+
+  @override
+  String get qualityOutputRate => '出力サンプルレート';
+
+  @override
+  String get qualityOutputChannels => '出力チャンネル';
+
+  @override
+  String get qualityLiveBitrate => '現在のビットレート';
+
+  @override
+  String get qualityGapless => 'ギャップレス再生';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => 'トラック';
+
+  @override
+  String get qualityReplayGainAlbum => 'アルバム';
+
+  @override
+  String get qualitySpeed => '速度';
+
+  @override
+  String get qualityDeviceName => '名前';
+
+  @override
+  String get qualityDeviceType => '種類';
+
+  @override
+  String get qualityDeviceSpeaker => '本体スピーカー';
+
+  @override
+  String get qualityDeviceWired => '有線ヘッドホン';
+
+  @override
+  String get qualityDeviceBluetooth => 'Bluetooth';
+
+  @override
+  String get qualityDeviceUsb => 'USBオーディオ';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => '補聴器';
+
+  @override
+  String get qualityDeviceDock => 'ドック';
+
+  @override
+  String get qualitySupportedRates => '対応サンプルレート';
+
+  @override
+  String get qualityAnyRate => '任意';
+
+  @override
+  String get qualityMaxBitDepth => '最大ビット深度';
+
+  @override
+  String get qualityMaxChannels => '最大チャンネル数';
+
+  @override
+  String get qualityBitPerfect => 'ビットパーフェクトモード';
+
+  @override
+  String get qualitySupported => '対応';
+
+  @override
+  String get qualityNotSupported => '非対応';
+
+  @override
+  String get qualitySpatialAudio => '空間オーディオ';
+
+  @override
+  String get qualityDeviceNote =>
+      'Androidはプレーヤーの出力先をアプリに知らせないため、通常音楽が送られるデバイスを表示しています。';
+
+  @override
+  String get qualityPhoneModel => '機種';
+
+  @override
+  String get qualityAndroidVersion => 'Androidバージョン';
+
+  @override
+  String get qualityMixerRate => 'ミキサーのサンプルレート';
+
+  @override
+  String get qualityMixerBuffer => 'ミキサーバッファ';
+
+  @override
+  String get qualityLowLatency => '低遅延オーディオ';
+
+  @override
+  String get qualityProAudio => 'プロオーディオ';
+
+  @override
+  String get qualityDeviceUnavailable => 'デバイスの詳細はAndroidでのみ表示できます。';
 
   @override
   String get qualityLossless => 'ロスレス';
@@ -2395,4 +2624,380 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mono => 'モノラル';
+
+  @override
+  String get progressBarStyle => 'プログレスバーのスタイル';
+
+  @override
+  String get progressBarStyleDesc => '波、太さ、つまみなど';
+
+  @override
+  String get progressBarPreview => 'プレビュー';
+
+  @override
+  String get progressWave => '波';
+
+  @override
+  String get progressWaveDesc => '再生済みの部分を動く波として表示';
+
+  @override
+  String get progressWaveHeight => '波の高さ';
+
+  @override
+  String get progressWaveLength => '波の長さ';
+
+  @override
+  String get progressWaveLengthDesc => '波と波の間隔';
+
+  @override
+  String get progressWaveSpeed => '波の速さ';
+
+  @override
+  String get progressWaveFromStart => '最初から波を表示';
+
+  @override
+  String get progressWaveFromStartDesc => '曲の冒頭を過ぎるのを待たずにすぐ波を表示';
+
+  @override
+  String get progressKeepWavePaused => '一時停止中も波を保持';
+
+  @override
+  String get progressKeepWavePausedDesc => '平らにせず波をその場で止める';
+
+  @override
+  String get progressBarThickness => 'バーの太さ';
+
+  @override
+  String get progressThumb => 'つまみ';
+
+  @override
+  String get progressThumbPill => 'ピル';
+
+  @override
+  String get progressThumbRound => '丸';
+
+  @override
+  String get progressThumbWidth => 'つまみの幅';
+
+  @override
+  String get progressThumbHeight => 'つまみの高さ';
+
+  @override
+  String get progressThumbSize => 'つまみのサイズ';
+
+  @override
+  String get progressThumbGap => 'つまみ周りの余白';
+
+  @override
+  String get progressTrackOpacity => '未再生部分の不透明度';
+
+  @override
+  String get progressGrowThumb => 'ドラッグ中につまみを拡大';
+
+  @override
+  String get resetToDefaults => 'デフォルトに戻す';
+
+  @override
+  String get artworkVisualizer => 'アートワークビジュアライザー';
+
+  @override
+  String get artworkVisualizerDesc => '再生中のアートワークに音楽に反応するエフェクト';
+
+  @override
+  String get visualizerEffect => 'エフェクト';
+
+  @override
+  String get visualizerAura => 'オーラグロー';
+
+  @override
+  String get visualizerRing => 'スペクトラムリング';
+
+  @override
+  String get visualizerWave => '下部の波';
+
+  @override
+  String get visualizerBars => 'バー';
+
+  @override
+  String get visualizerBreathing => 'ブリージング';
+
+  @override
+  String get visualizerIntensity => '強さ';
+
+  @override
+  String get visualizerSubtle => '控えめ';
+
+  @override
+  String get visualizerNormal => '標準';
+
+  @override
+  String get visualizerStrong => '強め';
+
+  @override
+  String get visualizerColors => '色';
+
+  @override
+  String get visualizerColorsArtwork => 'アートワーク';
+
+  @override
+  String get visualizerColorsTheme => 'テーマ';
+
+  @override
+  String get visualizerColorsWhite => '白';
+
+  @override
+  String get progressTrack => 'トラック';
+
+  @override
+  String get visualizerSync => 'オーディオ同期';
+
+  @override
+  String get visualizerSyncDesc =>
+      '聞こえる音に合うようエフェクトを遅らせます。Bluetoothヘッドホンでは大きくしてください。';
+
+  @override
+  String get visualizerSyncHint => '曲を再生して耳で合わせてください';
+
+  @override
+  String get lyricsHighlightStyle => 'ハイライトのスタイル';
+
+  @override
+  String get lyricsStyleLine => '行';
+
+  @override
+  String get lyricsStyleWord => '単語ごと';
+
+  @override
+  String get lyricsStyleCharacter => '文字ごと';
+
+  @override
+  String get lyricsWordSynced => '単語同期';
+
+  @override
+  String get lyricsLineSynced => '行同期';
+
+  @override
+  String get findWordSyncedLyrics => '単語同期の歌詞を探す';
+
+  @override
+  String get searchingWordSyncedLyrics => 'lrc.red と LyricsPlus を検索中…';
+
+  @override
+  String get wordSyncedLyricsLoaded => '単語同期の歌詞を読み込みました';
+
+  @override
+  String get noWordSyncedLyricsFound => 'この曲の単語同期の歌詞は見つかりませんでした';
+
+  @override
+  String get lyricsTiming => '歌詞のタイミング';
+
+  @override
+  String get lyricsTimingDesc =>
+      'プラスで歌詞を早く、マイナスで遅く表示します。歌詞が曲より先に進む場合（Bluetoothでよくあります）は値を下げてください。';
+
+  @override
+  String get lyricsTimingEarlier => '早く';
+
+  @override
+  String get lyricsTimingLater => '遅く';
+
+  @override
+  String get lyricsTimingReset => 'リセット';
+
+  @override
+  String get themeGroupColors => 'カラー';
+
+  @override
+  String get themeGroupBlurBackgrounds => 'ぼかしと背景';
+
+  @override
+  String get themeGroupDarkness => '暗さ';
+
+  @override
+  String get themeGroupFonts => 'フォント';
+
+  @override
+  String get themeGroupProfile => 'プロフィール';
+
+  @override
+  String get lyricsTipsGestures => 'ジェスチャー';
+
+  @override
+  String get lyricsTipsMenu => '⋮ メニュー内';
+
+  @override
+  String get gestureScroll => '自由にスクロール';
+
+  @override
+  String get gestureScrollDesc => '閲覧中は自動追従が一時停止します。「再同期」で現在の行に戻ります。';
+
+  @override
+  String get tipFindWordSyncDesc => 'lrc.red と LyricsPlus から単語ごとのタイミングを取得します。';
+
+  @override
+  String get tipHighlightStyleDesc => '単語同期の歌詞では、行・単語ごと・文字ごとから選べます。';
+
+  @override
+  String get tipLyricsTimingDesc => '歌詞を早めたり遅らせたりできます。Bluetooth 使用時に便利です。';
+
+  @override
+  String get tipChangeProviderDesc => '歌詞が違う・見つからない？別のソースを試してください。';
+
+  @override
+  String get tipOwnLyrics => '自分の歌詞';
+
+  @override
+  String get tipOwnLyricsDesc => '.lrc ファイルを読み込むか、この歌詞を端末に書き出します。';
+
+  @override
+  String get lyricsSources => '歌詞の提供元';
+
+  @override
+  String get creditLrcRedDesc => '単語同期の歌詞（デフォルトの提供元）';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      '単語同期の歌詞 · ibratabian17 によるオープンソースサーバー（Apache-2.0）、binimum がホスト';
+
+  @override
+  String get creditLrclibDesc => '行同期の歌詞 · 無料のオープンな歌詞データベース';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      'lrc.red が照合できるよう各曲の ISRC を検索 · オープンな音楽データベース（CC0 データ）';
+
+  @override
+  String get creditAmLyricsDesc => '単語同期歌詞のヒントになったプロジェクト · binimum 作（MPL-2.0）';
+
+  @override
+  String get lyricsCopyrightNote =>
+      '歌詞の権利はアーティストおよび権利者に帰属します。Looper は個人的な表示のためだけに取得し、端末内に保存します。';
+
+  @override
+  String get clearLyricsCache => '歌詞キャッシュを消去';
+
+  @override
+  String get clearLyricsCacheDesc =>
+      'ダウンロードした歌詞は消去するまで保存されます。自分のファイルや選んだ .lrc は残ります。';
+
+  @override
+  String get clearLyricsCacheConfirm =>
+      'ダウンロードした歌詞をすべて消去しますか？次回再生時にオンラインで再検索されます。';
+
+  @override
+  String get lyricsCacheCleared => '歌詞キャッシュを消去しました';
+
+  @override
+  String get analyzeYourTopSong => 'あなたの第1位';
+
+  @override
+  String get analyzeHighlights => 'ハイライト';
+
+  @override
+  String get analyzePeakTime => 'よく聴く時間帯';
+
+  @override
+  String get analyzeBusiestDay => '最も聴いた日';
+
+  @override
+  String get analyzeTopGenre => 'トップジャンル';
+
+  @override
+  String get analyzeLibraryExplored => 'ライブラリ再生率';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$total 曲中 $played 曲';
+  }
+
+  @override
+  String get analyzeCurrentStreak => '現在の連続記録';
+
+  @override
+  String get analyzeLongestStreak => '最長連続記録';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 日',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours時間$minutes分';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes分';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return '1日平均 $avg 回';
+  }
+
+  @override
+  String get dayPartMorning => '朝';
+
+  @override
+  String get dayPartAfternoon => '昼';
+
+  @override
+  String get dayPartEvening => '夕方';
+
+  @override
+  String get dayPartNight => '夜';
+
+  @override
+  String get updateNow => 'アップデート';
+
+  @override
+  String get updateLater => '後で';
+
+  @override
+  String get updateInstall => 'インストール';
+
+  @override
+  String get retry => '再試行';
+
+  @override
+  String get updateWhatsNew => '新機能';
+
+  @override
+  String get updateDownloading => 'アップデートをダウンロード中';
+
+  @override
+  String get updateVerifying => 'ダウンロードを検証中…';
+
+  @override
+  String get updateWaitingForInstaller => 'インストーラーを待機中…';
+
+  @override
+  String get updateReadyToInstall => 'ダウンロードが完了し、インストールできます。';
+
+  @override
+  String get updateErrorNetwork => 'ダウンロードに失敗しました。接続を確認してもう一度お試しください。';
+
+  @override
+  String get updateErrorChecksum => 'ダウンロードしたファイルが破損しています。もう一度お試しください。';
+
+  @override
+  String get updateErrorStorage => 'アップデートに必要な空き容量が足りません。';
+
+  @override
+  String get updateErrorInstall => 'アップデートをインストールできませんでした。';
+
+  @override
+  String get checkForUpdates => 'アップデートを確認';
+
+  @override
+  String get updateUpToDate => '最新バージョンです。';
+
+  @override
+  String get updateCheckFailed => 'アップデートを確認できませんでした。';
 }

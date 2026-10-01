@@ -30,8 +30,15 @@ class SongStat {
   final Song song;
   final int playCount;
 
-  /// Play count relative to the #1 song, in [0, 1] — drives proportional
-  /// bar widths in the ranked list.
+  /// Real time actually spent listening to this song ([Song.totalListenedMs]).
+  final int listenedMs;
+
+  /// How much the song was really listened to, measured in full plays - the
+  /// ranking key (see [AnalyzeSnapshot.listenScore]).
+  final double score;
+
+  /// [score] relative to the #1 song, in [0, 1] — drives proportional bar
+  /// widths in the ranked list.
   final double share;
 
   const SongStat({
@@ -39,6 +46,8 @@ class SongStat {
     required this.song,
     required this.playCount,
     required this.share,
+    this.listenedMs = 0,
+    this.score = 0,
   });
 }
 
@@ -89,7 +98,7 @@ class GenreStat {
   final String name;
   final int totalPlays;
   final int songCount;
-  final double fraction; // share of totalPlays across all genres, [0, 1]
+  final double fraction; // share of listening across all genres, [0, 1]
   final Color color;
 
   const GenreStat({
@@ -100,15 +109,19 @@ class GenreStat {
     required this.color,
   });
 
-  /// Deterministic, vibrant color derived from the genre name so the same
-  /// genre always renders the same color across the donut and its legend —
-  /// mirrors the hue-hash trick already used for genre cards in
-  /// GenresGridView (lib/ui/screens/android/tabs/views/library_categories_views.dart).
-  static Color colorFor(String name) {
-    final int hash = name.hashCode;
-    final double hue = (hash.abs() % 360).toDouble();
-    return HSLColor.fromAHSL(1.0, hue, 0.65, 0.58).toColor();
-  }
+  /// Slice colors by rank. A name hash (the old approach) often landed
+  /// neighbouring slices on near-identical hues, which made the donut
+  /// unreadable; a fixed, well-spread palette keeps every slice distinct.
+  static const palette = [
+    Color(0xFF7AA2FF), // blue
+    Color(0xFFFF7A9C), // pink
+    Color(0xFF5FD4A0), // green
+    Color(0xFFFFC857), // amber
+    Color(0xFFB18CFF), // violet
+    Color(0xFF4FC9E0), // cyan
+  ];
+
+  static Color colorAt(int rank) => palette[rank % palette.length];
 }
 
 /// Play count for a single calendar day, used by the listening-trend chart.
@@ -182,6 +195,34 @@ class AnalyzeSnapshot {
       ? null
       : topGenres.first.name;
 
+  /// Plays inside the trend window ([dailyCounts], the last 30 days).
+  int get recentPlays => dailyCounts.fold<int>(0, (sum, d) => sum + d.plays);
+
+  /// The day in the trend window with the most plays (the latest one on a
+  /// tie), or null when the window has no plays.
+  DailyCount? get busiestDay {
+    DailyCount? best;
+    for (final d in dailyCounts) {
+      if (d.plays > 0 && (best == null || d.plays >= best.plays)) best = d;
+    }
+    return best;
+  }
+
+  /// The (weekday, day-part) cell with the most plays, or null when the
+  /// activity grid is empty.
+  DayPartCount? get peakSlot {
+    DayPartCount? best;
+    for (final c in activityGrid) {
+      if (c.plays > 0 && (best == null || c.plays > best.plays)) best = c;
+    }
+    return best;
+  }
+
+  /// Share of the library played at least once, in [0, 1].
+  double get libraryExplored => totalSongsInLibrary == 0
+      ? 0
+      : (uniqueSongsPlayed / totalSongsInLibrary).clamp(0.0, 1.0);
+
   static const empty = AnalyzeSnapshot(
     totalPlays: 0,
     totalListenedMs: 0,
@@ -203,8 +244,36 @@ class AnalyzeSnapshot {
     String unknownLabel = 'Unknown',
     DateTime? now,
   }) {
-    final playedSongs = songs.where((s) => s.playCount > 0).toList()
-      ..sort((a, b) => b.playCount.compareTo(a.playCount));
+    // Plays that have real listened time on record, per song. Anything in
+    // playCount beyond this predates listen tracking (or never got past the
+    // first checkpoint) and is credited by [_untrackedPlayCredit] instead.
+    final trackedPlays = <String, int>{};
+    for (final e in events) {
+      if (e.listenedMs > 0) {
+        trackedPlays[e.songPath] = (trackedPlays[e.songPath] ?? 0) + 1;
+      }
+    }
+    final scores = <String, double>{
+      for (final s in songs)
+        if (s.playCount > 0 || s.totalListenedMs > 0)
+          s.path: listenScore(s, trackedPlays: trackedPlays[s.path] ?? 0),
+    };
+    double scoreOf(Song s) => scores[s.path] ?? 0;
+
+    // Ranked by how much each song was actually listened to, not by how often
+    // it was started: ten 5-second skips must not outrank three full listens.
+    // Ties fall back to raw plays, then to the more recently played song.
+    final playedSongs =
+        songs.where((s) => s.playCount > 0 || s.totalListenedMs > 0).toList()
+          ..sort((a, b) {
+            final byScore = scoreOf(b).compareTo(scoreOf(a));
+            if (byScore != 0) return byScore;
+            final byPlays = b.playCount.compareTo(a.playCount);
+            if (byPlays != 0) return byPlays;
+            final aLast = a.lastPlayed ?? DateTime(0);
+            final bLast = b.lastPlayed ?? DateTime(0);
+            return bLast.compareTo(aLast);
+          });
 
     final totalPlays = songs.fold<int>(0, (sum, s) => sum + s.playCount);
     // Real, tracked listening time - a sum of Song.totalListenedMs, which is
@@ -216,24 +285,23 @@ class AnalyzeSnapshot {
       (sum, s) => sum + s.totalListenedMs,
     );
 
-    final topSongPlayCount = playedSongs.isNotEmpty
-        ? playedSongs.first.playCount
-        : 0;
+    final topScore = playedSongs.isNotEmpty ? scoreOf(playedSongs.first) : 0;
     final topSongs = <SongStat>[
       for (var i = 0; i < playedSongs.length && i < 20; i++)
         SongStat(
           rank: i + 1,
           song: playedSongs[i],
           playCount: playedSongs[i].playCount,
-          share: topSongPlayCount == 0
-              ? 0
-              : playedSongs[i].playCount / topSongPlayCount,
+          listenedMs: playedSongs[i].totalListenedMs,
+          score: scoreOf(playedSongs[i]),
+          share: topScore == 0 ? 0 : scoreOf(playedSongs[i]) / topScore,
         ),
     ];
 
     final artistImages = <String, Artist>{for (final a in artists) a.name: a};
     final topArtists = _rankBy<ArtistStat>(
       playedSongs,
+      scoreOf: scoreOf,
       keyOf: (s) => s.artist ?? 'Unknown Artist',
       cap: 8,
       build: (name, plays, count, share, rank, sample) => ArtistStat(
@@ -249,6 +317,7 @@ class AnalyzeSnapshot {
 
     final topAlbums = _rankBy<AlbumStat>(
       playedSongs,
+      scoreOf: scoreOf,
       keyOf: (s) => s.album ?? 'Unknown Album',
       cap: 8,
       build: (name, plays, count, share, rank, sample) => AlbumStat(
@@ -262,7 +331,7 @@ class AnalyzeSnapshot {
       ),
     );
 
-    final topGenres = _computeGenres(playedSongs, unknownLabel);
+    final topGenres = _computeGenres(playedSongs, scoreOf, unknownLabel);
 
     final dailyCounts = _computeDailyCounts(events, now: now);
     final activityGrid = _computeActivityGrid(events);
@@ -283,11 +352,40 @@ class AnalyzeSnapshot {
     );
   }
 
-  /// Groups [songs] by a string key, sums their play counts, sorts
-  /// descending, and hands each group (plus a representative "sample" song
-  /// for art/metadata) to [build]. Shared by the artist/album rankings.
+  /// Credit given to a play with no listened time on record - plays from
+  /// before listen tracking existed. Roughly an average partial listen, so a
+  /// long pre-tracking history still counts without beating real full plays.
+  static const _untrackedPlayCredit = 0.5;
+
+  /// Assumed track length when a song's duration is unknown.
+  static const _fallbackDurationMs = 210000;
+
+  /// How much [song] was really listened to, in full plays: real listened
+  /// time divided by the track length, plus [_untrackedPlayCredit] for each
+  /// play without tracked time ([trackedPlays] = plays that have some).
+  ///
+  /// Like scrobbling on Last.fm or a stream counting on Spotify, a play only
+  /// matters as far as it was actually heard: a skip after 5s of a 3-minute
+  /// song is worth ~0.03, a full listen 1.0. Dividing by the track length
+  /// keeps long songs from winning on minutes alone, and repeat-one loops
+  /// (which never start a new play) still count every time through.
+  static double listenScore(Song song, {required int trackedPlays}) {
+    final durationMs = (song.duration ?? 0) > 0
+        ? song.duration!
+        : _fallbackDurationMs;
+    final fullListens = song.totalListenedMs / durationMs;
+    final untrackedPlays = song.playCount - trackedPlays;
+    return fullListens +
+        (untrackedPlays > 0 ? untrackedPlays * _untrackedPlayCredit : 0);
+  }
+
+  /// Groups [songs] by a string key, sums their play counts and listen
+  /// scores, sorts by score descending, and hands each group (plus a
+  /// representative "sample" song for art/metadata) to [build]. Shared by the
+  /// artist/album rankings.
   static List<T> _rankBy<T>(
     List<Song> songs, {
+    required double Function(Song) scoreOf,
     required String Function(Song) keyOf,
     required int cap,
     required T Function(
@@ -301,11 +399,13 @@ class AnalyzeSnapshot {
     build,
   }) {
     final plays = <String, int>{};
+    final scores = <String, double>{};
     final counts = <String, int>{};
     final samples = <String, Song>{};
     for (final song in songs) {
       final key = keyOf(song);
       plays[key] = (plays[key] ?? 0) + song.playCount;
+      scores[key] = (scores[key] ?? 0) + scoreOf(song);
       counts[key] = (counts[key] ?? 0) + 1;
       // Prefer a sample that has artwork, for a nicer thumbnail.
       final existing = samples[key];
@@ -315,9 +415,8 @@ class AnalyzeSnapshot {
       }
     }
 
-    final keys = plays.keys.toList()
-      ..sort((a, b) => plays[b]!.compareTo(plays[a]!));
-    final topPlays = keys.isNotEmpty ? plays[keys.first]! : 0;
+    final keys = plays.keys.toList()..sort(_byScoreThenPlays(scores, plays));
+    final topScore = keys.isNotEmpty ? scores[keys.first]! : 0;
 
     return [
       for (var i = 0; i < keys.length && i < cap; i++)
@@ -325,32 +424,50 @@ class AnalyzeSnapshot {
           keys[i],
           plays[keys[i]]!,
           counts[keys[i]]!,
-          topPlays == 0 ? 0 : plays[keys[i]]! / topPlays,
+          topScore == 0 ? 0 : scores[keys[i]]! / topScore,
           i + 1,
           samples[keys[i]]!,
         ),
     ];
   }
 
-  static List<GenreStat> _computeGenres(List<Song> songs, String unknownLabel) {
+  /// Orders group keys by listen score, then by raw plays.
+  static int Function(String, String) _byScoreThenPlays(
+    Map<String, double> scores,
+    Map<String, int> plays,
+  ) {
+    return (a, b) {
+      final byScore = scores[b]!.compareTo(scores[a]!);
+      return byScore != 0 ? byScore : plays[b]!.compareTo(plays[a]!);
+    };
+  }
+
+  static List<GenreStat> _computeGenres(
+    List<Song> songs,
+    double Function(Song) scoreOf,
+    String unknownLabel,
+  ) {
     final plays = <String, int>{};
+    final scores = <String, double>{};
     final counts = <String, int>{};
     for (final song in songs) {
       final key = (song.genre == null || song.genre!.trim().isEmpty)
           ? unknownLabel
           : song.genre!;
       plays[key] = (plays[key] ?? 0) + song.playCount;
+      scores[key] = (scores[key] ?? 0) + scoreOf(song);
       counts[key] = (counts[key] ?? 0) + 1;
     }
     if (plays.isEmpty) return [];
 
-    final keys = plays.keys.toList()
-      ..sort((a, b) => plays[b]!.compareTo(plays[a]!));
-    final totalPlays = plays.values.fold<int>(0, (a, b) => a + b);
+    // Slices are sized by share of real listening, not by raw plays.
+    final keys = plays.keys.toList()..sort(_byScoreThenPlays(scores, plays));
+    final totalScore = scores.values.fold<double>(0, (a, b) => a + b);
 
     const maxSlices = 6;
     final result = <GenreStat>[];
     var otherPlays = 0;
+    var otherScore = 0.0;
     var otherSongs = 0;
     for (var i = 0; i < keys.length; i++) {
       final key = keys[i];
@@ -360,12 +477,13 @@ class AnalyzeSnapshot {
             name: key,
             totalPlays: plays[key]!,
             songCount: counts[key]!,
-            fraction: totalPlays == 0 ? 0 : plays[key]! / totalPlays,
-            color: GenreStat.colorFor(key),
+            fraction: totalScore == 0 ? 0 : scores[key]! / totalScore,
+            color: GenreStat.colorAt(result.length),
           ),
         );
       } else {
         otherPlays += plays[key]!;
+        otherScore += scores[key]!;
         otherSongs += counts[key]!;
       }
     }
@@ -375,7 +493,7 @@ class AnalyzeSnapshot {
           name: 'Other',
           totalPlays: otherPlays,
           songCount: otherSongs,
-          fraction: totalPlays == 0 ? 0 : otherPlays / totalPlays,
+          fraction: totalScore == 0 ? 0 : otherScore / totalScore,
           color: Colors.white.withValues(alpha: 0.25),
         ),
       );

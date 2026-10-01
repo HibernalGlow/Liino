@@ -12,7 +12,7 @@ class _PremiumMaintainerSection extends StatelessWidget {
         _PremiumMaintainerRow(
           name: 'Nilesh Suthar',
           role: l10n.creatorAndMaintainer,
-          avatar: 'assets/about/maintainer_avatar.png',
+          avatar: AppAssets.maintainerAvatar,
           github: 'https://github.com/SthrNilshaaa',
           telegram: 'https://t.me/neelshy',
           isLast: false,
@@ -20,7 +20,7 @@ class _PremiumMaintainerSection extends StatelessWidget {
         _PremiumMaintainerRow(
           name: 'Karan Suthar',
           role: l10n.designerAndMaintainer,
-          avatar: 'assets/about/designer_avatar.png',
+          avatar: AppAssets.designerAvatar,
           github: 'https://github.com/sthrkaran',
           telegram: 'https://t.me/karanwhy',
           isLast: true,
@@ -102,23 +102,23 @@ class _PremiumMaintainerRow extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: SvgPicture.asset(
-                      'assets/about/github_icon.svg',
+                      AppAssets.github,
                       width: 18,
                       height: 18,
                     ),
                     onPressed: () {
-                      HapticFeedback.lightImpact();
+                      AppHaptics.light();
                       _launchUrl(github);
                     },
                   ),
                   IconButton(
                     icon: SvgPicture.asset(
-                      'assets/about/telegram_icon.svg',
+                      AppAssets.telegram,
                       width: 18,
                       height: 18,
                     ),
                     onPressed: () {
-                      HapticFeedback.lightImpact();
+                      AppHaptics.light();
                       _launchUrl(telegram);
                     },
                   ),

@@ -545,8 +545,44 @@ abstract class AppLocalizations {
   /// No description provided for @dynamicColorActiveLyricsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Use extracted artwork colors for the currently playing lyrics line'**
+  /// **'Color the playing lyrics line; off keeps it white'**
   String get dynamicColorActiveLyricsDesc;
+
+  /// No description provided for @activeLyricsIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Line Intensity'**
+  String get activeLyricsIntensity;
+
+  /// No description provided for @activeLyricsIntensityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'How much color the playing lyrics line shows'**
+  String get activeLyricsIntensityDesc;
+
+  /// No description provided for @activeLyricsIntensityPreviewInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive line'**
+  String get activeLyricsIntensityPreviewInactive;
+
+  /// No description provided for @activeLyricsIntensityPreviewActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active line'**
+  String get activeLyricsIntensityPreviewActive;
+
+  /// No description provided for @activeLyricsUseAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent Color Active Line'**
+  String get activeLyricsUseAccent;
+
+  /// No description provided for @activeLyricsUseAccentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the pure accent color; off blends it with white for a softer tint'**
+  String get activeLyricsUseAccentDesc;
 
   /// No description provided for @dynamicLyricsBg.
   ///
@@ -881,7 +917,7 @@ abstract class AppLocalizations {
   /// No description provided for @lyricsProviderDesc.
   ///
   /// In en, this message translates to:
-  /// **'Online lyrics fetched from lrclib.net (LRCLIB)'**
+  /// **'Online lyrics from lrc.red, LyricsPlus, LRCLIB and more'**
   String get lyricsProviderDesc;
 
   /// No description provided for @maintainersAndDesigners.
@@ -1622,6 +1658,120 @@ abstract class AppLocalizations {
   /// **'Show More'**
   String get showMore;
 
+  /// No description provided for @segmentedUtilityButtons.
+  ///
+  /// In en, this message translates to:
+  /// **'Segmented Player Buttons'**
+  String get segmentedUtilityButtons;
+
+  /// No description provided for @segmentedUtilityButtonsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Show shuffle, repeat, next up and lyrics as four icon tiles styled like the playback controls'**
+  String get segmentedUtilityButtonsDesc;
+
+  /// No description provided for @qualityBadgeStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality Badge Style'**
+  String get qualityBadgeStyle;
+
+  /// No description provided for @qualityBadgeStyleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Look, icon, colors and details of the audio quality badge'**
+  String get qualityBadgeStyleDesc;
+
+  /// No description provided for @qualityBadgeLook.
+  ///
+  /// In en, this message translates to:
+  /// **'Look'**
+  String get qualityBadgeLook;
+
+  /// No description provided for @qualityBadgeLookPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled'**
+  String get qualityBadgeLookPill;
+
+  /// No description provided for @qualityBadgeLookOutlined.
+  ///
+  /// In en, this message translates to:
+  /// **'Outlined'**
+  String get qualityBadgeLookOutlined;
+
+  /// No description provided for @qualityBadgeLookText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get qualityBadgeLookText;
+
+  /// No description provided for @qualityBadgeIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get qualityBadgeIcon;
+
+  /// No description provided for @qualityBadgeColorsByQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'By quality'**
+  String get qualityBadgeColorsByQuality;
+
+  /// No description provided for @qualityBadgeSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'Separator'**
+  String get qualityBadgeSeparator;
+
+  /// No description provided for @qualityBadgeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get qualityBadgeDetails;
+
+  /// No description provided for @qualityBadgeLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality level'**
+  String get qualityBadgeLevel;
+
+  /// No description provided for @qualityBadgeLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get qualityBadgeLayout;
+
+  /// No description provided for @qualityBadgeLayoutName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name only'**
+  String get qualityBadgeLayoutName;
+
+  /// No description provided for @qualityBadgeShape.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape'**
+  String get qualityBadgeShape;
+
+  /// No description provided for @qualityBadgeShapePill.
+  ///
+  /// In en, this message translates to:
+  /// **'Pill'**
+  String get qualityBadgeShapePill;
+
+  /// No description provided for @qualityBadgeShapeRounded.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounded'**
+  String get qualityBadgeShapeRounded;
+
+  /// No description provided for @qualityBadgeShapeSquare.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get qualityBadgeShapeSquare;
+
   /// No description provided for @showQualityBadge.
   ///
   /// In en, this message translates to:
@@ -1898,6 +2048,18 @@ abstract class AppLocalizations {
   /// **'Drag the mini player up to morph it into the full player'**
   String get fluidPlayerDesc;
 
+  /// No description provided for @hapticFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic feedback'**
+  String get hapticFeedback;
+
+  /// No description provided for @hapticFeedbackDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate on taps, toggles and gestures'**
+  String get hapticFeedbackDesc;
+
   /// No description provided for @viewAll.
   ///
   /// In en, this message translates to:
@@ -1973,7 +2135,7 @@ abstract class AppLocalizations {
   /// No description provided for @whyInternetUsedDesc.
   ///
   /// In en, this message translates to:
-  /// **'• Dynamic Lyrics Syncing: Used solely to securely fetch and download synchronized lyrics (LRC formats) from online databases. No personal data, settings, or media files are ever uploaded or shared.'**
+  /// **'• Lyrics: fetches synced lyrics from lrc.red, LyricsPlus, LRCLIB or the provider you choose. Only the song title, artist, album and duration are sent to find a match. No personal data, settings, or media files are ever uploaded or shared.'**
   String get whyInternetUsedDesc;
 
   /// No description provided for @whyPermissionsUsed.
@@ -3863,13 +4025,13 @@ abstract class AppLocalizations {
   /// No description provided for @gestureTips.
   ///
   /// In en, this message translates to:
-  /// **'Gesture Tips'**
+  /// **'Lyrics Tips'**
   String get gestureTips;
 
   /// No description provided for @gestureTipsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Tap, long-press, pinch to zoom & more'**
+  /// **'Gestures, word sync, timing & more'**
   String get gestureTipsDesc;
 
   /// No description provided for @exportLyrics.
@@ -3911,7 +4073,7 @@ abstract class AppLocalizations {
   /// No description provided for @gestureLongPressLineDesc.
   ///
   /// In en, this message translates to:
-  /// **'Start selecting lines to turn into a shareable lyrics card. Tap more lines to extend the selection.'**
+  /// **'Select lines to share as a lyrics card.'**
   String get gestureLongPressLineDesc;
 
   /// No description provided for @gesturePinch.
@@ -3941,7 +4103,7 @@ abstract class AppLocalizations {
   /// No description provided for @lyricsGestures.
   ///
   /// In en, this message translates to:
-  /// **'Lyrics Gestures'**
+  /// **'Lyrics Tips'**
   String get lyricsGestures;
 
   /// No description provided for @lyricsGesturesIntro.
@@ -4238,6 +4400,294 @@ abstract class AppLocalizations {
   /// **'Nyquist: {khz} kHz'**
   String nyquistKhz(String khz);
 
+  /// No description provided for @qualityHiRes.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi-Res Lossless'**
+  String get qualityHiRes;
+
+  /// No description provided for @qualityMono.
+  ///
+  /// In en, this message translates to:
+  /// **'Mono'**
+  String get qualityMono;
+
+  /// No description provided for @qualityStereo.
+  ///
+  /// In en, this message translates to:
+  /// **'Stereo'**
+  String get qualityStereo;
+
+  /// No description provided for @qualitySignalPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Signal Path'**
+  String get qualitySignalPath;
+
+  /// No description provided for @qualityStageSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get qualityStageSource;
+
+  /// No description provided for @qualityStageDecoder.
+  ///
+  /// In en, this message translates to:
+  /// **'Decoder'**
+  String get qualityStageDecoder;
+
+  /// No description provided for @qualityStageOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get qualityStageOutput;
+
+  /// No description provided for @qualityStageDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get qualityStageDevice;
+
+  /// No description provided for @qualityNativeEndToEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Plays at the file\'s own sample rate all the way through'**
+  String get qualityNativeEndToEnd;
+
+  /// No description provided for @qualityResampledBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Resampled from {from} to {to} on the way out'**
+  String qualityResampledBy(String from, String to);
+
+  /// No description provided for @qualitySectionSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source File'**
+  String get qualitySectionSource;
+
+  /// No description provided for @qualitySectionEngine.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback Engine'**
+  String get qualitySectionEngine;
+
+  /// No description provided for @qualitySectionDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Output Device'**
+  String get qualitySectionDevice;
+
+  /// No description provided for @qualitySectionPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'This Phone'**
+  String get qualitySectionPhone;
+
+  /// No description provided for @qualityOutputFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Output Format'**
+  String get qualityOutputFormat;
+
+  /// No description provided for @qualityOutputRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Output Sample Rate'**
+  String get qualityOutputRate;
+
+  /// No description provided for @qualityOutputChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'Output Channels'**
+  String get qualityOutputChannels;
+
+  /// No description provided for @qualityLiveBitrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Bitrate'**
+  String get qualityLiveBitrate;
+
+  /// No description provided for @qualityGapless.
+  ///
+  /// In en, this message translates to:
+  /// **'Gapless Playback'**
+  String get qualityGapless;
+
+  /// No description provided for @qualityReplayGain.
+  ///
+  /// In en, this message translates to:
+  /// **'ReplayGain'**
+  String get qualityReplayGain;
+
+  /// No description provided for @qualityReplayGainTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get qualityReplayGainTrack;
+
+  /// No description provided for @qualityReplayGainAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Album'**
+  String get qualityReplayGainAlbum;
+
+  /// No description provided for @qualitySpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get qualitySpeed;
+
+  /// No description provided for @qualityDeviceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get qualityDeviceName;
+
+  /// No description provided for @qualityDeviceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get qualityDeviceType;
+
+  /// No description provided for @qualityDeviceSpeaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone speaker'**
+  String get qualityDeviceSpeaker;
+
+  /// No description provided for @qualityDeviceWired.
+  ///
+  /// In en, this message translates to:
+  /// **'Wired headphones'**
+  String get qualityDeviceWired;
+
+  /// No description provided for @qualityDeviceBluetooth.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth'**
+  String get qualityDeviceBluetooth;
+
+  /// No description provided for @qualityDeviceUsb.
+  ///
+  /// In en, this message translates to:
+  /// **'USB audio'**
+  String get qualityDeviceUsb;
+
+  /// No description provided for @qualityDeviceHdmi.
+  ///
+  /// In en, this message translates to:
+  /// **'HDMI'**
+  String get qualityDeviceHdmi;
+
+  /// No description provided for @qualityDeviceHearingAid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hearing aid'**
+  String get qualityDeviceHearingAid;
+
+  /// No description provided for @qualityDeviceDock.
+  ///
+  /// In en, this message translates to:
+  /// **'Dock'**
+  String get qualityDeviceDock;
+
+  /// No description provided for @qualitySupportedRates.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported Rates'**
+  String get qualitySupportedRates;
+
+  /// No description provided for @qualityAnyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get qualityAnyRate;
+
+  /// No description provided for @qualityMaxBitDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Bit Depth'**
+  String get qualityMaxBitDepth;
+
+  /// No description provided for @qualityMaxChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Channels'**
+  String get qualityMaxChannels;
+
+  /// No description provided for @qualityBitPerfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Bit-perfect Mode'**
+  String get qualityBitPerfect;
+
+  /// No description provided for @qualitySupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported'**
+  String get qualitySupported;
+
+  /// No description provided for @qualityNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not supported'**
+  String get qualityNotSupported;
+
+  /// No description provided for @qualitySpatialAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Spatial Audio'**
+  String get qualitySpatialAudio;
+
+  /// No description provided for @qualityDeviceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Android doesn\'t tell apps which output a player is routed to, so this is the device it normally sends music to.'**
+  String get qualityDeviceNote;
+
+  /// No description provided for @qualityPhoneModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get qualityPhoneModel;
+
+  /// No description provided for @qualityAndroidVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Android Version'**
+  String get qualityAndroidVersion;
+
+  /// No description provided for @qualityMixerRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixer Sample Rate'**
+  String get qualityMixerRate;
+
+  /// No description provided for @qualityMixerBuffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixer Buffer'**
+  String get qualityMixerBuffer;
+
+  /// No description provided for @qualityLowLatency.
+  ///
+  /// In en, this message translates to:
+  /// **'Low-latency Audio'**
+  String get qualityLowLatency;
+
+  /// No description provided for @qualityProAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro Audio'**
+  String get qualityProAudio;
+
+  /// No description provided for @qualityDeviceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Device details are only available on Android.'**
+  String get qualityDeviceUnavailable;
+
   /// No description provided for @qualityLossless.
   ///
   /// In en, this message translates to:
@@ -4495,6 +4945,714 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mono'**
   String get mono;
+
+  /// No description provided for @progressBarStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress bar style'**
+  String get progressBarStyle;
+
+  /// No description provided for @progressBarStyleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Wave, thickness, thumb and more'**
+  String get progressBarStyleDesc;
+
+  /// No description provided for @progressBarPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get progressBarPreview;
+
+  /// No description provided for @progressWave.
+  ///
+  /// In en, this message translates to:
+  /// **'Wave'**
+  String get progressWave;
+
+  /// No description provided for @progressWaveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw the played part of the bar as a moving wave'**
+  String get progressWaveDesc;
+
+  /// No description provided for @progressWaveHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Wave height'**
+  String get progressWaveHeight;
+
+  /// No description provided for @progressWaveLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Wave length'**
+  String get progressWaveLength;
+
+  /// No description provided for @progressWaveLengthDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance from one wave to the next'**
+  String get progressWaveLengthDesc;
+
+  /// No description provided for @progressWaveSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wave speed'**
+  String get progressWaveSpeed;
+
+  /// No description provided for @progressWaveFromStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Wave from the start'**
+  String get progressWaveFromStart;
+
+  /// No description provided for @progressWaveFromStartDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the wave right away instead of after the first part of the song'**
+  String get progressWaveFromStartDesc;
+
+  /// No description provided for @progressKeepWavePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep wave when paused'**
+  String get progressKeepWavePaused;
+
+  /// No description provided for @progressKeepWavePausedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the wave still instead of flattening it'**
+  String get progressKeepWavePausedDesc;
+
+  /// No description provided for @progressBarThickness.
+  ///
+  /// In en, this message translates to:
+  /// **'Bar thickness'**
+  String get progressBarThickness;
+
+  /// No description provided for @progressThumb.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumb'**
+  String get progressThumb;
+
+  /// No description provided for @progressThumbPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Pill'**
+  String get progressThumbPill;
+
+  /// No description provided for @progressThumbRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Round'**
+  String get progressThumbRound;
+
+  /// No description provided for @progressThumbWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumb width'**
+  String get progressThumbWidth;
+
+  /// No description provided for @progressThumbHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumb height'**
+  String get progressThumbHeight;
+
+  /// No description provided for @progressThumbSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumb size'**
+  String get progressThumbSize;
+
+  /// No description provided for @progressThumbGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap around thumb'**
+  String get progressThumbGap;
+
+  /// No description provided for @progressTrackOpacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Unplayed track opacity'**
+  String get progressTrackOpacity;
+
+  /// No description provided for @progressGrowThumb.
+  ///
+  /// In en, this message translates to:
+  /// **'Grow thumb while dragging'**
+  String get progressGrowThumb;
+
+  /// No description provided for @resetToDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to defaults'**
+  String get resetToDefaults;
+
+  /// No description provided for @artworkVisualizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Artwork visualizer'**
+  String get artworkVisualizer;
+
+  /// No description provided for @artworkVisualizerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A music-reactive effect on the Now Playing artwork'**
+  String get artworkVisualizerDesc;
+
+  /// No description provided for @visualizerEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'Effect'**
+  String get visualizerEffect;
+
+  /// No description provided for @visualizerAura.
+  ///
+  /// In en, this message translates to:
+  /// **'Aura glow'**
+  String get visualizerAura;
+
+  /// No description provided for @visualizerRing.
+  ///
+  /// In en, this message translates to:
+  /// **'Spectrum ring'**
+  String get visualizerRing;
+
+  /// No description provided for @visualizerWave.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom wave'**
+  String get visualizerWave;
+
+  /// No description provided for @visualizerBars.
+  ///
+  /// In en, this message translates to:
+  /// **'Bars'**
+  String get visualizerBars;
+
+  /// No description provided for @visualizerBreathing.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathing'**
+  String get visualizerBreathing;
+
+  /// No description provided for @visualizerIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Intensity'**
+  String get visualizerIntensity;
+
+  /// No description provided for @visualizerSubtle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtle'**
+  String get visualizerSubtle;
+
+  /// No description provided for @visualizerNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get visualizerNormal;
+
+  /// No description provided for @visualizerStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong'**
+  String get visualizerStrong;
+
+  /// No description provided for @visualizerColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors'**
+  String get visualizerColors;
+
+  /// No description provided for @visualizerColorsArtwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Artwork'**
+  String get visualizerColorsArtwork;
+
+  /// No description provided for @visualizerColorsTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get visualizerColorsTheme;
+
+  /// No description provided for @visualizerColorsWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'White'**
+  String get visualizerColorsWhite;
+
+  /// No description provided for @progressTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get progressTrack;
+
+  /// No description provided for @visualizerSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio sync'**
+  String get visualizerSync;
+
+  /// No description provided for @visualizerSyncDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay the effect so it lands with what you hear. Raise it for Bluetooth headphones.'**
+  String get visualizerSyncDesc;
+
+  /// No description provided for @visualizerSyncHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Play a song to tune this by ear'**
+  String get visualizerSyncHint;
+
+  /// No description provided for @lyricsHighlightStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlight style'**
+  String get lyricsHighlightStyle;
+
+  /// No description provided for @lyricsStyleLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get lyricsStyleLine;
+
+  /// No description provided for @lyricsStyleWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Word by word'**
+  String get lyricsStyleWord;
+
+  /// No description provided for @lyricsStyleCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter by letter'**
+  String get lyricsStyleCharacter;
+
+  /// No description provided for @lyricsWordSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Word-synced'**
+  String get lyricsWordSynced;
+
+  /// No description provided for @lyricsLineSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Line-synced'**
+  String get lyricsLineSynced;
+
+  /// No description provided for @findWordSyncedLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Find word-synced lyrics'**
+  String get findWordSyncedLyrics;
+
+  /// No description provided for @searchingWordSyncedLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching lrc.red and LyricsPlus…'**
+  String get searchingWordSyncedLyrics;
+
+  /// No description provided for @wordSyncedLyricsLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Word-synced lyrics loaded'**
+  String get wordSyncedLyricsLoaded;
+
+  /// No description provided for @noWordSyncedLyricsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No word-synced lyrics found for this song'**
+  String get noWordSyncedLyricsFound;
+
+  /// No description provided for @lyricsTiming.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics timing'**
+  String get lyricsTiming;
+
+  /// No description provided for @lyricsTimingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive shows lyrics earlier, negative later. If lyrics run ahead of the song (common with Bluetooth), lower it.'**
+  String get lyricsTimingDesc;
+
+  /// No description provided for @lyricsTimingEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get lyricsTimingEarlier;
+
+  /// No description provided for @lyricsTimingLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get lyricsTimingLater;
+
+  /// No description provided for @lyricsTimingReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get lyricsTimingReset;
+
+  /// No description provided for @themeGroupColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors'**
+  String get themeGroupColors;
+
+  /// No description provided for @themeGroupBlurBackgrounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur & Backgrounds'**
+  String get themeGroupBlurBackgrounds;
+
+  /// No description provided for @themeGroupDarkness.
+  ///
+  /// In en, this message translates to:
+  /// **'Darkness'**
+  String get themeGroupDarkness;
+
+  /// No description provided for @themeGroupFonts.
+  ///
+  /// In en, this message translates to:
+  /// **'Fonts'**
+  String get themeGroupFonts;
+
+  /// No description provided for @themeGroupProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get themeGroupProfile;
+
+  /// No description provided for @lyricsTipsGestures.
+  ///
+  /// In en, this message translates to:
+  /// **'Gestures'**
+  String get lyricsTipsGestures;
+
+  /// No description provided for @lyricsTipsMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'In the ⋮ menu'**
+  String get lyricsTipsMenu;
+
+  /// No description provided for @gestureScroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll freely'**
+  String get gestureScroll;
+
+  /// No description provided for @gestureScrollDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-follow pauses while you browse. Tap Re-sync to jump back.'**
+  String get gestureScrollDesc;
+
+  /// No description provided for @tipFindWordSyncDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch per-word timing from lrc.red and LyricsPlus.'**
+  String get tipFindWordSyncDesc;
+
+  /// No description provided for @tipHighlightStyleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Line, word by word or letter by letter, for word-synced lyrics.'**
+  String get tipHighlightStyleDesc;
+
+  /// No description provided for @tipLyricsTimingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift lyrics earlier or later, handy with Bluetooth.'**
+  String get tipLyricsTimingDesc;
+
+  /// No description provided for @tipChangeProviderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong or missing lyrics? Try another source.'**
+  String get tipChangeProviderDesc;
+
+  /// No description provided for @tipOwnLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own lyrics'**
+  String get tipOwnLyrics;
+
+  /// No description provided for @tipOwnLyricsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Load an .lrc file, or export these lyrics to your device.'**
+  String get tipOwnLyricsDesc;
+
+  /// No description provided for @lyricsSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics Sources'**
+  String get lyricsSources;
+
+  /// No description provided for @creditLrcRedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Word-synced lyrics (default provider)'**
+  String get creditLrcRedDesc;
+
+  /// No description provided for @creditLyricsPlusDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Word-synced lyrics · open-source server by ibratabian17 (Apache-2.0), hosted by binimum'**
+  String get creditLyricsPlusDesc;
+
+  /// No description provided for @creditLrclibDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Line-synced lyrics · free, open lyrics database'**
+  String get creditLrclibDesc;
+
+  /// No description provided for @creditMusicBrainzDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Finds each song\'s ISRC so lrc.red can match it · open music database (CC0 data)'**
+  String get creditMusicBrainzDesc;
+
+  /// No description provided for @creditAmLyricsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspired our word-synced lyrics · by binimum (MPL-2.0)'**
+  String get creditAmLyricsDesc;
+
+  /// No description provided for @lyricsCopyrightNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics belong to their artists and rights holders. Looper only fetches them for personal display, and keeps them on your device.'**
+  String get lyricsCopyrightNote;
+
+  /// No description provided for @clearLyricsCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear lyrics cache'**
+  String get clearLyricsCache;
+
+  /// No description provided for @clearLyricsCacheDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded lyrics are kept until you clear them. Your own files and .lrc picks stay.'**
+  String get clearLyricsCacheDesc;
+
+  /// No description provided for @clearLyricsCacheConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all downloaded lyrics? Songs will look them up online again on their next play.'**
+  String get clearLyricsCacheConfirm;
+
+  /// No description provided for @lyricsCacheCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics cache cleared'**
+  String get lyricsCacheCleared;
+
+  /// No description provided for @analyzeYourTopSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Your #1 song'**
+  String get analyzeYourTopSong;
+
+  /// No description provided for @analyzeHighlights.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlights'**
+  String get analyzeHighlights;
+
+  /// No description provided for @analyzePeakTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak time'**
+  String get analyzePeakTime;
+
+  /// No description provided for @analyzeBusiestDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Busiest day'**
+  String get analyzeBusiestDay;
+
+  /// No description provided for @analyzeTopGenre.
+  ///
+  /// In en, this message translates to:
+  /// **'Top genre'**
+  String get analyzeTopGenre;
+
+  /// No description provided for @analyzeLibraryExplored.
+  ///
+  /// In en, this message translates to:
+  /// **'Library explored'**
+  String get analyzeLibraryExplored;
+
+  /// No description provided for @analyzeSongsOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{played} of {total} songs'**
+  String analyzeSongsOfTotal(int played, int total);
+
+  /// No description provided for @analyzeCurrentStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Current streak'**
+  String get analyzeCurrentStreak;
+
+  /// No description provided for @analyzeLongestStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest streak'**
+  String get analyzeLongestStreak;
+
+  /// No description provided for @daysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String daysCount(int count);
+
+  /// No description provided for @durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String durationHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @durationMinutesOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String durationMinutesOnly(int minutes);
+
+  /// No description provided for @analyzeAvgPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{avg} per day on average'**
+  String analyzeAvgPerDay(String avg);
+
+  /// No description provided for @dayPartMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning'**
+  String get dayPartMorning;
+
+  /// No description provided for @dayPartAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon'**
+  String get dayPartAfternoon;
+
+  /// No description provided for @dayPartEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening'**
+  String get dayPartEvening;
+
+  /// No description provided for @dayPartNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get dayPartNight;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateNow;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
+  /// No description provided for @updateInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get updateInstall;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @updateWhatsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get updateWhatsNew;
+
+  /// No description provided for @updateDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading update'**
+  String get updateDownloading;
+
+  /// No description provided for @updateVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying download…'**
+  String get updateVerifying;
+
+  /// No description provided for @updateWaitingForInstaller.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the installer…'**
+  String get updateWaitingForInstaller;
+
+  /// No description provided for @updateReadyToInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded and ready to install.'**
+  String get updateReadyToInstall;
+
+  /// No description provided for @updateErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed. Check your connection and try again.'**
+  String get updateErrorNetwork;
+
+  /// No description provided for @updateErrorChecksum.
+  ///
+  /// In en, this message translates to:
+  /// **'The download was corrupted. Please try again.'**
+  String get updateErrorChecksum;
+
+  /// No description provided for @updateErrorStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough free storage for the update.'**
+  String get updateErrorStorage;
+
+  /// No description provided for @updateErrorInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t install the update.'**
+  String get updateErrorInstall;
+
+  /// No description provided for @checkForUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get checkForUpdates;
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on the latest version.'**
+  String get updateUpToDate;
+
+  /// No description provided for @updateCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check for updates.'**
+  String get updateCheckFailed;
 }
 
 class _AppLocalizationsDelegate

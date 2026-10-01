@@ -33,7 +33,7 @@ class _PremiumLibraryFoldersList extends ConsumerWidget {
                   color: Colors.white60,
                 ),
                 onPressed: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.light();
                   if (Platform.isAndroid) {
                     SafFolderService.releaseFolder(path);
                   }

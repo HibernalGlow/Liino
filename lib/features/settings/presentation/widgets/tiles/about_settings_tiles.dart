@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -12,6 +11,10 @@ import 'package:looper_player/features/settings/presentation/providers/settings_
 
 import 'package:looper_player/core/providers/providers.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:looper_player/core/services/update/apk_update_notifier.dart';
+import 'package:looper_player/ui/widgets/sheets/apk_update_sheet.dart';
 
 class LooperVersionTile extends ConsumerWidget {
   const LooperVersionTile({super.key});
@@ -55,6 +58,8 @@ class LyricsProviderTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     final availableProviders = [
+      'lrc.red',
+      'LyricsPlus',
       'LRCLIB',
       'Genius',
       'Musixmatch',
@@ -77,13 +82,13 @@ class LyricsProviderTile extends ConsumerWidget {
         ),
       ),
       subtitle: Text(
-        providerUrls[currentProvider] ?? 'lrclib.net',
+        providerUrls[currentProvider] ?? 'lrc.red',
         style: AppFonts.jostStyle(color: Colors.white54, fontSize: 12),
       ),
       trailing: DropdownButton<String>(
         value: availableProviders.contains(currentProvider)
             ? currentProvider
-            : 'LRCLIB',
+            : 'lrc.red',
         dropdownColor: const Color(0xFF1A1A1A),
         underline: const SizedBox(),
         items: availableProviders.map((prov) {
@@ -129,7 +134,7 @@ class OpenSourceLicensesTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         Navigator.of(context, rootNavigator: true).push(
           MaterialPageRoute(
             builder: (context) => LicensePage(
@@ -179,12 +184,105 @@ class GitHubStarTile extends StatelessWidget {
         size: 18,
       ),
       onTap: () async {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         final Uri uri = Uri.parse(AppLinks.githubRepo);
         try {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         } catch (e) {}
       },
+    );
+  }
+}
+
+/// Manual update check for the github build (see [ApkInstaller.supported]);
+/// opens the in-app update sheet when a newer release exists.
+class CheckForUpdatesTile extends ConsumerStatefulWidget {
+  const CheckForUpdatesTile({super.key});
+
+  @override
+  ConsumerState<CheckForUpdatesTile> createState() =>
+      _CheckForUpdatesTileState();
+}
+
+class _CheckForUpdatesTileState extends ConsumerState<CheckForUpdatesTile> {
+  bool _checking = false;
+
+  Future<void> _check() async {
+    if (_checking) return;
+    AppHaptics.light();
+    setState(() => _checking = true);
+    final result = await ref.read(apkUpdateProvider.notifier).check();
+    if (!mounted) return;
+    setState(() => _checking = false);
+
+    if (result == ApkCheckResult.available) {
+      showApkUpdateSheet(context);
+      return;
+    }
+    final l10n = context.l10n;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          result == ApkCheckResult.upToDate
+              ? l10n.updateUpToDate
+              : l10n.updateCheckFailed,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final update = ref.watch(apkUpdateProvider);
+    final release = update.release;
+    final accentColor = Color(
+      ref.watch(settingsProvider.select((s) => s.accentColor)),
+    );
+
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: accentColor.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(LucideIcons.download, color: accentColor, size: 22),
+      ),
+      title: Text(
+        l10n.checkForUpdates,
+        style: AppFonts.jostStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: release == null
+          ? null
+          : Text(
+              l10n.updateAvailableOnGithub(release.tag),
+              style: AppFonts.jostStyle(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 12,
+              ),
+            ),
+      trailing: _checking || update.phase == ApkUpdatePhase.downloading
+          ? SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: accentColor,
+                value: _checking ? null : update.progress,
+              ),
+            )
+          : Icon(
+              LucideIcons.chevronRight,
+              color: Colors.white.withValues(alpha: 0.4),
+              size: 18,
+            ),
+      onTap: _check,
     );
   }
 }
@@ -290,7 +388,7 @@ class AboutMaintainerRow extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () async {
-              HapticFeedback.lightImpact();
+              AppHaptics.light();
               final Uri uri = Uri.parse(github);
               try {
                 await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -300,17 +398,13 @@ class AboutMaintainerRow extends StatelessWidget {
               width: 24,
               height: 24,
               alignment: Alignment.center,
-              child: SvgPicture.asset(
-                'assets/about/github_icon.svg',
-                width: 24,
-                height: 24,
-              ),
+              child: SvgPicture.asset(AppAssets.github, width: 24, height: 24),
             ),
           ),
           const SizedBox(width: 12),
           GestureDetector(
             onTap: () async {
-              HapticFeedback.lightImpact();
+              AppHaptics.light();
               final Uri uri = Uri.parse(telegram);
               try {
                 await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -320,10 +414,110 @@ class AboutMaintainerRow extends StatelessWidget {
               width: 24,
               height: 24,
               child: SvgPicture.asset(
-                'assets/about/telegram_icon.svg',
+                AppAssets.telegram,
                 width: 24,
                 height: 24,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Services and projects Looper's online lyrics rely on, credited in About on
+/// both Android and desktop. None publish terms of use, so each gets a name,
+/// what it provides, its license where it has one, and a link.
+typedef LyricsCredit = ({String name, String description, String url});
+
+List<LyricsCredit> lyricsCredits(AppLocalizations l10n) => [
+  (
+    name: 'lrc.red',
+    description: l10n.creditLrcRedDesc,
+    url: AppLinks.lrcRedWeb,
+  ),
+  (
+    name: 'LyricsPlus',
+    description: l10n.creditLyricsPlusDesc,
+    url: AppLinks.lyricsPlusSource,
+  ),
+  (name: 'LRCLIB', description: l10n.creditLrclibDesc, url: AppLinks.lrclibWeb),
+  (
+    name: 'MusicBrainz',
+    description: l10n.creditMusicBrainzDesc,
+    url: AppLinks.musicBrainzWeb,
+  ),
+  (
+    name: 'am-lyrics',
+    description: l10n.creditAmLyricsDesc,
+    url: AppLinks.amLyricsSource,
+  ),
+];
+
+class LyricsCreditsSection extends StatelessWidget {
+  final Color accentColor;
+
+  const LyricsCreditsSection({super.key, required this.accentColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.lyricsSources.toUpperCase(),
+            style: AppFonts.jostStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: accentColor.withValues(alpha: 0.8),
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final credit in lyricsCredits(l10n))
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () async {
+                AppHaptics.light();
+                try {
+                  await launchUrl(
+                    Uri.parse(credit.url),
+                    mode: LaunchMode.externalApplication,
+                  );
+                } catch (e) {}
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InfoSubTile(
+                        icon: LucideIcons.music,
+                        title: credit.name,
+                        description: credit.description,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      LucideIcons.externalLink,
+                      size: 14.s,
+                      color: Colors.white38,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.lyricsCopyrightNote,
+            style: AppFonts.jostStyle(
+              fontSize: 11,
+              height: 1.5,
+              color: Colors.white.withValues(alpha: 0.35),
             ),
           ),
         ],

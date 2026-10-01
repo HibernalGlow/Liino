@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// A squiggly Variant of the default [Slider] track.
@@ -38,11 +39,22 @@ class SquigglySliderTrackShape extends SliderTrackShape
     this.squiggleAmplitude = 0.0,
     this.squiggleWavelength = 0.0,
     this.squigglePhaseFactor = 1.0,
+    this.phase,
+    this.thumbGap,
   });
 
   final double squiggleAmplitude;
   final double squiggleWavelength;
   final double squigglePhaseFactor;
+
+  /// When set, the phase factor is read from here at paint time instead of
+  /// [squigglePhaseFactor], so the wave can move by repainting alone,
+  /// without rebuilding the Slider.
+  final ValueListenable<double>? phase;
+
+  /// Empty space between the thumb and each side of the track. Defaults to
+  /// 0.75x the thumb's width.
+  final double? thumbGap;
 
   @override
   void paint(
@@ -56,8 +68,6 @@ class SquigglySliderTrackShape extends SliderTrackShape
     Offset? secondaryOffset,
     bool isDiscrete = false,
     bool isEnabled = false,
-    final double thumbGap = 6,
-
     double additionalActiveTrackHeight = 0,
   }) {
     assert(sliderTheme.disabledActiveTrackColor != null);
@@ -120,7 +130,7 @@ class SquigglySliderTrackShape extends SliderTrackShape
         .getPreferredSize(true, false)
         .width;
 
-    final thumbGap = thumbWidth * 0.75;
+    final thumbGap = this.thumbGap ?? thumbWidth * 0.75;
     final lr = max(ll, thumbCenter.dx - thumbGap);
     final lb = (textDirection == TextDirection.ltr)
         ? trackRect.bottom + (additionalActiveTrackHeight / 2)
@@ -144,7 +154,8 @@ class SquigglySliderTrackShape extends SliderTrackShape
         leftTrackPaint,
       );
     } else {
-      final phase = squiggleWavelength * squigglePhaseFactor;
+      final phase =
+          squiggleWavelength * (this.phase?.value ?? squigglePhaseFactor);
       final double heightCenter = (lt + lb) / 2;
       final double startX = ll + radius;
       final double endX = lr - radius;

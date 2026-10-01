@@ -5,6 +5,7 @@ import 'package:looper_player/features/settings/presentation/providers/settings_
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
 
 class PremiumLoadingView extends ConsumerStatefulWidget {
   final String? message;
@@ -74,7 +75,7 @@ class _PremiumLoadingViewState extends ConsumerState<PremiumLoadingView> {
                   width: 400.s,
                   height: 300.s,
                   child: Lottie.asset(
-                    'assets/loading.json',
+                    AppAssets.loadingAnimation,
                     fit: BoxFit.contain,
                   ),
                 ),

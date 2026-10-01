@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/ui/widgets/common/app_loading_indicator.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
@@ -23,6 +22,7 @@ import 'package:looper_player/ui/android/player/equalizer/android_equalizer_scre
 import 'package:looper_player/ui/widgets/common/menu_option_tile.dart';
 import 'package:looper_player/ui/widgets/sheets/edit_song_sheet.dart';
 import 'package:looper_player/ui/widgets/sheets/sleep_timer_sheet_content.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 void showSongOptionsBottomSheet({
   required BuildContext context,
@@ -343,7 +343,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                         icon: LucideIcons.playCircle,
                         iconColor: accentColor,
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref.read(playbackProvider.notifier).addNext(song);
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -359,7 +359,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                         icon: LucideIcons.listPlus,
                         iconColor: accentColor,
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref.read(playbackProvider.notifier).addToQueue(song);
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -375,7 +375,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                         icon: LucideIcons.listMusic,
                         iconColor: accentColor,
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           Navigator.pop(context);
                           _showPlaylistSelector(parentContext, ref, l10n);
                         },
@@ -396,7 +396,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                             ? Colors.white70
                             : accentColor,
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           Navigator.pop(context);
                           showSleepTimerBottomSheet(parentContext, ref);
                         },
@@ -412,7 +412,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                             ? Colors.redAccent
                             : accentColor,
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref
                               .read(libraryProvider.notifier)
                               .toggleFavorite(song);
@@ -425,7 +425,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                           icon: LucideIcons.trash2,
                           iconColor: Colors.redAccent,
                           onTap: () async {
-                            HapticFeedback.mediumImpact();
+                            AppHaptics.medium();
                             final messenger = ScaffoldMessenger.of(context);
                             await PlaylistService.removeSongFromPlaylist(
                               playlist!,
@@ -447,7 +447,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                           icon: LucideIcons.edit3,
                           iconColor: accentColor,
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             Navigator.pop(context);
                             _showEditSongSheet(parentContext, ref);
                           },
@@ -458,7 +458,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                           icon: LucideIcons.sliders,
                           iconColor: accentColor,
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             Navigator.pop(context);
                             Navigator.push(
                               parentContext,
@@ -474,7 +474,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                         icon: LucideIcons.info,
                         iconColor: accentColor,
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           Navigator.pop(context);
                           showModalBottomSheet(
                             context: context,
@@ -492,7 +492,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                           icon: LucideIcons.activity,
                           iconColor: accentColor,
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            AppHaptics.light();
                             Navigator.pop(context);
                             Navigator.push(
                               context,
@@ -508,7 +508,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                         icon: LucideIcons.share2,
                         iconColor: accentColor,
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          AppHaptics.light();
                           ref.read(playbackProvider.notifier).shareSong(song);
                           Navigator.pop(context);
                         },
@@ -519,7 +519,7 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                           icon: LucideIcons.trash2,
                           iconColor: Colors.redAccent,
                           onTap: () {
-                            HapticFeedback.heavyImpact();
+                            AppHaptics.warning();
                             Navigator.pop(context);
                             _showDeleteDialog(parentContext, ref);
                           },

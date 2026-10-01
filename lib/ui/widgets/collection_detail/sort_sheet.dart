@@ -152,7 +152,7 @@ extension _CollectionSortSheet on CollectionDetailView {
 
     return InkWell(
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         ref
             .read(settingsProvider.notifier)
             .updateCollectionSortOptionIndex(value.index);

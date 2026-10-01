@@ -27,27 +27,19 @@ class FontFamilySelectionTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final l10n = AppLocalizations.of(context)!;
-    final availableFonts = [
-      'Jost',
-      'DM Sans',
-      'Poppins',
-      'Space Grotesk',
-      'Plus Jakarta Sans',
-      'Sora',
-      'Google Sans',
-    ];
+    const availableFonts = AppFonts.selectableFamilies;
 
     return ListTile(
       leading: const Icon(LucideIcons.type, color: Colors.white70),
       title: Text(l10n.selectFontFamily, style: _tileTitleStyle()),
       subtitle: Text(
-        l10n.activeFont(settings.customFontFamily ?? 'Jost'),
+        l10n.activeFont(settings.customFontFamily),
         style: _tileSubtitleStyle(),
       ),
       trailing: DropdownButton<String>(
         value: availableFonts.contains(settings.customFontFamily)
             ? settings.customFontFamily
-            : 'Jost',
+            : AppFonts.stackSansText,
         dropdownColor: const Color(0xFF1A1A1A),
         underline: const SizedBox(),
         items: availableFonts.map((font) {
@@ -103,7 +95,7 @@ class FontWeightSelectionTile extends ConsumerWidget {
                 final accentColor = Color(settings.accentColor);
                 return GestureDetector(
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     final newDelta = (w - 400) ~/ 100;
                     ref
                         .read(settingsProvider.notifier)
@@ -178,25 +170,21 @@ class LyricsFontFamilySelectionTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final l10n = AppLocalizations.of(context)!;
-    final availableFonts = [
-      'Sora',
-      'Jost',
-      'Space Grotesk',
-      'Plus Jakarta Sans',
-      'Google Sans',
-    ];
+    const availableFonts = AppFonts.selectableFamilies;
 
     return ListTile(
       leading: const Icon(LucideIcons.type, color: Colors.white70),
       title: Text(l10n.lyricsFontFamily, style: _tileTitleStyle()),
       subtitle: Text(
-        l10n.activeLyricsFont(settings.customFontFamilyLyrics ?? 'Sora'),
+        l10n.activeLyricsFont(
+          settings.customFontFamilyLyrics ?? AppFonts.stackSansText,
+        ),
         style: _tileSubtitleStyle(),
       ),
       trailing: DropdownButton<String>(
         value: availableFonts.contains(settings.customFontFamilyLyrics)
             ? settings.customFontFamilyLyrics
-            : 'Sora',
+            : AppFonts.stackSansText,
         dropdownColor: const Color(0xFF1A1A1A),
         underline: const SizedBox(),
         items: availableFonts.map((font) {
@@ -254,7 +242,7 @@ class LyricsFontWeightSelectionTile extends ConsumerWidget {
                 final accentColor = Color(settings.accentColor);
                 return GestureDetector(
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    AppHaptics.light();
                     final newDelta = (w - 700) ~/ 100;
                     ref
                         .read(settingsProvider.notifier)

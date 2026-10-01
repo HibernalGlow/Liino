@@ -7,25 +7,44 @@ class ScrollingText extends StatelessWidget {
   final double? height;
   final TextAlign textAlign;
 
+  /// Sizes every line by [style]'s own font alone, whatever glyphs the
+  /// text contains. Otherwise a line grows to fit its tallest fallback
+  /// font (emoji, CJK, other scripts), so a layout built around it shifts
+  /// from song to song. Glyphs reaching past the line box still paint.
+  final bool lockLineHeight;
+
   const ScrollingText({
     super.key,
     required this.text,
     required this.style,
     this.height,
     this.textAlign = TextAlign.start,
+    this.lockLineHeight = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final StrutStyle? strut = lockLineHeight
+        ? StrutStyle.fromTextStyle(style, forceStrutHeight: true)
+        : null;
     return LayoutBuilder(
       builder: (context, constraints) {
+        // Measured exactly as the Text below is drawn (same scale, strut
+        // and direction), so the scroll-or-fit decision and the marquee's
+        // height match the static text's.
         final textPainter = TextPainter(
           text: TextSpan(text: text, style: style),
           maxLines: 1,
-          textDirection: TextDirection.ltr,
+          textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
+          textScaler: textScaler,
+          strutStyle: strut,
         )..layout();
+        final bool overflows = textPainter.width > constraints.maxWidth;
+        final double measuredHeight = textPainter.height;
+        textPainter.dispose();
 
-        if (textPainter.width > constraints.maxWidth) {
+        if (overflows) {
           // Not a guessed fontSize * 1.5 - that under-measures scripts like
           // Devanagari, which need more vertical room than Latin text at the
           // same font size (ascent/descent plus vowel signs above and below
@@ -34,7 +53,7 @@ class ScrollingText extends StatelessWidget {
           // lyrics/titles. textPainter is already laid out for this exact
           // text+style above, so its measured height is exact.
           return SizedBox(
-            height: height ?? textPainter.height,
+            height: height ?? measuredHeight,
             child: Marqueer(
               pps: 30.0,
               infinity: true,
@@ -47,6 +66,7 @@ class ScrollingText extends StatelessWidget {
                 child: Text(
                   text,
                   style: style,
+                  strutStyle: strut,
                   textAlign: textAlign,
                   maxLines: 1,
                   overflow: TextOverflow.visible,
@@ -58,6 +78,7 @@ class ScrollingText extends StatelessWidget {
           return Text(
             text,
             style: style,
+            strutStyle: strut,
             textAlign: textAlign,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

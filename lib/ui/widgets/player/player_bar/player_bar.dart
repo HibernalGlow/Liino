@@ -14,6 +14,7 @@ import 'package:looper_player/features/settings/presentation/providers/settings_
 import '../../../android/player/equalizer/android_equalizer_screen.dart';
 import '../premium_progress_bar.dart';
 import 'equal_height_track_shape.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
 part 'bouncy_tap.dart';
 
 class PlayerBar extends ConsumerWidget {
@@ -267,7 +268,7 @@ class _PremiumPlayerBar extends ConsumerWidget {
         IconButton(
           onPressed: () => ref.read(playbackProvider.notifier).skipPrevious(),
           icon: SvgPicture.asset(
-            'assets/music_bar_Icons/prev_track.svg',
+            AppAssets.desktopPrevious,
             width: 12,
             height: 12,
             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
@@ -301,7 +302,7 @@ class _PremiumPlayerBar extends ConsumerWidget {
         IconButton(
           onPressed: () => ref.read(playbackProvider.notifier).skipNext(),
           icon: SvgPicture.asset(
-            'assets/music_bar_Icons/next_track.svg',
+            AppAssets.desktopNext,
             width: 12,
             height: 12,
             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
@@ -322,7 +323,7 @@ class _PremiumPlayerBar extends ConsumerWidget {
             onPressed: () =>
                 ref.read(playbackProvider.notifier).toggleShuffle(),
             icon: SvgPicture.asset(
-              'assets/music_bar_Icons/shuffle.svg',
+              AppAssets.desktopShuffle,
               width: 12,
               height: 12,
               colorFilter: ColorFilter.mode(
@@ -339,8 +340,8 @@ class _PremiumPlayerBar extends ConsumerWidget {
                 ref.read(playbackProvider.notifier).nextRepeatMode(),
             icon: SvgPicture.asset(
               repeatMode == RepeatMode.one
-                  ? 'assets/music_bar_Icons/repeat_1.svg'
-                  : 'assets/music_bar_Icons/repeat.svg',
+                  ? AppAssets.desktopRepeatOne
+                  : AppAssets.desktopRepeat,
               width: 12,
               height: 12,
               colorFilter: repeatMode == RepeatMode.one
@@ -375,9 +376,7 @@ class _PremiumPlayerBar extends ConsumerWidget {
             constraints: const BoxConstraints(),
             onPressed: () => ref.read(playbackProvider.notifier).toggleMute(),
             icon: SvgPicture.asset(
-              volume == 0
-                  ? 'assets/music_bar_Icons/mute.svg'
-                  : 'assets/music_bar_Icons/volume.svg',
+              volume == 0 ? AppAssets.desktopMute : AppAssets.desktopVolume,
               width: 12,
               height: 12,
               colorFilter: ColorFilter.mode(
@@ -431,9 +430,7 @@ class _PremiumPlayerBar extends ConsumerWidget {
         if (!isVeryNarrow)
           IconButton(
             icon: SvgPicture.asset(
-              isFavorite
-                  ? 'assets/music_bar_Icons/liked.svg'
-                  : 'assets/music_bar_Icons/like.svg',
+              isFavorite ? AppAssets.desktopLiked : AppAssets.desktopLike,
               width: 16,
               height: 16,
               colorFilter: ColorFilter.mode(
@@ -448,7 +445,7 @@ class _PremiumPlayerBar extends ConsumerWidget {
         const SizedBox(width: 4),
         IconButton(
           icon: SvgPicture.asset(
-            'assets/music_bar_Icons/lyrics.svg',
+            AppAssets.desktopLyrics,
             width: 16,
             height: 16,
             colorFilter: ColorFilter.mode(

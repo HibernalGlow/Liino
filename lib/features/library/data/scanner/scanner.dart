@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../../../../core/services/storage/db_service.dart';
 import 'package:isar_community/isar.dart';
+import '../../../playback/data/lyrics_fetcher.dart';
 import '../../../playback/data/metadata_service.dart';
 import '../services/artwork_downloader_service.dart';
 import '../services/saf_folder_service.dart';
@@ -296,6 +297,7 @@ class LibraryScanner {
     final durationMs = (mediaStoreData?['duration'] as num?)?.toInt();
     final trackNumber = (mediaStoreData?['track'] as num?)?.toInt();
     final year = (mediaStoreData?['year'] as num?)?.toInt();
+    final genre = _cleanGenre(mediaStoreData?['genre'] as String?);
 
     if (artist == null ||
         artist.trim().isEmpty ||
@@ -326,6 +328,7 @@ class LibraryScanner {
       ..title = cleanTitle
       ..artist = cleanArtist
       ..album = cleanAlbum
+      ..genre = genre
       ..duration = durationMs
       ..trackNumber = trackNumber
       ..year = year
@@ -380,7 +383,14 @@ class LibraryScanner {
         song.isFavorite = existingDbSong.isFavorite;
         song.hasCustomEqualizer = existingDbSong.hasCustomEqualizer;
         song.equalizerGains = existingDbSong.equalizerGains;
-        song.lyrics ??= existingDbSong.lyrics;
+        // A re-read that finds no genre (tag read timed out, MediaStore
+        // hasn't indexed it) shouldn't wipe one already known - e.g. the
+        // quick insert's MediaStore genre, or a user edit.
+        song.genre ??= existingDbSong.genre;
+        song.lyrics = LyricsFetcher.mergeScanned(
+          existingDbSong.lyrics,
+          song.lyrics,
+        );
       }
       songsToPut.add(song);
 
@@ -446,7 +456,12 @@ class LibraryScanner {
         .filter()
         .needsEnrichmentEqualTo(true)
         .findAll();
-    if (pending.isEmpty) return;
+    final genreless = await DbService.isar.songs
+        .filter()
+        .needsEnrichmentEqualTo(false)
+        .genreIsNull()
+        .findAll();
+    if (pending.isEmpty && genreless.isEmpty) return;
 
     final mediaStoreItems = await _queryMediaStoreNative(
       includeSystemAndMessagingAudio: includeSystemAndMessagingAudio,
@@ -461,6 +476,22 @@ class LibraryScanner {
         }
       }
     }
+
+    // Songs enriched before genre had any fallback were stored with none;
+    // fill those in from MediaStore (an in-memory lookup, no file I/O).
+    final backfilled = <Song>[];
+    for (final song in genreless) {
+      final item =
+          mediaStoreMap[song.path] ?? mediaStoreMap[p.canonicalize(song.path)];
+      final genre = _cleanGenre(item?['genre'] as String?);
+      if (genre != null) backfilled.add(song..genre = genre);
+    }
+    if (backfilled.isNotEmpty) {
+      await DbService.isar.writeTxn(() async {
+        await DbService.isar.songs.putAll(backfilled);
+      });
+    }
+    if (pending.isEmpty) return;
 
     final dbSongsMap = {for (final s in pending) s.path: s};
     final maps = await _loadNameMaps();
@@ -619,6 +650,39 @@ class LibraryScanner {
     }
   }
 
+  /// Genre via Android's MediaMetadataRetriever - the fallback for when
+  /// neither MetadataGod nor MediaStore produced one.
+  Future<String?> _fetchNativeGenre(
+    String path, {
+    required Duration timeout,
+  }) async {
+    try {
+      final genre = await _broadcastChannel
+          .invokeMethod<String>('getEmbeddedGenre', {'path': path})
+          .timeout(timeout);
+      return _cleanGenre(genre);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Trims [raw] and resolves bare ID3v1 genre codes ("17", "(17)") to
+  /// their names; empty or placeholder values become null so they're
+  /// grouped under the localized "Unknown" label instead.
+  static String? _cleanGenre(String? raw) {
+    var genre = raw?.trim();
+    if (genre == null || genre.isEmpty) return null;
+    final code = RegExp(r'^\(?(\d{1,3})\)?$').firstMatch(genre);
+    if (code != null) {
+      final index = int.parse(code.group(1)!);
+      if (index >= _id3v1Genres.length) return null;
+      genre = _id3v1Genres[index];
+    }
+    final lower = genre.toLowerCase();
+    if (lower == 'unknown' || lower == '<unknown>') return null;
+    return genre;
+  }
+
   /// [retry] is the second, one-at-a-time attempt enrichPendingSongs makes
   /// for a song whose first attempt reported `'transient': true` in its
   /// result - i.e. a tag or embedded-picture read timed out, which is not
@@ -646,7 +710,7 @@ class LibraryScanner {
       String? title = metadata?.title;
       String? artist = metadata?.artist;
       String? album = metadata?.album;
-      String? genre = metadata?.genre;
+      String? genre = _cleanGenre(metadata?.genre);
       int? durationMs = metadata?.durationMs?.toInt();
       int? trackNumber = metadata?.trackNumber;
       int? year = metadata?.year;
@@ -672,6 +736,14 @@ class LibraryScanner {
         if (year == null || year == 0) {
           year = (mediaStoreData['year'] as num?)?.toInt();
         }
+        genre ??= _cleanGenre(mediaStoreData['genre'] as String?);
+      }
+
+      // Genre had no fallback at all, unlike every other field above: when
+      // MetadataGod couldn't read the file (or timed out) every song ended
+      // up genre-less, so the Genres tab showed a single "Unknown" entry.
+      if (genre == null && Platform.isAndroid) {
+        genre = await _fetchNativeGenre(file.path, timeout: tagTimeout);
       }
 
       if (durationMs != null && durationMs < LibraryScanner.minDurationMs) {

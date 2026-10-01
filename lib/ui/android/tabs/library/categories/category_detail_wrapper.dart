@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/providers/navigation_provider.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
@@ -9,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'library_categories_views.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class CategoryDetailWrapper extends ConsumerWidget {
   final String title;
@@ -224,7 +224,7 @@ class CategoryDetailWrapper extends ConsumerWidget {
 
     return InkWell(
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         if (categoryType == 'album') {
           ref
               .read(settingsProvider.notifier)
@@ -353,7 +353,7 @@ class CategoryDetailWrapper extends ConsumerWidget {
                       width: 44,
                       height: 44,
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         _showSortBottomSheet(context, ref, title, l10n);
                       },
                       child: const Icon(

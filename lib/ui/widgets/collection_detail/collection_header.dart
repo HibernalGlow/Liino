@@ -65,7 +65,7 @@ extension _CollectionHeader on CollectionDetailView {
               height: 44,
               useExpanded: false,
               onTap: () {
-                HapticFeedback.mediumImpact();
+                AppHaptics.medium();
                 ref.read(playbackProvider.notifier).setPlaylist(songsToRender);
               },
               child: Row(
@@ -95,7 +95,7 @@ extension _CollectionHeader on CollectionDetailView {
               height: 44,
               useExpanded: false,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.light();
                 ref.read(playbackProvider.notifier).toggleShuffle();
                 ref.read(playbackProvider.notifier).setPlaylist(songsToRender);
               },
@@ -112,7 +112,7 @@ extension _CollectionHeader on CollectionDetailView {
               height: 44,
               useExpanded: false,
               onTap: () {
-                HapticFeedback.lightImpact();
+                AppHaptics.light();
                 _showSortBottomSheet(context, ref);
               },
               child: const Icon(
@@ -144,7 +144,7 @@ extension _CollectionHeader on CollectionDetailView {
                 height: 44,
                 useExpanded: false,
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  AppHaptics.light();
                   _showEditAlbumSheet(context, ref, reactiveAlbum);
                 },
                 child: const Icon(

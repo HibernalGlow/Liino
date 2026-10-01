@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -8,6 +7,7 @@ import 'package:looper_player/core/services/storage/db_service.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/ui/widgets/sheets/app_bottom_sheet.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 void showCustomColorPicker(
   BuildContext context,
@@ -73,7 +73,7 @@ void showCustomColorPicker(
                   children: [
                     TextButton(
                       onPressed: () {
-                        HapticFeedback.mediumImpact();
+                        AppHaptics.medium();
                         Navigator.pop(context);
                       },
                       child: Text(
@@ -187,7 +187,7 @@ void showReorderBottomSheet(
                     buildDefaultDragHandles: false,
                     itemCount: currentOrder.length,
                     onReorder: (oldIndex, newIndex) {
-                      HapticFeedback.lightImpact();
+                      AppHaptics.light();
                       setModalState(() {
                         if (oldIndex < newIndex) {
                           newIndex -= 1;
@@ -282,7 +282,7 @@ void showReorderBottomSheet(
                       ),
                     ),
                     onPressed: () {
-                      HapticFeedback.mediumImpact();
+                      AppHaptics.medium();
                       Navigator.pop(context);
                     },
                     child: Text(

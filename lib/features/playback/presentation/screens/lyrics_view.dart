@@ -2,21 +2,36 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/library/domain/models/models.dart';
 import 'package:looper_player/features/playback/presentation/providers/lyrics/lyrics_notifier.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
+import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
-import 'package:looper_player/ui/widgets/common/app_loading_indicator.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../widgets/lyrics/advanced_lyric_renderer.dart';
+import '../widgets/lyrics/lyrics_skeleton.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
-enum LyricsSyncMode { line, word, char }
+enum LyricsSyncMode {
+  line,
+  word,
+  char;
+
+  /// From AppSettings.lyricsSyncStyle. Unknown/empty (installs from before
+  /// the setting existed) means the default, the character wipe.
+  static LyricsSyncMode fromSetting(String value) => switch (value) {
+    'line' => LyricsSyncMode.line,
+    'word' => LyricsSyncMode.word,
+    _ => LyricsSyncMode.char,
+  };
+
+  String get settingValue => name;
+}
 
 class LyricsView extends ConsumerStatefulWidget {
   const LyricsView({super.key});
@@ -26,7 +41,13 @@ class LyricsView extends ConsumerStatefulWidget {
 }
 
 class _LyricsViewState extends ConsumerState<LyricsView> {
-  LyricsSyncMode _syncMode = LyricsSyncMode.line;
+  LyricsSyncMode get _syncMode => LyricsSyncMode.fromSetting(
+    ref.watch(settingsProvider.select((s) => s.lyricsSyncStyle)),
+  );
+
+  void _setSyncMode(LyricsSyncMode mode) => ref
+      .read(settingsProvider.notifier)
+      .updateLyricsSyncStyle(mode.settingValue);
 
   @override
   void initState() {
@@ -62,18 +83,34 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       children: [
         Column(
           children: [
-            if (_syncMode != LyricsSyncMode.line) _buildDisclaimer(l10n),
             Expanded(
-              child: lyricsState.isLoading
-                  ? const AppLoadingIndicator(size: 220.0)
-                  : lyricsState.rawLrc == null
-                  ? _buildNoLyricsState(context, l10n, primaryColor)
-                  : AdvancedLyricRenderer(
-                      lines: lyricsState.parsedLines,
-                      mode: _syncMode,
-                      onSeek: (pos) =>
-                          ref.read(playbackProvider.notifier).seek(pos),
-                    ),
+              // Cross-fades between the three states. The keys are fixed per
+              // state, so new lines for the same state (an offset change,
+              // a word-sync upgrade) update the renderer in place instead
+              // of fading it out and back in.
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                layoutBuilder: (current, previous) => Stack(
+                  fit: StackFit.expand,
+                  children: [...previous, ?current],
+                ),
+                child: lyricsState.isLoading
+                    ? const LyricsSkeleton(key: ValueKey('loading'))
+                    : lyricsState.rawLrc == null
+                    ? KeyedSubtree(
+                        key: const ValueKey('empty'),
+                        child: _buildNoLyricsState(context, l10n, primaryColor),
+                      )
+                    : AdvancedLyricRenderer(
+                        key: const ValueKey('lyrics'),
+                        lines: lyricsState.parsedLines,
+                        mode: _syncMode,
+                        onSeek: (pos) =>
+                            ref.read(playbackProvider.notifier).seek(pos),
+                      ),
+              ),
             ),
           ],
         ),
@@ -189,7 +226,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
 
   Future<void> _importLyricsFile(BuildContext context, Song song) async {
     final l10n = AppLocalizations.of(context)!;
-    HapticFeedback.mediumImpact();
+    AppHaptics.medium();
     try {
       final result = await FilePicker.pickFile(
         type: FileType.custom,
@@ -204,43 +241,19 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       await ref.read(lyricsProvider.notifier).applyCustomLyrics(song, content);
 
       if (mounted) {
+        AppHaptics.success();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.customLyricsAppliedSuccess)),
         );
       }
     } catch (e) {
       if (mounted) {
+        AppHaptics.error();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.failedToImportLyrics('$e'))),
         );
       }
     }
-  }
-
-  Widget _buildDisclaimer(AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.info_outline, size: 12, color: Colors.orange),
-          const SizedBox(width: 6),
-          Text(
-            l10n.approximatedSyncNoWordTimings,
-            style: AppFonts.spaceGroteskStyle(
-              fontSize: 10,
-              color: Colors.orange,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildModeSelector([bool isShort = false]) {
@@ -259,7 +272,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
             isSelected: _syncMode == LyricsSyncMode.line,
             isShort: isShort,
             onTap: () {
-              setState(() => _syncMode = LyricsSyncMode.line);
+              _setSyncMode(LyricsSyncMode.line);
             },
           ),
           _ModeButton(
@@ -267,7 +280,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
             isSelected: _syncMode == LyricsSyncMode.word,
             isShort: isShort,
             onTap: () {
-              setState(() => _syncMode = LyricsSyncMode.word);
+              _setSyncMode(LyricsSyncMode.word);
             },
           ),
           _ModeButton(
@@ -275,7 +288,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
             isSelected: _syncMode == LyricsSyncMode.char,
             isShort: isShort,
             onTap: () {
-              setState(() => _syncMode = LyricsSyncMode.char);
+              _setSyncMode(LyricsSyncMode.char);
             },
           ),
         ],

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/services/storage/import_export_service.dart';
 import 'package:looper_player/core/utils/logger_helper.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class ExportBackupTile extends ConsumerWidget {
   const ExportBackupTile({super.key});
@@ -23,7 +23,7 @@ class ExportBackupTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         ImportExportService.exportLibraryData(context);
       },
     );
@@ -46,7 +46,7 @@ class ImportBackupTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         ImportExportService.importLibraryData(context, ref);
       },
     );
@@ -72,7 +72,7 @@ class ExportLogsTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         LoggerHelper.exportLogs();
       },
     );
@@ -104,7 +104,7 @@ class ClearLogsTile extends ConsumerWidget {
         size: 16,
       ),
       onTap: () async {
-        HapticFeedback.mediumImpact();
+        AppHaptics.medium();
         await LoggerHelper.clearLogs();
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

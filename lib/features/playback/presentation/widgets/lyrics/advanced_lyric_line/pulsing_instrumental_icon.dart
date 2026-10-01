@@ -4,8 +4,9 @@ part of 'advanced_lyric_line.dart';
 /// same glyph the inactive and already-played instrumental symbols use, but
 /// pulsing with a soft glow and a gentle bounce for as long as this line
 /// stays active, so the animation itself (not a different symbol) is what
-/// marks it as the current one.
-class _PulsingInstrumentalIcon extends StatefulWidget {
+/// marks it as the current one. While playback is paused the pulse eases
+/// back to rest (no glow, no bounce) and picks up again on resume.
+class _PulsingInstrumentalIcon extends ConsumerStatefulWidget {
   const _PulsingInstrumentalIcon({required this.color, required this.style});
 
   /// Color of the glow halo behind the symbol - the symbol's own color
@@ -14,16 +15,36 @@ class _PulsingInstrumentalIcon extends StatefulWidget {
   final TextStyle style;
 
   @override
-  State<_PulsingInstrumentalIcon> createState() =>
+  ConsumerState<_PulsingInstrumentalIcon> createState() =>
       _PulsingInstrumentalIconState();
 }
 
-class _PulsingInstrumentalIconState extends State<_PulsingInstrumentalIcon>
+class _PulsingInstrumentalIconState
+    extends ConsumerState<_PulsingInstrumentalIcon>
     with SingleTickerProviderStateMixin {
+  static const _beat = Duration(milliseconds: 900);
+
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..repeat(reverse: true);
+    duration: _beat,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (ref.read(playbackProvider).isPlaying) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  void _syncWithPlayback(bool playing) {
+    if (playing) {
+      if (!_controller.isAnimating) _controller.repeat(reverse: true);
+    } else {
+      // Settle back down instead of freezing mid-glow.
+      _controller.animateTo(0, duration: _beat * _controller.value);
+    }
+  }
 
   @override
   void dispose() {
@@ -33,6 +54,10 @@ class _PulsingInstrumentalIconState extends State<_PulsingInstrumentalIcon>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      playbackProvider.select((s) => s.isPlaying),
+      (_, playing) => _syncWithPlayback(playing),
+    );
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {

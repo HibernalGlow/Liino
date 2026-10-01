@@ -4,7 +4,7 @@ description: "Looper Player - A powerful music player."
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 2.7.0+30
+version: 2.7.2+35
 
 environment:
   sdk: ^3.11.0
@@ -51,6 +51,7 @@ dependencies:
   permission_handler: ^11.3.1
   file_picker: ^12.3.0
   http: ^1.6.0
+  xml: ^6.6.1
   cached_network_image: ^3.4.1
   share_plus: ^13.3.0
   marqueer: ^2.5.0
@@ -62,6 +63,10 @@ dependencies:
   metadata_god: ^1.1.0
   appambit_sdk_flutter: ^1.2.0
   gal: ^2.3.3
+  haptic_feedback: ^0.8.0
+  vibration: ^3.2.1
+  skeletonizer: ^3.0.0
+  crypto: ^3.0.7
 
 
 dev_dependencies:
@@ -78,139 +83,169 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: "assets/launcher_logo.png"
+  image_path: "assets/branding/launcher_icon.png"
   adaptive_icon_background: "#242424" #55DF69"
-  adaptive_icon_foreground: "assets/launcher_logo_adaptive.png"
+  adaptive_icon_foreground: "assets/branding/launcher_icon_adaptive.png"
   adaptive_icon_foreground_inset: 0
   min_sdk_android: 21
 
 flutter:
   generate: true
   uses-material-design: true
+  # Only runtime assets are bundled. assets/branding/ holds build-time
+  # artwork (launcher + Linux icons, README logos) and is intentionally
+  # left out.
   assets:
-    - assets/
-    - assets/music_bar_Icons/
-    - assets/side_bar/
-    - assets/about/
-    - assets/android_icons/
-    - assets/android_icons/avatars/
+    - assets/animations/
+    - assets/avatars/
+    - assets/icons/android/
+    - assets/icons/desktop/
+    - assets/icons/social/
+    - assets/images/
+    - assets/images/about/
   shaders:
     - media/shaders/ambient_noise.frag
   fonts:
     - family: Jost
       fonts:
-        - asset: assets/fonts/Jost/static/Jost-Thin.ttf
+        - asset: assets/fonts/jost/Jost-Thin.ttf
           weight: 100
-        - asset: assets/fonts/Jost/static/Jost-ExtraLight.ttf
+        - asset: assets/fonts/jost/Jost-ExtraLight.ttf
           weight: 200
-        - asset: assets/fonts/Jost/static/Jost-Light.ttf
+        - asset: assets/fonts/jost/Jost-Light.ttf
           weight: 300
-        - asset: assets/fonts/Jost/static/Jost-Regular.ttf
+        - asset: assets/fonts/jost/Jost-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Jost/static/Jost-Medium.ttf
+        - asset: assets/fonts/jost/Jost-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Jost/static/Jost-SemiBold.ttf
+        - asset: assets/fonts/jost/Jost-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Jost/static/Jost-Bold.ttf
+        - asset: assets/fonts/jost/Jost-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Jost/static/Jost-ExtraBold.ttf
+        - asset: assets/fonts/jost/Jost-ExtraBold.ttf
           weight: 800
-        - asset: assets/fonts/Jost/static/Jost-Black.ttf
+        - asset: assets/fonts/jost/Jost-Black.ttf
           weight: 900
     - family: Poppins
       fonts:
-        - asset: assets/fonts/Poppins/Poppins-Thin.ttf
+        - asset: assets/fonts/poppins/Poppins-Thin.ttf
           weight: 100
-        - asset: assets/fonts/Poppins/Poppins-ExtraLight.ttf
+        - asset: assets/fonts/poppins/Poppins-ExtraLight.ttf
           weight: 200
-        - asset: assets/fonts/Poppins/Poppins-Light.ttf
+        - asset: assets/fonts/poppins/Poppins-Light.ttf
           weight: 300
-        - asset: assets/fonts/Poppins/Poppins-Regular.ttf
+        - asset: assets/fonts/poppins/Poppins-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Poppins/Poppins-Medium.ttf
+        - asset: assets/fonts/poppins/Poppins-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Poppins/Poppins-SemiBold.ttf
+        - asset: assets/fonts/poppins/Poppins-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Poppins/Poppins-Bold.ttf
+        - asset: assets/fonts/poppins/Poppins-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Poppins/Poppins-ExtraBold.ttf
+        - asset: assets/fonts/poppins/Poppins-ExtraBold.ttf
           weight: 800
-        - asset: assets/fonts/Poppins/Poppins-Black.ttf
+        - asset: assets/fonts/poppins/Poppins-Black.ttf
           weight: 900
     - family: Space Grotesk
       fonts:
-        - asset: assets/fonts/Space_Grotesk/static/SpaceGrotesk-Light.ttf
+        - asset: assets/fonts/space_grotesk/SpaceGrotesk-Light.ttf
           weight: 300
-        - asset: assets/fonts/Space_Grotesk/static/SpaceGrotesk-Regular.ttf
+        - asset: assets/fonts/space_grotesk/SpaceGrotesk-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Space_Grotesk/static/SpaceGrotesk-Medium.ttf
+        - asset: assets/fonts/space_grotesk/SpaceGrotesk-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Space_Grotesk/static/SpaceGrotesk-SemiBold.ttf
+        - asset: assets/fonts/space_grotesk/SpaceGrotesk-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Space_Grotesk/static/SpaceGrotesk-Bold.ttf
+        - asset: assets/fonts/space_grotesk/SpaceGrotesk-Bold.ttf
           weight: 700
     - family: DM Sans
       fonts:
-        - asset: assets/fonts/DM_Sans/static/DMSans-Thin.ttf
+        - asset: assets/fonts/dm_sans/DMSans-Thin.ttf
           weight: 100
-        - asset: assets/fonts/DM_Sans/static/DMSans-ExtraLight.ttf
+        - asset: assets/fonts/dm_sans/DMSans-ExtraLight.ttf
           weight: 200
-        - asset: assets/fonts/DM_Sans/static/DMSans-Light.ttf
+        - asset: assets/fonts/dm_sans/DMSans-Light.ttf
           weight: 300
-        - asset: assets/fonts/DM_Sans/static/DMSans-Regular.ttf
+        - asset: assets/fonts/dm_sans/DMSans-Regular.ttf
           weight: 400
-        - asset: assets/fonts/DM_Sans/static/DMSans-Medium.ttf
+        - asset: assets/fonts/dm_sans/DMSans-Medium.ttf
           weight: 500
-        - asset: assets/fonts/DM_Sans/static/DMSans-SemiBold.ttf
+        - asset: assets/fonts/dm_sans/DMSans-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/DM_Sans/static/DMSans-Bold.ttf
+        - asset: assets/fonts/dm_sans/DMSans-Bold.ttf
           weight: 700
-        - asset: assets/fonts/DM_Sans/static/DMSans-ExtraBold.ttf
+        - asset: assets/fonts/dm_sans/DMSans-ExtraBold.ttf
           weight: 800
-        - asset: assets/fonts/DM_Sans/static/DMSans-Black.ttf
+        - asset: assets/fonts/dm_sans/DMSans-Black.ttf
           weight: 900
     - family: Plus Jakarta Sans
       fonts:
-        - asset: assets/fonts/Plus_Jakarta_Sans/static/PlusJakartaSans-ExtraLight.ttf
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-ExtraLight.ttf
           weight: 200
-        - asset: assets/fonts/Plus_Jakarta_Sans/static/PlusJakartaSans-Light.ttf
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-Light.ttf
           weight: 300
-        - asset: assets/fonts/Plus_Jakarta_Sans/static/PlusJakartaSans-Regular.ttf
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Plus_Jakarta_Sans/static/PlusJakartaSans-Medium.ttf
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Plus_Jakarta_Sans/static/PlusJakartaSans-SemiBold.ttf
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Plus_Jakarta_Sans/static/PlusJakartaSans-Bold.ttf
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Plus_Jakarta_Sans/static/PlusJakartaSans-ExtraBold.ttf
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-ExtraBold.ttf
           weight: 800
     - family: Sora
       fonts:
-        - asset: assets/fonts/Sora/static/Sora-Thin.ttf
+        - asset: assets/fonts/sora/Sora-Thin.ttf
           weight: 100
-        - asset: assets/fonts/Sora/static/Sora-ExtraLight.ttf
+        - asset: assets/fonts/sora/Sora-ExtraLight.ttf
           weight: 200
-        - asset: assets/fonts/Sora/static/Sora-Light.ttf
+        - asset: assets/fonts/sora/Sora-Light.ttf
           weight: 300
-        - asset: assets/fonts/Sora/static/Sora-Regular.ttf
+        - asset: assets/fonts/sora/Sora-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Sora/static/Sora-Medium.ttf
+        - asset: assets/fonts/sora/Sora-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Sora/static/Sora-SemiBold.ttf
+        - asset: assets/fonts/sora/Sora-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Sora/static/Sora-Bold.ttf
+        - asset: assets/fonts/sora/Sora-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Sora/static/Sora-ExtraBold.ttf
+        - asset: assets/fonts/sora/Sora-ExtraBold.ttf
           weight: 800
     - family: Google Sans
       fonts:
-        - asset: assets/fonts/Google_Sans/static/GoogleSans-Regular.ttf
+        - asset: assets/fonts/google_sans/GoogleSans-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Google_Sans/static/GoogleSans-Medium.ttf
+        - asset: assets/fonts/google_sans/GoogleSans-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Google_Sans/static/GoogleSans-SemiBold.ttf
+        - asset: assets/fonts/google_sans/GoogleSans-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Google_Sans/static/GoogleSans-Bold.ttf
+        - asset: assets/fonts/google_sans/GoogleSans-Bold.ttf
+          weight: 700
+    - family: Noto Sans Devanagari
+      fonts:
+        - asset: assets/fonts/noto_sans_devanagari/NotoSansDevanagari-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/noto_sans_devanagari/NotoSansDevanagari-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/noto_sans_devanagari/NotoSansDevanagari-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/noto_sans_devanagari/NotoSansDevanagari-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/noto_sans_devanagari/NotoSansDevanagari-ExtraBold.ttf
+          weight: 800
+    - family: Stack Sans Text
+      fonts:
+        - asset: assets/fonts/stack_sans_text/StackSansText-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/stack_sans_text/StackSansText-Light.ttf
+          weight: 300
+        - asset: assets/fonts/stack_sans_text/StackSansText-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/stack_sans_text/StackSansText-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/stack_sans_text/StackSansText-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/stack_sans_text/StackSansText-Bold.ttf
           weight: 700
 

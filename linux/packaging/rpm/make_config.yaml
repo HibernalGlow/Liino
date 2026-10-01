@@ -10,7 +10,7 @@ url: https://github.com/nilshaaa/looper_player
 vendor: nilshaaa
 packager: nilshaaa
 packagerEmail: nilshaaa@example.com
-icon: assets/logo_linux.png
+icon: assets/branding/linux_icon.png
 categories:
   - AudioVideo
   - Audio

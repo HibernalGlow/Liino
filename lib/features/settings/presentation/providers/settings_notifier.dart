@@ -1,10 +1,14 @@
 import 'dart:io';
 import 'package:isar_community/isar.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../../core/services/haptics/app_haptics.dart';
 import '../../../../core/services/storage/db_service.dart';
 
 import '../../../library/data/services/artwork_downloader_service.dart';
 import '../../../../core/theme/app_fonts.dart';
+import '../../domain/artwork_visualizer_style.dart';
+import '../../domain/quality_badge_style.dart';
+import '../../domain/progress_bar_style.dart';
 
 part 'settings_notifier.g.dart';
 
@@ -14,6 +18,7 @@ class Settings extends _$Settings {
 
   @override
   AppSettings build() {
+    listenSelf((_, next) => AppHaptics.enabled = !next.disableHaptics);
     initialization = _loadSettings();
     return AppSettings();
   }
@@ -97,6 +102,32 @@ class Settings extends _$Settings {
         settings.settingsV3 = true;
         needsSave = true;
       }
+      if (!settings.lyricsOffsetEarlierMigrated) {
+        // The offset used to mean positive = later. 0 and the old default
+        // (+200 later) are taken as untouched and get the new default
+        // (+200 earlier); anything else keeps its effect by flipping sign.
+        final int old = settings.lyricsOffsetMs;
+        settings.lyricsOffsetMs = old == 0 || old == 200
+            ? AppSettings.defaultLyricsOffsetMs
+            : -old;
+        settings.lyricsOffsetEarlierMigrated = true;
+        needsSave = true;
+      }
+      if (!settings.stackSansDefaultMigrated) {
+        final font = settings.customFontFamily;
+        if (font.isEmpty || font == 'Space Grotesk') {
+          settings.customFontFamily = AppFonts.stackSansText;
+        }
+        settings.stackSansDefaultMigrated = true;
+        needsSave = true;
+      }
+      if (!settings.lyricsProviderWordSyncMigrated) {
+        if (settings.lyricsProvider == 'LRCLIB') {
+          settings.lyricsProvider = 'lrc.red';
+        }
+        settings.lyricsProviderWordSyncMigrated = true;
+        needsSave = true;
+      }
       if (settings.homeSectionOrder.isEmpty) {
         settings.homeSectionOrder = [
           'quick_picks',
@@ -127,6 +158,9 @@ class Settings extends _$Settings {
       // Initialize default settings
       // Default to off on Android, but enabled on Linux
       final defaultSettings = AppSettings()
+        ..lyricsProviderWordSyncMigrated = true
+        ..lyricsOffsetEarlierMigrated = true
+        ..stackSansDefaultMigrated = true
         ..enableDynamicTheming = !Platform.isAndroid
         ..bgBrightness = 0.5
         ..bgOpacity = 0.3
@@ -146,7 +180,7 @@ class Settings extends _$Settings {
         ..songsDarkness = 0.72
         ..libraryDarkness = 0.72
         ..musicDarkness = 0.62
-        ..lyricsDarkness = 0.55
+        ..lyricsDarkness = 0.35
         ..showQualityBadge = true
         ..enablePlayerGradient = true
         ..settingsV2 = true
@@ -177,8 +211,10 @@ class Settings extends _$Settings {
   void _updateActiveFont([AppSettings? customState]) {
     final activeState = customState ?? state;
     AppFonts.activeFontFamily = activeState.useNewFont
-        ? (activeState.customFontFamily ?? 'Jost')
-        : 'DM Sans';
+        ? (activeState.customFontFamily.isEmpty
+              ? AppFonts.stackSansText
+              : activeState.customFontFamily)
+        : 'Stack Sans Text';
     AppFonts.appFontWeightDelta = activeState.useNewFont
         ? activeState.customFontWeightDelta
         : 0;
@@ -232,6 +268,22 @@ class Settings extends _$Settings {
       ..audioFocusRestartOnGain = s.audioFocusRestartOnGain
       ..disableSquiggle = s.disableSquiggle
       ..disableAnimatedDuration = s.disableAnimatedDuration
+      ..progressBarThickness = s.progressBarThickness
+      ..progressWaveHeight = s.progressWaveHeight
+      ..progressWaveLength = s.progressWaveLength
+      ..progressWaveSpeed = s.progressWaveSpeed
+      ..progressThumbStyle = s.progressThumbStyle
+      ..progressThumbWidth = s.progressThumbWidth
+      ..progressThumbHeight = s.progressThumbHeight
+      ..progressThumbGap = s.progressThumbGap
+      ..progressInactiveOpacity = s.progressInactiveOpacity
+      ..progressWaveFromStart = s.progressWaveFromStart
+      ..progressFreezeWhenPaused = s.progressFreezeWhenPaused
+      ..progressGrowThumbOnDrag = s.progressGrowThumbOnDrag
+      ..artworkVisualizer = s.artworkVisualizer
+      ..artworkVisualizerIntensity = s.artworkVisualizerIntensity
+      ..artworkVisualizerColors = s.artworkVisualizerColors
+      ..artworkVisualizerSyncMs = s.artworkVisualizerSyncMs
       ..disableBlur = s.disableBlur
       ..alwaysBlurSheets = s.alwaysBlurSheets
       ..enableInternet = s.enableInternet
@@ -239,8 +291,17 @@ class Settings extends _$Settings {
       ..includeSystemAndMessagingAudio = s.includeSystemAndMessagingAudio
       ..keepBackgroundGradient = s.keepBackgroundGradient
       ..showQualityBadge = s.showQualityBadge
+      ..qualityBadgeLook = s.qualityBadgeLook
+      ..qualityBadgeIcon = s.qualityBadgeIcon
+      ..qualityBadgeColors = s.qualityBadgeColors
+      ..qualityBadgeSeparator = s.qualityBadgeSeparator
+      ..qualityBadgeShape = s.qualityBadgeShape
+      ..qualityBadgeLayout = s.qualityBadgeLayout
+      ..qualityBadgeFields = s.qualityBadgeFields
       ..enablePlayerGradient = s.enablePlayerGradient
       ..animatePlayerGradient = s.animatePlayerGradient
+      ..segmentedUtilityButtons = s.segmentedUtilityButtons
+      ..disableHaptics = s.disableHaptics
       ..animateBackgroundGradient = s.animateBackgroundGradient
       ..settingsV2 = s.settingsV2
       ..settingsV3 = s.settingsV3
@@ -269,6 +330,8 @@ class Settings extends _$Settings {
       ..resumeOnStart = s.resumeOnStart
       ..permanentAudioFocusChange = s.permanentAudioFocusChange
       ..dynamicColorActiveLyrics = s.dynamicColorActiveLyrics
+      ..activeLyricsIntensity = s.activeLyricsIntensity
+      ..activeLyricsSoftColor = s.activeLyricsSoftColor
       ..ambientColorBackground = s.ambientColorBackground
       ..lyricsAlignment = s.lyricsAlignment
       ..dynamicAccentColor = s.dynamicAccentColor
@@ -308,6 +371,11 @@ class Settings extends _$Settings {
       ..exclusiveHardwareMode = s.exclusiveHardwareMode
       ..lyricsProvider = s.lyricsProvider
       ..autoLyricsFallback = s.autoLyricsFallback
+      ..lyricsProviderWordSyncMigrated = s.lyricsProviderWordSyncMigrated
+      ..lyricsSyncStyle = s.lyricsSyncStyle
+      ..lyricsOffsetMs = s.lyricsOffsetMs
+      ..lyricsOffsetEarlierMigrated = s.lyricsOffsetEarlierMigrated
+      ..stackSansDefaultMigrated = s.stackSansDefaultMigrated
       ..equalizerGlobalMode = s.equalizerGlobalMode
       ..firstTimeEqualizer = s.firstTimeEqualizer
       ..lyricsGestureTutorialSeen = s.lyricsGestureTutorialSeen;
@@ -337,6 +405,12 @@ class Settings extends _$Settings {
   Future<void> updateAutoLyricsFallback(bool value) =>
       _update((s) => s..autoLyricsFallback = value);
 
+  Future<void> updateLyricsSyncStyle(String value) =>
+      _update((s) => s..lyricsSyncStyle = value);
+
+  Future<void> updateLyricsOffsetMs(int value) =>
+      _update((s) => s..lyricsOffsetMs = value.clamp(-5000, 5000));
+
   Future<void> updateBlurredArtworkForLyrics(bool value) =>
       _update((s) => s..blurredArtworkForLyrics = value);
 
@@ -348,6 +422,12 @@ class Settings extends _$Settings {
 
   Future<void> updateShowPerformanceOptimizer(bool value) =>
       _update((s) => s..showPerformanceOptimizer = value);
+
+  Future<void> updateSegmentedUtilityButtons(bool value) =>
+      _update((s) => s..segmentedUtilityButtons = value);
+
+  Future<void> updateHapticsEnabled(bool value) =>
+      _update((s) => s..disableHaptics = !value);
 
   Future<void> updateEnablePlayerGradient(bool value) => _update((s) {
     s.enablePlayerGradient = value;
@@ -434,6 +514,71 @@ class Settings extends _$Settings {
   Future<void> updateDisableAnimatedDuration(bool disabled) =>
       _update((s) => s..disableAnimatedDuration = disabled);
 
+  Future<void> updateProgressBarStyle(ProgressBarStyle style) =>
+      _update(style.applyTo);
+
+  /// Back to the look the bar had before it was customisable. The nullable
+  /// fields go back to null (= default) rather than to today's defaults, so
+  /// a future default tweak still reaches users who never changed them.
+  Future<void> resetProgressBarStyle() => _update(
+    (s) => s
+      ..disableSquiggle = false
+      ..progressBarThickness = null
+      ..progressWaveHeight = null
+      ..progressWaveLength = null
+      ..progressWaveSpeed = null
+      ..progressThumbStyle = null
+      ..progressThumbWidth = null
+      ..progressThumbHeight = null
+      ..progressThumbGap = null
+      ..progressInactiveOpacity = null
+      ..progressWaveFromStart = false
+      ..progressFreezeWhenPaused = false
+      ..progressGrowThumbOnDrag = false,
+  );
+
+  Future<void> updateArtworkVisualizer(ArtworkVisualizerType type) =>
+      _update((s) => s..artworkVisualizer = type.index);
+
+  Future<void> updateArtworkVisualizerIntensity(
+    ArtworkVisualizerIntensity intensity,
+  ) => _update((s) => s..artworkVisualizerIntensity = intensity.index);
+
+  Future<void> updateArtworkVisualizerColors(ArtworkVisualizerColors colors) =>
+      _update((s) => s..artworkVisualizerColors = colors.index);
+
+  Future<void> updateArtworkVisualizerSyncMs(int ms) =>
+      _update((s) => s..artworkVisualizerSyncMs = ms);
+
+  Future<void> updateQualityBadgeLook(QualityBadgeLook look) =>
+      _update((s) => s..qualityBadgeLook = look.index);
+
+  Future<void> updateQualityBadgeIcon(QualityBadgeIcon icon) =>
+      _update((s) => s..qualityBadgeIcon = icon.index);
+
+  Future<void> updateQualityBadgeColors(QualityBadgeColors colors) =>
+      _update((s) => s..qualityBadgeColors = colors.index);
+
+  Future<void> updateQualityBadgeSeparator(QualityBadgeSeparator separator) =>
+      _update((s) => s..qualityBadgeSeparator = separator.index);
+
+  Future<void> updateQualityBadgeShape(QualityBadgeShape shape) =>
+      _update((s) => s..qualityBadgeShape = shape.index);
+
+  Future<void> updateQualityBadgeLayout(QualityBadgeLayout layout) =>
+      _update((s) => s..qualityBadgeLayout = layout.index);
+
+  /// Turns one detail on or off. The last detail left on can't be turned
+  /// off, so the badge never ends up empty.
+  Future<void> updateQualityBadgeField(QualityBadgeField field, bool on) =>
+      _update((s) {
+        final int mask = QualityBadgeStyle.fromSettings(s).fields;
+        final int bit = 1 << field.index;
+        final int next = on ? mask | bit : mask & ~bit;
+        if (next != 0) s.qualityBadgeFields = next;
+        return s;
+      });
+
   Future<void> updateDisableBlur(bool disabled) =>
       _update((s) => s..disableBlur = disabled);
 
@@ -502,6 +647,12 @@ class Settings extends _$Settings {
 
   Future<void> updateDynamicColorActiveLyrics(bool enabled) =>
       _update((s) => s..dynamicColorActiveLyrics = enabled);
+
+  Future<void> updateActiveLyricsIntensity(double value) =>
+      _update((s) => s..activeLyricsIntensity = value);
+
+  Future<void> updateActiveLyricsUseAccent(bool enabled) =>
+      _update((s) => s..activeLyricsSoftColor = !enabled);
 
   Future<void> updateLyricsAlignment(String alignment) =>
       _update((s) => s..lyricsAlignment = alignment);

@@ -13,6 +13,7 @@ import 'package:looper_player/core/providers/player_expand_provider.dart';
 import 'package:looper_player/core/providers/providers.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import 'package:looper_player/ui/widgets/player/player_gradient/gradient_audio_energy.dart';
+import 'package:looper_player/ui/widgets/player/player_spectrum.dart';
 part 'blob_painter.dart';
 part 'grain_layer.dart';
 
@@ -67,18 +68,6 @@ class _AnimatedPlayerGradientState extends ConsumerState<AnimatedPlayerGradient>
   static const double _loopSeconds = 48;
   // Capped at ~30 fps: the motion is slow enough that 60 adds nothing.
   static const Duration _paintInterval = Duration(milliseconds: 33);
-
-  // Light spectrum preset: a fraction of the plugin's default cost (2048-pt,
-  // 4x overlap, 30 Hz), since the pipeline runs on the UI isolate and this
-  // only needs three coarse energy levels. Nothing else in the app reads
-  // the spectrum, so setting it globally is safe.
-  static const SpectrumSettings _spectrum = SpectrumSettings(
-    fftSize: 1024,
-    bandCount: 16,
-    overlapFactor: 1,
-    emitInterval: Duration(milliseconds: 50),
-  );
-  static bool _spectrumConfigured = false;
 
   late final Ticker _ticker = createTicker(_onTick);
   late final AnimationController _colorAnim = AnimationController(
@@ -215,10 +204,7 @@ class _AnimatedPlayerGradientState extends ConsumerState<AnimatedPlayerGradient>
     final bool wantFft = _active && _playing;
     if (wantFft && _fftSub == null) {
       final player = ref.read(audioServiceProvider).player;
-      if (!_spectrumConfigured) {
-        _spectrumConfigured = true;
-        unawaited(player.setSpectrum(_spectrum));
-      }
+      PlayerSpectrum.ensureConfigured(player);
       _fftSub = player.stream.fft.listen((frame) {
         _motion.energy.addFrame(frame.bands, frame.bandLowHz, frame.bandHighHz);
       });

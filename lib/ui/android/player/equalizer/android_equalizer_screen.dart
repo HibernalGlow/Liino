@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/providers/providers.dart';
@@ -18,6 +17,7 @@ import 'equalizer_slider_track.dart';
 import 'equalizer_curve_painter.dart';
 import 'interactive_equalizer_graph.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 export 'equalizer_curve_painter.dart';
 
 part 'android_equalizer_screen.g.dart';
@@ -154,7 +154,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                       useBlur: useBlur,
                       keepSurfaceOnDisableBlur: true,
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         Navigator.of(context).pop();
                       },
                       child: const Icon(
@@ -179,7 +179,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                         size: 20,
                       ),
                       onPressed: () {
-                        HapticFeedback.lightImpact();
+                        AppHaptics.light();
                         _showEqualizerModeDialog(context, ref);
                       },
                     ),
@@ -196,7 +196,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                           ? context.l10n.eqSwitchToSliders
                           : context.l10n.eqSwitchToGraph,
                       onPressed: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selection();
                         ref
                             .read(equalizerViewModeProvider.notifier)
                             .set(!isGraphMode);
@@ -223,7 +223,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                           activeThumbColor: accentColor,
                           activeTrackColor: accentColor.withValues(alpha: 0.5),
                           onChanged: (val) {
-                            HapticFeedback.mediumImpact();
+                            AppHaptics.medium();
                             eqNotifier.toggleEqualizer(val);
                           },
                         ),
@@ -274,7 +274,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                                   isCurrent: isCurrent,
                                   accentColor: accentColor,
                                   onTap: () {
-                                    HapticFeedback.selectionClick();
+                                    AppHaptics.selection();
                                     eqNotifier.setPreset(name, presetGains);
                                   },
                                 );
@@ -294,7 +294,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                                   isCurrent: isCurrent,
                                   accentColor: accentColor,
                                   onTap: () {
-                                    HapticFeedback.selectionClick();
+                                    AppHaptics.selection();
                                     eqNotifier.applyCustomPreset(preset.gains);
                                   },
                                   onLongPress: () => _confirmDeleteCustomPreset(
@@ -381,7 +381,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                                   eqState.enabled)
                                 TextButton.icon(
                                   onPressed: () {
-                                    HapticFeedback.mediumImpact();
+                                    AppHaptics.medium();
                                     eqNotifier.resetCurrentSongToDefault();
                                   },
                                   icon: Icon(
@@ -527,7 +527,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
 
                                                         if (newInt != oldInt) {
                                                           if (newInt == 0) {
-                                                            HapticFeedback.mediumImpact(); // Snapped to zero!
+                                                            AppHaptics.snap(); // Snapped to zero!
                                                           }
                                                         }
                                                         eqNotifier.setBandGain(
@@ -650,7 +650,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                                     if (eqState.preampGain.round() !=
                                             finalized.round() &&
                                         finalized.round() == 0) {
-                                      HapticFeedback.mediumImpact();
+                                      AppHaptics.medium();
                                     }
                                     eqNotifier.setBandGain(18, finalized);
                                   },
@@ -745,7 +745,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                               alpha: 0.35,
                             ),
                             onChanged: (val) {
-                              HapticFeedback.mediumImpact();
+                              AppHaptics.medium();
                               eqNotifier.setCompressorEnabled(val);
                             },
                           ),
@@ -855,7 +855,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                               alpha: 0.35,
                             ),
                             onChanged: (val) {
-                              HapticFeedback.mediumImpact();
+                              AppHaptics.medium();
                               eqNotifier.setLoudnormEnabled(val);
                             },
                           ),
@@ -893,7 +893,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                               alpha: 0.35,
                             ),
                             onChanged: (val) {
-                              HapticFeedback.mediumImpact();
+                              AppHaptics.medium();
                               eqNotifier.setShelvingEnabled(val);
                             },
                           ),
@@ -940,7 +940,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                               alpha: 0.35,
                             ),
                             onChanged: (val) {
-                              HapticFeedback.mediumImpact();
+                              AppHaptics.medium();
                               eqNotifier.setPitchTempoEnabled(val);
                             },
                           ),
@@ -1176,7 +1176,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                                   child: TextButton.icon(
                                     onPressed: eqState.enabled
                                         ? () async {
-                                            HapticFeedback.mediumImpact();
+                                            AppHaptics.medium();
                                             await eqNotifier
                                                 .applyCurrentGainsToGlobal();
                                             if (context.mounted) {
@@ -1233,7 +1233,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                                   Expanded(
                                     child: TextButton.icon(
                                       onPressed: () async {
-                                        HapticFeedback.mediumImpact();
+                                        AppHaptics.medium();
                                         await eqNotifier
                                             .resetCurrentSongToDefault();
                                         if (context.mounted) {
@@ -1291,7 +1291,7 @@ class AndroidEqualizerScreen extends ConsumerWidget {
                             // Reset All Songs Equalizer Data
                             TextButton.icon(
                               onPressed: () async {
-                                HapticFeedback.heavyImpact();
+                                AppHaptics.warning();
                                 final confirm = await showDialog<bool>(
                                   context: context,
                                   builder: (context) => AlertDialog(

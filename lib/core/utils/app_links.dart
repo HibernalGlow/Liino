@@ -30,16 +30,34 @@ class AppLinks {
   static const String deezerApiBase = 'https://api.deezer.com';
   static const String iTunesSearchUrl = 'https://itunes.apple.com/search';
   static const String lrclibApiBase = 'https://lrclib.net/api';
+  static const String lrcRedApiBase = 'https://lrc.red';
+
+  /// Primary first. (The two vercel.app mirrors am-lyrics also lists were
+  /// returning 402 DEPLOYMENT_DISABLED as of 2026-09-27, so they're gone.)
+  static const List<String> lyricsPlusMirrors = [
+    'https://lyricsplus.binimum.org',
+    'https://lyricsplus.prjktla.workers.dev',
+  ];
 
   // Lyrics Providers Web Links
+  static const String lrcRedWeb = 'https://lrc.red';
+  static const String lyricsPlusWeb = 'https://lyricsplus.binimum.org';
   static const String lrclibWeb = 'https://lrclib.net';
+  static const String musicBrainzWeb = 'https://musicbrainz.org';
   static const String geniusWeb = 'https://genius.com';
   static const String musixmatchWeb = 'https://www.musixmatch.com';
   static const String azlyricsWeb = 'https://www.azlyrics.com';
   static const String lyricsmintWeb = 'https://www.lyricsmint.com';
   static const String lyricfindWeb = 'https://www.lyricfind.com';
 
+  // Credits: projects our word-synced lyrics build on (see About).
+  static const String lyricsPlusSource =
+      'https://github.com/ibratabian17/lyricsplus';
+  static const String amLyricsSource = 'https://github.com/binimum/am-lyrics';
+
   static const Map<String, String> lyricsProviderUrls = {
+    'lrc.red': lrcRedWeb,
+    'LyricsPlus': lyricsPlusWeb,
     'LRCLIB': lrclibWeb,
     'Genius': geniusWeb,
     'Musixmatch': musixmatchWeb,

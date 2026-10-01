@@ -240,7 +240,27 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get dynamicColorActiveLyricsDesc =>
-      'Şu anda çalınan şarkı sözü satırı için çıkarılan resim renklerini kullan';
+      'Çalan şarkı sözü satırını renklendirir; kapalıyken beyaz kalır';
+
+  @override
+  String get activeLyricsIntensity => 'Aktif Satır Yoğunluğu';
+
+  @override
+  String get activeLyricsIntensityDesc =>
+      'Çalan şarkı sözü satırının ne kadar renk göstereceği';
+
+  @override
+  String get activeLyricsIntensityPreviewInactive => 'Pasif satır';
+
+  @override
+  String get activeLyricsIntensityPreviewActive => 'Aktif satır';
+
+  @override
+  String get activeLyricsUseAccent => 'Aktif Satırda Vurgu Rengi';
+
+  @override
+  String get activeLyricsUseAccentDesc =>
+      'Saf vurgu rengini kullan; kapalıyken daha yumuşak bir ton için beyazla karıştırılır';
 
   @override
   String get dynamicLyricsBg => 'Dinamik Şarkı Sözleri BG';
@@ -425,7 +445,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get lyricsProviderDesc =>
-      'Çevrimiçi şarkı sözleri lrclib.net\'ten (LRCLIB) alınmıştır';
+      'lrc.red, LyricsPlus, LRCLIB ve diğerlerinden çevrimiçi şarkı sözleri';
 
   @override
   String get maintainersAndDesigners => 'Geliştiriciler ve Tasarımcılar';
@@ -831,6 +851,65 @@ class AppLocalizationsTr extends AppLocalizations {
   String get showMore => 'Daha Fazla Göster';
 
   @override
+  String get segmentedUtilityButtons => 'Bölümlü Oynatıcı Düğmeleri';
+
+  @override
+  String get segmentedUtilityButtonsDesc =>
+      'Karıştır, tekrarla, sıradaki ve şarkı sözlerini oynatma kontrolleri tarzında dört simge kutusu olarak göster';
+
+  @override
+  String get qualityBadgeStyle => 'Kalite Rozeti Stili';
+
+  @override
+  String get qualityBadgeStyleDesc =>
+      'Ses kalitesi rozetinin görünümü, simgesi, renkleri ve ayrıntıları';
+
+  @override
+  String get qualityBadgeLook => 'Görünüm';
+
+  @override
+  String get qualityBadgeLookPill => 'Dolgulu';
+
+  @override
+  String get qualityBadgeLookOutlined => 'Çerçeveli';
+
+  @override
+  String get qualityBadgeLookText => 'Metin';
+
+  @override
+  String get qualityBadgeIcon => 'Simge';
+
+  @override
+  String get qualityBadgeColorsByQuality => 'Kaliteye göre';
+
+  @override
+  String get qualityBadgeSeparator => 'Ayırıcı';
+
+  @override
+  String get qualityBadgeDetails => 'Ayrıntılar';
+
+  @override
+  String get qualityBadgeLevel => 'Kalite seviyesi';
+
+  @override
+  String get qualityBadgeLayout => 'İçerik';
+
+  @override
+  String get qualityBadgeLayoutName => 'Yalnızca ad';
+
+  @override
+  String get qualityBadgeShape => 'Şekil';
+
+  @override
+  String get qualityBadgeShapePill => 'Hap';
+
+  @override
+  String get qualityBadgeShapeRounded => 'Yuvarlatılmış';
+
+  @override
+  String get qualityBadgeShapeSquare => 'Kare';
+
+  @override
   String get showQualityBadge => 'Kalite Rozetini Göster';
 
   @override
@@ -984,6 +1063,12 @@ class AppLocalizationsTr extends AppLocalizations {
       'Mini oynatıcıyı tam oynatıcıya dönüştürmek için yukarı sürükleyin';
 
   @override
+  String get hapticFeedback => 'Dokunsal geri bildirim';
+
+  @override
+  String get hapticFeedbackDesc => 'Dokunma, geçiş ve hareketlerde titreşim';
+
+  @override
   String get viewAll => 'Tümünü Görüntüle';
 
   @override
@@ -1031,7 +1116,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get whyInternetUsedDesc =>
-      'Cihazınızın hafızasındaki standart çevrimdışı ses parçalarını keşfetmek ve oynatmak için gereklidir.';
+      '• Şarkı sözleri: lrc.red, LyricsPlus, LRCLIB veya seçtiğiniz sağlayıcıdan senkronlu sözleri alır. Eşleşme bulmak için yalnızca şarkı adı, sanatçı, albüm ve süre gönderilir. Hiçbir kişisel veri, ayar veya medya dosyası asla yüklenmez veya paylaşılmaz.';
 
   @override
   String get whyPermissionsUsed =>
@@ -2107,11 +2192,11 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get gestureTips => 'Hareket İpuçları';
+  String get gestureTips => 'Şarkı Sözü İpuçları';
 
   @override
   String get gestureTipsDesc =>
-      'Dokun, uzun bas, yakınlaştırmak için sıkıştır ve dahası';
+      'Hareketler, kelime senkronu, zamanlama ve dahası';
 
   @override
   String get exportLyrics => 'Sözleri Dışa Aktar';
@@ -2137,7 +2222,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get gestureLongPressLineDesc =>
-      'Paylaşılabilir bir söz kartı için satır seçmeye başla. Seçimi genişletmek için başka satırlara dokun.';
+      'Söz kartı olarak paylaşmak için satırları seç.';
 
   @override
   String get gesturePinch => 'İki parmakla sıkıştır';
@@ -2152,7 +2237,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get gestureSwipeDownDesc => 'Söz ekranını kapatıp oynatıcıya döner.';
 
   @override
-  String get lyricsGestures => 'Söz Hareketleri';
+  String get lyricsGestures => 'Şarkı Sözü İpuçları';
 
   @override
   String get lyricsGesturesIntro =>
@@ -2321,6 +2406,155 @@ class AppLocalizationsTr extends AppLocalizations {
   String nyquistKhz(String khz) {
     return 'Nyquist: $khz kHz';
   }
+
+  @override
+  String get qualityHiRes => 'Hi-Res Kayıpsız';
+
+  @override
+  String get qualityMono => 'Mono';
+
+  @override
+  String get qualityStereo => 'Stereo';
+
+  @override
+  String get qualitySignalPath => 'Sinyal Yolu';
+
+  @override
+  String get qualityStageSource => 'Kaynak';
+
+  @override
+  String get qualityStageDecoder => 'Kod Çözücü';
+
+  @override
+  String get qualityStageOutput => 'Çıkış';
+
+  @override
+  String get qualityStageDevice => 'Cihaz';
+
+  @override
+  String get qualityNativeEndToEnd =>
+      'Baştan sona dosyanın kendi örnekleme hızında çalınıyor';
+
+  @override
+  String qualityResampledBy(String from, String to) {
+    return 'Çıkışta $from değerinden $to değerine dönüştürüldü';
+  }
+
+  @override
+  String get qualitySectionSource => 'Kaynak Dosya';
+
+  @override
+  String get qualitySectionEngine => 'Oynatma Motoru';
+
+  @override
+  String get qualitySectionDevice => 'Çıkış Cihazı';
+
+  @override
+  String get qualitySectionPhone => 'Bu Telefon';
+
+  @override
+  String get qualityOutputFormat => 'Çıkış Biçimi';
+
+  @override
+  String get qualityOutputRate => 'Çıkış Örnekleme Hızı';
+
+  @override
+  String get qualityOutputChannels => 'Çıkış Kanalları';
+
+  @override
+  String get qualityLiveBitrate => 'Anlık Bit Hızı';
+
+  @override
+  String get qualityGapless => 'Boşluksuz Oynatma';
+
+  @override
+  String get qualityReplayGain => 'ReplayGain';
+
+  @override
+  String get qualityReplayGainTrack => 'Parça';
+
+  @override
+  String get qualityReplayGainAlbum => 'Albüm';
+
+  @override
+  String get qualitySpeed => 'Hız';
+
+  @override
+  String get qualityDeviceName => 'Ad';
+
+  @override
+  String get qualityDeviceType => 'Tür';
+
+  @override
+  String get qualityDeviceSpeaker => 'Telefon hoparlörü';
+
+  @override
+  String get qualityDeviceWired => 'Kablolu kulaklık';
+
+  @override
+  String get qualityDeviceBluetooth => 'Bluetooth';
+
+  @override
+  String get qualityDeviceUsb => 'USB ses';
+
+  @override
+  String get qualityDeviceHdmi => 'HDMI';
+
+  @override
+  String get qualityDeviceHearingAid => 'İşitme cihazı';
+
+  @override
+  String get qualityDeviceDock => 'Dock';
+
+  @override
+  String get qualitySupportedRates => 'Desteklenen Hızlar';
+
+  @override
+  String get qualityAnyRate => 'Herhangi';
+
+  @override
+  String get qualityMaxBitDepth => 'Maks. Bit Derinliği';
+
+  @override
+  String get qualityMaxChannels => 'Maks. Kanal';
+
+  @override
+  String get qualityBitPerfect => 'Bit-perfect Modu';
+
+  @override
+  String get qualitySupported => 'Destekleniyor';
+
+  @override
+  String get qualityNotSupported => 'Desteklenmiyor';
+
+  @override
+  String get qualitySpatialAudio => 'Uzamsal Ses';
+
+  @override
+  String get qualityDeviceNote =>
+      'Android, bir oynatıcının hangi çıkışa yönlendirildiğini uygulamalara söylemez; bu, müziğin normalde gittiği cihazdır.';
+
+  @override
+  String get qualityPhoneModel => 'Model';
+
+  @override
+  String get qualityAndroidVersion => 'Android Sürümü';
+
+  @override
+  String get qualityMixerRate => 'Mikser Örnekleme Hızı';
+
+  @override
+  String get qualityMixerBuffer => 'Mikser Arabelleği';
+
+  @override
+  String get qualityLowLatency => 'Düşük Gecikmeli Ses';
+
+  @override
+  String get qualityProAudio => 'Profesyonel Ses';
+
+  @override
+  String get qualityDeviceUnavailable =>
+      'Cihaz ayrıntıları yalnızca Android\'de kullanılabilir.';
 
   @override
   String get qualityLossless => 'Kayıpsız';
@@ -2500,4 +2734,397 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get mono => 'Mono';
+
+  @override
+  String get progressBarStyle => 'İlerleme çubuğu stili';
+
+  @override
+  String get progressBarStyleDesc => 'Dalga, kalınlık, tutamaç ve daha fazlası';
+
+  @override
+  String get progressBarPreview => 'Önizleme';
+
+  @override
+  String get progressWave => 'Dalga';
+
+  @override
+  String get progressWaveDesc =>
+      'Çubuğun çalınan kısmını hareketli bir dalga olarak çiz';
+
+  @override
+  String get progressWaveHeight => 'Dalga yüksekliği';
+
+  @override
+  String get progressWaveLength => 'Dalga boyu';
+
+  @override
+  String get progressWaveLengthDesc => 'Bir dalgadan diğerine olan mesafe';
+
+  @override
+  String get progressWaveSpeed => 'Dalga hızı';
+
+  @override
+  String get progressWaveFromStart => 'Baştan itibaren dalga';
+
+  @override
+  String get progressWaveFromStartDesc =>
+      'Dalgayı şarkının başı geçtikten sonra değil, hemen göster';
+
+  @override
+  String get progressKeepWavePaused => 'Duraklatıldığında dalgayı koru';
+
+  @override
+  String get progressKeepWavePausedDesc =>
+      'Dalgayı düzleştirmek yerine sabit tut';
+
+  @override
+  String get progressBarThickness => 'Çubuk kalınlığı';
+
+  @override
+  String get progressThumb => 'Tutamaç';
+
+  @override
+  String get progressThumbPill => 'Hap';
+
+  @override
+  String get progressThumbRound => 'Yuvarlak';
+
+  @override
+  String get progressThumbWidth => 'Tutamaç genişliği';
+
+  @override
+  String get progressThumbHeight => 'Tutamaç yüksekliği';
+
+  @override
+  String get progressThumbSize => 'Tutamaç boyutu';
+
+  @override
+  String get progressThumbGap => 'Tutamaç çevresindeki boşluk';
+
+  @override
+  String get progressTrackOpacity => 'Çalınmamış kısmın opaklığı';
+
+  @override
+  String get progressGrowThumb => 'Sürüklerken tutamacı büyüt';
+
+  @override
+  String get resetToDefaults => 'Varsayılanlara sıfırla';
+
+  @override
+  String get artworkVisualizer => 'Kapak görselleştirici';
+
+  @override
+  String get artworkVisualizerDesc =>
+      'Çalan şarkının kapağında müziğe tepki veren bir efekt';
+
+  @override
+  String get visualizerEffect => 'Efekt';
+
+  @override
+  String get visualizerAura => 'Aura parıltısı';
+
+  @override
+  String get visualizerRing => 'Spektrum halkası';
+
+  @override
+  String get visualizerWave => 'Alt dalga';
+
+  @override
+  String get visualizerBars => 'Çubuklar';
+
+  @override
+  String get visualizerBreathing => 'Nefes';
+
+  @override
+  String get visualizerIntensity => 'Yoğunluk';
+
+  @override
+  String get visualizerSubtle => 'Hafif';
+
+  @override
+  String get visualizerNormal => 'Normal';
+
+  @override
+  String get visualizerStrong => 'Güçlü';
+
+  @override
+  String get visualizerColors => 'Renkler';
+
+  @override
+  String get visualizerColorsArtwork => 'Kapak';
+
+  @override
+  String get visualizerColorsTheme => 'Tema';
+
+  @override
+  String get visualizerColorsWhite => 'Beyaz';
+
+  @override
+  String get progressTrack => 'Parça çubuğu';
+
+  @override
+  String get visualizerSync => 'Ses senkronizasyonu';
+
+  @override
+  String get visualizerSyncDesc =>
+      'Efekti duyduğunuz sesle eşleşecek şekilde geciktirir. Bluetooth kulaklıklar için artırın.';
+
+  @override
+  String get visualizerSyncHint => 'Kulakla ayarlamak için bir şarkı çalın';
+
+  @override
+  String get lyricsHighlightStyle => 'Vurgu stili';
+
+  @override
+  String get lyricsStyleLine => 'Satır';
+
+  @override
+  String get lyricsStyleWord => 'Kelime kelime';
+
+  @override
+  String get lyricsStyleCharacter => 'Harf harf';
+
+  @override
+  String get lyricsWordSynced => 'Kelime senkronlu';
+
+  @override
+  String get lyricsLineSynced => 'Satır senkronlu';
+
+  @override
+  String get findWordSyncedLyrics => 'Kelime senkronlu şarkı sözü bul';
+
+  @override
+  String get searchingWordSyncedLyrics => 'lrc.red ve LyricsPlus\'ta aranıyor…';
+
+  @override
+  String get wordSyncedLyricsLoaded =>
+      'Kelime senkronlu şarkı sözleri yüklendi';
+
+  @override
+  String get noWordSyncedLyricsFound =>
+      'Bu şarkı için kelime senkronlu şarkı sözü bulunamadı';
+
+  @override
+  String get lyricsTiming => 'Şarkı sözü zamanlaması';
+
+  @override
+  String get lyricsTimingDesc =>
+      'Pozitif değer sözleri daha erken, negatif daha geç gösterir. Sözler şarkının önünde gidiyorsa (Bluetooth\'ta yaygın), değeri düşürün.';
+
+  @override
+  String get lyricsTimingEarlier => 'Daha erken';
+
+  @override
+  String get lyricsTimingLater => 'Daha geç';
+
+  @override
+  String get lyricsTimingReset => 'Sıfırla';
+
+  @override
+  String get themeGroupColors => 'Renkler';
+
+  @override
+  String get themeGroupBlurBackgrounds => 'Bulanıklık ve Arka Planlar';
+
+  @override
+  String get themeGroupDarkness => 'Karartma';
+
+  @override
+  String get themeGroupFonts => 'Yazı Tipleri';
+
+  @override
+  String get themeGroupProfile => 'Profil';
+
+  @override
+  String get lyricsTipsGestures => 'Hareketler';
+
+  @override
+  String get lyricsTipsMenu => '⋮ menüsünde';
+
+  @override
+  String get gestureScroll => 'Serbestçe kaydır';
+
+  @override
+  String get gestureScrollDesc =>
+      'Gezinirken otomatik takip duraklar. Geri dönmek için Yeniden Senkronize Et\'e dokun.';
+
+  @override
+  String get tipFindWordSyncDesc =>
+      'lrc.red ve LyricsPlus\'tan kelime kelime zamanlama getir.';
+
+  @override
+  String get tipHighlightStyleDesc =>
+      'Kelime senkronlu sözlerde satır, kelime kelime veya harf harf.';
+
+  @override
+  String get tipLyricsTimingDesc =>
+      'Sözleri erkene veya geçe kaydır, Bluetooth\'ta kullanışlı.';
+
+  @override
+  String get tipChangeProviderDesc =>
+      'Sözler yanlış veya yok mu? Başka bir kaynak dene.';
+
+  @override
+  String get tipOwnLyrics => 'Kendi sözlerin';
+
+  @override
+  String get tipOwnLyricsDesc =>
+      'Bir .lrc dosyası yükle veya bu sözleri cihazına aktar.';
+
+  @override
+  String get lyricsSources => 'Şarkı Sözü Kaynakları';
+
+  @override
+  String get creditLrcRedDesc =>
+      'Kelime senkronlu şarkı sözleri (varsayılan sağlayıcı)';
+
+  @override
+  String get creditLyricsPlusDesc =>
+      'Kelime senkronlu şarkı sözleri · ibratabian17 tarafından açık kaynak sunucu (Apache-2.0), binimum tarafından barındırılıyor';
+
+  @override
+  String get creditLrclibDesc =>
+      'Satır senkronlu şarkı sözleri · ücretsiz, açık şarkı sözü veritabanı';
+
+  @override
+  String get creditMusicBrainzDesc =>
+      'lrc.red eşleştirebilsin diye her şarkının ISRC kodunu bulur · açık müzik veritabanı (CC0 verisi)';
+
+  @override
+  String get creditAmLyricsDesc =>
+      'Kelime senkronlu sözlerimize ilham verdi · binimum tarafından (MPL-2.0)';
+
+  @override
+  String get lyricsCopyrightNote =>
+      'Şarkı sözleri sanatçılarına ve hak sahiplerine aittir. Looper bunları yalnızca kişisel görüntüleme için alır ve cihazınızda saklar.';
+
+  @override
+  String get clearLyricsCache => 'Şarkı sözü önbelleğini temizle';
+
+  @override
+  String get clearLyricsCacheDesc =>
+      'İndirilen sözler siz temizleyene kadar saklanır. Kendi dosyalarınız ve seçtiğiniz .lrc\'ler kalır.';
+
+  @override
+  String get clearLyricsCacheConfirm =>
+      'İndirilen tüm sözler silinsin mi? Şarkılar bir sonraki çalışta sözleri yeniden çevrimiçi arar.';
+
+  @override
+  String get lyricsCacheCleared => 'Şarkı sözü önbelleği temizlendi';
+
+  @override
+  String get analyzeYourTopSong => '1 numaralı şarkın';
+
+  @override
+  String get analyzeHighlights => 'Öne çıkanlar';
+
+  @override
+  String get analyzePeakTime => 'En yoğun zaman';
+
+  @override
+  String get analyzeBusiestDay => 'En yoğun gün';
+
+  @override
+  String get analyzeTopGenre => 'En çok dinlenen tür';
+
+  @override
+  String get analyzeLibraryExplored => 'Keşfedilen kitaplık';
+
+  @override
+  String analyzeSongsOfTotal(int played, int total) {
+    return '$total şarkıdan $played tanesi';
+  }
+
+  @override
+  String get analyzeCurrentStreak => 'Mevcut seri';
+
+  @override
+  String get analyzeLongestStreak => 'En uzun seri';
+
+  @override
+  String daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count gün',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours sa $minutes dk';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes dk';
+  }
+
+  @override
+  String analyzeAvgPerDay(String avg) {
+    return 'Günde ortalama $avg';
+  }
+
+  @override
+  String get dayPartMorning => 'Sabah';
+
+  @override
+  String get dayPartAfternoon => 'Öğleden sonra';
+
+  @override
+  String get dayPartEvening => 'Akşam';
+
+  @override
+  String get dayPartNight => 'Gece';
+
+  @override
+  String get updateNow => 'Güncelle';
+
+  @override
+  String get updateLater => 'Daha sonra';
+
+  @override
+  String get updateInstall => 'Yükle';
+
+  @override
+  String get retry => 'Tekrar dene';
+
+  @override
+  String get updateWhatsNew => 'Yenilikler';
+
+  @override
+  String get updateDownloading => 'Güncelleme indiriliyor';
+
+  @override
+  String get updateVerifying => 'İndirme doğrulanıyor…';
+
+  @override
+  String get updateWaitingForInstaller => 'Yükleyici bekleniyor…';
+
+  @override
+  String get updateReadyToInstall => 'İndirildi ve yüklenmeye hazır.';
+
+  @override
+  String get updateErrorNetwork =>
+      'İndirme başarısız oldu. Bağlantınızı kontrol edip tekrar deneyin.';
+
+  @override
+  String get updateErrorChecksum =>
+      'İndirilen dosya bozuk. Lütfen tekrar deneyin.';
+
+  @override
+  String get updateErrorStorage => 'Güncelleme için yeterli boş alan yok.';
+
+  @override
+  String get updateErrorInstall => 'Güncelleme yüklenemedi.';
+
+  @override
+  String get checkForUpdates => 'Güncellemeleri denetle';
+
+  @override
+  String get updateUpToDate => 'En son sürümü kullanıyorsunuz.';
+
+  @override
+  String get updateCheckFailed => 'Güncellemeler denetlenemedi.';
 }

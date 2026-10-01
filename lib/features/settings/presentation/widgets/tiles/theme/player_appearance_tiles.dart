@@ -1,23 +1,60 @@
 part of 'theme_settings_tiles.dart';
 
-class FlatProgressBarTile extends ConsumerWidget {
-  const FlatProgressBarTile({super.key});
+/// Opens the progress bar style sheet (wave, thickness, thumb, ...). Took
+/// over the old "Flat progress bar" switch, which is now the sheet's Wave
+/// toggle.
+class ProgressBarStyleTile extends ConsumerWidget {
+  const ProgressBarStyleTile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
     final l10n = AppLocalizations.of(context)!;
-    return SwitchListTile(
-      secondary: const Icon(LucideIcons.sliders, color: Colors.white70),
-      title: Text(l10n.flatProgressBar, style: _tileTitleStyle()),
+    return ListTile(
+      leading: const Icon(LucideIcons.slidersHorizontal, color: Colors.white70),
+      title: Text(l10n.progressBarStyle, style: _tileTitleStyle()),
+      subtitle: Text(l10n.progressBarStyleDesc, style: _tileSubtitleStyle()),
+      trailing: const Icon(
+        LucideIcons.chevronRight,
+        color: Colors.white38,
+        size: 20,
+      ),
+      onTap: () {
+        AppHaptics.light();
+        showProgressBarStyleSheet(context);
+      },
+    );
+  }
+}
+
+/// Opens the artwork visualizer sheet (effect, intensity, colors).
+class ArtworkVisualizerTile extends ConsumerWidget {
+  const ArtworkVisualizerTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final type = ref.watch(
+      settingsProvider.select(
+        (s) => ArtworkVisualizerStyle.fromSettings(s).type,
+      ),
+    );
+    return ListTile(
+      leading: const Icon(LucideIcons.audioLines, color: Colors.white70),
+      title: Text(l10n.artworkVisualizer, style: _tileTitleStyle()),
       subtitle: Text(
-        l10n.disableSquigglyProgressBar,
+        type == ArtworkVisualizerType.none
+            ? l10n.artworkVisualizerDesc
+            : artworkVisualizerTypeLabel(l10n, type),
         style: _tileSubtitleStyle(),
       ),
-      activeThumbColor: Color(settings.accentColor),
-      value: settings.disableSquiggle,
-      onChanged: (value) {
-        ref.read(settingsProvider.notifier).updateDisableSquiggle(value);
+      trailing: const Icon(
+        LucideIcons.chevronRight,
+        color: Colors.white38,
+        size: 20,
+      ),
+      onTap: () {
+        AppHaptics.light();
+        showArtworkVisualizerSheet(context);
       },
     );
   }
@@ -60,6 +97,57 @@ class ShowQualityBadgeTile extends ConsumerWidget {
       value: settings.showQualityBadge,
       onChanged: (value) {
         ref.read(settingsProvider.notifier).updateShowQualityBadge(value);
+      },
+    );
+  }
+}
+
+/// Opens the quality badge style sheet (look, icon, colors, details).
+class QualityBadgeStyleTile extends ConsumerWidget {
+  const QualityBadgeStyleTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    return ListTile(
+      leading: const Icon(LucideIcons.badgeCheck, color: Colors.white70),
+      title: Text(l10n.qualityBadgeStyle, style: _tileTitleStyle()),
+      subtitle: Text(l10n.qualityBadgeStyleDesc, style: _tileSubtitleStyle()),
+      trailing: const Icon(
+        LucideIcons.chevronRight,
+        color: Colors.white38,
+        size: 20,
+      ),
+      onTap: () {
+        AppHaptics.light();
+        showQualityBadgeSheet(context);
+      },
+    );
+  }
+}
+
+/// Swaps the player's shuffle / repeat / next up / lyrics pill groups for
+/// four icon-only tiles styled like the prev / play / next row.
+class SegmentedUtilityButtonsTile extends ConsumerWidget {
+  const SegmentedUtilityButtonsTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final l10n = AppLocalizations.of(context)!;
+    return SwitchListTile(
+      secondary: const Icon(LucideIcons.columns4, color: Colors.white70),
+      title: Text(l10n.segmentedUtilityButtons, style: _tileTitleStyle()),
+      subtitle: Text(
+        l10n.segmentedUtilityButtonsDesc,
+        style: _tileSubtitleStyle(),
+      ),
+      activeThumbColor: Color(settings.accentColor),
+      value: settings.segmentedUtilityButtons,
+      onChanged: (value) {
+        ref
+            .read(settingsProvider.notifier)
+            .updateSegmentedUtilityButtons(value);
       },
     );
   }

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo_appbar.png" width="140" height="100" />
+  <img src="assets/branding/readme_logo.png" width="140" height="100" />
 </p>
 
 <p align="center">
@@ -115,13 +115,13 @@ We refreshed our identity to better match the evolution of the project. If you a
 
 | Old Look | New Look |
 | :---: | :---: |
-| <img src="assets/main_logo.svg" width="240" alt="Old Icon" /> | <img src="assets/launcher_logo.png" width="120" alt="New Icon" /> |
+| <img src="assets/branding/legacy_logo.svg" width="240" alt="Old Icon" /> | <img src="assets/branding/launcher_icon.png" width="120" alt="New Icon" /> |
 | *Legacy Design (v1.x)* | *Current Design (v2.5+)* |
 
 ### What changed?
 * **Modernized Grid:** Rebuilt from the ground up for crisp rendering across high-DPI displays.
 * **Refined Aesthetics:** Cleaner curves, consistent optical weighting, and improved silhouette recognition at micro sizes (16px/24px).
-* **Asset Paths:** Legacy assets located under `/assets/legacy/` are deprecated and will be removed in upcoming releases.
+* **Asset Paths:** The old mark is kept only for reference at `assets/branding/legacy_logo.svg`.
 
 ---
 
@@ -200,6 +200,14 @@ A massive thank you to the brilliant creators behind Looper Player and the open-
 ### Core Project Team
 * **Nilesh Suthar** — *Lead Architect & Lead Developer*
 * **Karan Suthar** — *Creative UI/UX & Interaction Designer*
+
+### Lyrics Sources
+Online lyrics come from these services and projects. Lyrics belong to their artists and rights holders and are fetched for personal display only.
+* **[lrc.red](https://lrc.red)**: word-synced lyrics (the default provider)
+* **[LyricsPlus](https://github.com/ibratabian17/lyricsplus)**: word-synced lyrics. It's an open-source server by ibratabian17 (Apache-2.0), hosted by binimum.
+* **[LRCLIB](https://lrclib.net)**: line-synced lyrics from a free, open database
+* **[MusicBrainz](https://musicbrainz.org)**: finds each song's ISRC so lrc.red can match it (open music database, CC0 data)
+* **[am-lyrics](https://github.com/binimum/am-lyrics)** by binimum (MPL-2.0): inspired Looper's word-synced lyrics support. No code was copied; Looper's Dart implementation was written from the lyrics formats.
 
 ---
 

@@ -61,7 +61,7 @@ void _showEqualizerModeDialog(BuildContext context, WidgetRef ref) {
                 useCenter: false,
                 forceTransparent: true,
                 onTap: () async {
-                  HapticFeedback.mediumImpact();
+                  AppHaptics.medium();
                   await ref
                       .read(settingsProvider.notifier)
                       .updateEqualizerGlobalMode(true);
@@ -155,7 +155,7 @@ void _showEqualizerModeDialog(BuildContext context, WidgetRef ref) {
                 useCenter: false,
                 forceTransparent: true,
                 onTap: () async {
-                  HapticFeedback.mediumImpact();
+                  AppHaptics.medium();
                   await ref
                       .read(settingsProvider.notifier)
                       .updateEqualizerGlobalMode(false);

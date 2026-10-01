@@ -16,7 +16,7 @@ class SelectAvatarsTile extends ConsumerWidget {
         size: 18,
       ),
       onTap: () {
-        HapticFeedback.lightImpact();
+        AppHaptics.light();
         showAvatarPickerSheet(context);
       },
     );

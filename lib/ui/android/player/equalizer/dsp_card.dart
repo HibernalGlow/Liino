@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class DspCard extends StatefulWidget {
   final String title;
@@ -39,7 +39,7 @@ class _DspCardState extends State<DspCard> {
         children: [
           InkWell(
             onTap: () {
-              HapticFeedback.selectionClick();
+              AppHaptics.selection();
               setState(() {
                 _expanded = !_expanded;
               });

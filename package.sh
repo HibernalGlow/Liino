@@ -48,7 +48,7 @@ OVERRIDE_DEB_DEPENDS="${DEB_DEPENDS:-}"
 # mark that suits desktop docks and launchers better than a mobile launcher
 # tile. --icon still overrides it, and if the file doesn't exist in the target
 # project the script falls back to auto-detecting an icon.
-LINUX_ICON="${LINUX_ICON:-assets/logo_linux.png}"
+LINUX_ICON="${LINUX_ICON:-assets/branding/linux_icon.png}"
 
 # Android build outputs (see package_android). ABIs produced by
 # `flutter build apk --split-per-abi`; narrow them with e.g. ANDROID_ABIS="arm64-v8a".
@@ -82,7 +82,7 @@ Options:
   --display-name <name>   Override the human-readable app name (default: from AndroidManifest.xml / linux window title)
   --description <text>    Override the package description (default: from pubspec.yaml)
   --maintainer <name>     Override the maintainer string (default: from git config user.name/user.email)
-  --icon <path>           Override the source icon image (default: assets/logo_linux.png, else flutter_launcher_icons image_path, or a common asset path)
+  --icon <path>           Override the source icon image (default: assets/branding/linux_icon.png, else flutter_launcher_icons image_path, or a common asset path)
   --categories <string>   Override the .desktop Categories= value
   --mime-types <string>   Override the .desktop MimeType= value
   --deb-depends <string>  Override the .deb Depends: line
@@ -90,7 +90,7 @@ Options:
 
 Environment:
   ANDROID_ABIS            Split-APK ABIs to collect (default: "arm64-v8a armeabi-v7a x86_64")
-  LINUX_ICON              Icon for the Linux packages (default: assets/logo_linux.png)
+  LINUX_ICON              Icon for the Linux packages (default: assets/branding/linux_icon.png)
 
 Android output: artifacts are copied to dist/android/ with a SHA256SUMS-v<version>.txt.
 With --build, any missing artifact fails the run (non-zero exit) instead of being skipped.
@@ -244,7 +244,7 @@ detect_maintainer() {
 
 detect_icon() {
     local icon candidate
-    # 1. The Linux icon (LINUX_ICON, assets/logo_linux.png by default).
+    # 1. The Linux icon (LINUX_ICON, assets/branding/linux_icon.png by default).
     if [[ -n "$LINUX_ICON" && -f "$LINUX_ICON" ]]; then
         echo "$LINUX_ICON"
         return
@@ -257,7 +257,7 @@ detect_icon() {
         return
     fi
     # 3. Common conventional asset locations.
-    for candidate in assets/icon.png assets/icon/icon.png assets/launcher_logo.png \
+    for candidate in assets/icon.png assets/icon/icon.png assets/branding/launcher_icon.png \
                       assets/app_icon.png assets/logo.png web/icons/Icon-512.png; do
         if [[ -f "$candidate" ]]; then
             echo "$candidate"

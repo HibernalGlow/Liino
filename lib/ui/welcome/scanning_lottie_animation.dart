@@ -10,7 +10,7 @@ class _ScanningLottieAnimation extends StatelessWidget {
         width: 400.s,
         height: 300.s,
         child: Lottie.asset(
-          'assets/loading.json',
+          AppAssets.loadingAnimation,
           fit: BoxFit.contain,
           repeat: true,
         ),

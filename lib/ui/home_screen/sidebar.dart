@@ -38,7 +38,7 @@ class Sidebar extends ConsumerWidget {
                           SizedBox(
                             height: 42,
                             child: SvgPicture.asset(
-                              'assets/main_logo_transparent.svg',
+                              AppAssets.logo,
                               fit: BoxFit.contain,
                               colorMapper: AccentColorMapper(
                                 Theme.of(context).colorScheme.primary,

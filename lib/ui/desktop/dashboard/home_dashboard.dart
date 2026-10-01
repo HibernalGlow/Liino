@@ -15,6 +15,7 @@ import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/core/services/storage/db_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:looper_player/core/utils/l10n.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
 part 'featured_artist_card.dart';
 part 'dashboard_sections.dart';
 part 'desktop_items.dart';
@@ -53,7 +54,7 @@ class HomeDashboard extends ConsumerWidget {
                 SizedBox(
                   height: 50.s,
                   child: SvgPicture.asset(
-                    'assets/main_logo_transparent.svg',
+                    AppAssets.logo,
                     fit: BoxFit.contain,
                     colorMapper: AccentColorMapper(
                       Theme.of(context).colorScheme.primary,

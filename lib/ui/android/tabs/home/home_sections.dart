@@ -82,7 +82,7 @@ extension _HomeTabSections on _AndroidHomeTabState {
       margin: const EdgeInsets.symmetric(horizontal: 6),
       child: InkWell(
         onTap: () async {
-          HapticFeedback.lightImpact();
+          AppHaptics.light();
           final songs = await DbService.isar.songs
               .filter()
               .artistEqualTo(artist.name)
@@ -161,7 +161,7 @@ extension _HomeTabSections on _AndroidHomeTabState {
       margin: const EdgeInsets.symmetric(horizontal: 6),
       child: InkWell(
         onTap: () async {
-          HapticFeedback.lightImpact();
+          AppHaptics.light();
           final songs = await DbService.isar.songs
               .filter()
               .albumEqualTo(album.name)
@@ -241,7 +241,7 @@ extension _HomeTabSections on _AndroidHomeTabState {
       margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       child: InkWell(
         onTap: () {
-          HapticFeedback.lightImpact();
+          AppHaptics.light();
           final firstWithArt = genreSongs.firstWhere(
             (s) => s.artPath != null,
             orElse: () => genreSongs.first,
@@ -422,7 +422,7 @@ extension _HomeTabSections on _AndroidHomeTabState {
         borderRadius: BorderRadius.circular(36),
         useExpanded: false,
         onTap: () {
-          HapticFeedback.lightImpact();
+          AppHaptics.light();
           ref
               .read(playbackProvider.notifier)
               .setPlaylist(recentSongs, initialIndex: index);

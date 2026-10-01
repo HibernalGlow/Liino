@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart' hide RepeatMode;
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:looper_player/core/services/storage/db_service.dart';
@@ -9,6 +8,7 @@ import 'package:looper_player/core/theme/app_icons.dart';
 import 'package:looper_player/core/utils/ui_utils.dart';
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import '../../widgets/premium_section.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 
 class FavoriteButtonWithGlow extends StatefulWidget {
   final Song song;
@@ -98,8 +98,10 @@ class _FavoriteButtonWithGlowState extends State<FavoriteButtonWithGlow>
               ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.05)
               : Colors.transparent,
           onTap: () {
-            HapticFeedback.selectionClick();
-            if (!widget.song.isFavorite) {
+            if (widget.song.isFavorite) {
+              AppHaptics.selection();
+            } else {
+              AppHaptics.heartbeat();
               _generateRandomParticles();
               _glowController.forward(from: 0.0);
             }

@@ -2,12 +2,18 @@
   github flavor only: merged on top of src/main/AndroidManifest.xml. The Play
   build never sees these entries - Play policy disallows MANAGE_EXTERNAL_STORAGE
   for a media player, but the GitHub APK can offer it for whole-storage and
-  SD card scanning (see lib/core/storage_access.dart).
+  SD card scanning (see lib/core/storage_access.dart). It likewise restricts
+  REQUEST_INSTALL_PACKAGES, which the GitHub APK needs to update itself.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+
+    <!-- In-app update: lets the GitHub APK install the newer APK it downloads
+         from the project's releases (see InAppUpdater.kt in this flavor). The
+         Play build updates through Play and must never declare this. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Android 10 (API 29) has no All Files Access; legacy storage lets
          READ_EXTERNAL_STORAGE walk the whole storage root there instead. -->

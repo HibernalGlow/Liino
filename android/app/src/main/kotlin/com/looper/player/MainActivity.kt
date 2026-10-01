@@ -19,6 +19,9 @@ import android.util.Log
 import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.os.PowerManager
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 
 class MainActivity : FlutterActivity() {
@@ -27,11 +30,17 @@ class MainActivity : FlutterActivity() {
     private val WAKELOCK_CHANNEL = "com.looper.player/wakelock"
     private val UPDATE_CHANNEL = "com.looper.player/updates"
     private val AUDIO_FOCUS_CHANNEL = "com.looper.player/audio_focus"
+    private val AUDIO_INFO_CHANNEL = "com.looper.player/audio_info"
+    private val SYSTEM_UI_CHANNEL = "com.looper.player/system_ui"
     private val SAF_PICK_FOLDER_REQUEST_CODE = 9273
     private val MEDIA_WRITE_REQUEST_CODE = 9274
     private val MEDIA_BATCH_DELETE_REQUEST_CODE = 9275
     private var wakeLock: PowerManager.WakeLock? = null
-    // Real Play In-App Updates in the play flavor, a no-op in the github one.
+    // Whether Flutter asked for the navigation bar to be hidden (the lyrics
+    // screen does while its controls are hidden). Re-applied on resume since
+    // the system brings the bars back when the app leaves the foreground.
+    private var navBarHidden = false
+    // Play In-App Updates in the play flavor, the APK installer in the github one.
     private var inAppUpdater: InAppUpdater? = null
     // Pending result for an in-flight pickSafFolder() call, bridged across
     // the async gap to the system folder-picker Activity in onActivityResult.
@@ -233,6 +242,27 @@ class MainActivity : FlutterActivity() {
                 } else {
                     result.success(null)
                 }
+            } else if (call.method == "getEmbeddedGenre") {
+                // Fallback for when MetadataGod couldn't read the tags and
+                // MediaStore has no GENRE column (API 29) or left it empty.
+                val path = call.argument<String>("path")
+                if (path != null) {
+                    metadataExecutor.execute {
+                        var genre: String? = null
+                        val mmr = MediaMetadataRetriever()
+                        try {
+                            mmr.setDataSource(path)
+                            genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
+                        } catch (e: Exception) {
+                            genre = null
+                        } finally {
+                            try { mmr.release() } catch (e: Exception) {}
+                        }
+                        runOnUiThread { result.success(genre) }
+                    }
+                } else {
+                    result.success(null)
+                }
             } else if (call.method == "pickSafFolder") {
                 // Storage Access Framework folder pick, used for "Add folder"
                 // instead of MANAGE_EXTERNAL_STORAGE (Play Store disallows the
@@ -400,6 +430,28 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SYSTEM_UI_CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "setNavigationBarHidden") {
+                navBarHidden = call.argument<Boolean>("hidden") ?: false
+                applyNavigationBarVisibility()
+                result.success(null)
+            } else {
+                result.notImplemented()
+            }
+        }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, AUDIO_INFO_CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "getOutputInfo") {
+                try {
+                    result.success(AudioOutputInfo.collect(applicationContext))
+                } catch (e: Exception) {
+                    result.error("AUDIO_INFO_ERROR", e.message, null)
+                }
+            } else {
+                result.notImplemented()
+            }
+        }
+
         val updateChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, UPDATE_CHANNEL)
         inAppUpdater?.onDestroy() // configureFlutterEngine can run again for the same activity
         val updater = InAppUpdater(this) { updateChannel.invokeMethod("onUpdateDownloaded", null) }
@@ -422,7 +474,7 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 else -> {
-                    result.notImplemented()
+                    if (!updater.onMethodCall(call, result)) result.notImplemented()
                 }
             }
         }
@@ -661,6 +713,21 @@ class MainActivity : FlutterActivity() {
     override fun onResume() {
         super.onResume()
         inAppUpdater?.onResume()
+        if (navBarHidden) applyNavigationBarVisibility()
+    }
+
+    // Hides/shows only the navigation bar (3-button bar or gesture pill),
+    // leaving the status bar and edge-to-edge layout alone. While hidden, a
+    // swipe from the edge shows it briefly over the app.
+    private fun applyNavigationBarVisibility() {
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        if (navBarHidden) {
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.navigationBars())
+        } else {
+            controller.show(WindowInsetsCompat.Type.navigationBars())
+        }
     }
 
     override fun onDestroy() {
@@ -1026,7 +1093,13 @@ class MainActivity : FlutterActivity() {
                 android.provider.MediaStore.Audio.Media.DATA,
                 android.provider.MediaStore.Audio.Media.YEAR,
                 android.provider.MediaStore.Audio.Media.TRACK
-            )
+            ) + if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                // GENRE only became a column of the audio table in API 30;
+                // before that it lived in a separate Genres.Members join.
+                arrayOf(android.provider.MediaStore.Audio.Media.GENRE)
+            } else {
+                emptyArray()
+            }
 
             val categorySelection = if (includeSystemAndMessagingAudio) {
                 "1 = 1"
@@ -1062,6 +1135,11 @@ class MainActivity : FlutterActivity() {
                 val pathCol = cursor.getColumnIndex(android.provider.MediaStore.Audio.Media.DATA)
                 val yearCol = cursor.getColumnIndex(android.provider.MediaStore.Audio.Media.YEAR)
                 val trackCol = cursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TRACK)
+                val genreCol = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    cursor.getColumnIndex(android.provider.MediaStore.Audio.Media.GENRE)
+                } else {
+                    -1
+                }
 
                 while (cursor.moveToNext()) {
                     val path = if (pathCol != -1) cursor.getString(pathCol) else null
@@ -1096,6 +1174,7 @@ class MainActivity : FlutterActivity() {
                     val size = if (sizeCol != -1) cursor.getLong(sizeCol) else 0L
                     val year = if (yearCol != -1) cursor.getInt(yearCol) else 0
                     val track = if (trackCol != -1) cursor.getInt(trackCol) else 0
+                    val genre = if (genreCol != -1) cursor.getString(genreCol) else null
 
                     audioList.add(mapOf(
                         "path" to path,
@@ -1105,7 +1184,8 @@ class MainActivity : FlutterActivity() {
                         "duration" to duration,
                         "size" to size,
                         "year" to year,
-                        "track" to track
+                        "track" to track,
+                        "genre" to genre
                     ))
                 }
             }

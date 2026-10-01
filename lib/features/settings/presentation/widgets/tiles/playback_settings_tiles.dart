@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:looper_player/core/services/haptics/app_haptics.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
@@ -143,6 +144,32 @@ class FluidPlayerTile extends ConsumerWidget {
       value: settings.enableSlideGesture,
       onChanged: (value) {
         ref.read(settingsProvider.notifier).updateEnableSlideGesture(value);
+      },
+    );
+  }
+}
+
+class HapticFeedbackTile extends ConsumerWidget {
+  const HapticFeedbackTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final on = !settings.disableHaptics;
+    return SwitchListTile(
+      secondary: Icon(
+        on ? LucideIcons.vibrate : LucideIcons.vibrateOff,
+        color: Colors.white70,
+      ),
+      title: Text(l10n.hapticFeedback, style: _tileTitleStyle()),
+      subtitle: Text(l10n.hapticFeedbackDesc, style: _tileSubtitleStyle()),
+      activeThumbColor: Color(settings.accentColor),
+      value: on,
+      onChanged: (value) async {
+        await ref.read(settingsProvider.notifier).updateHapticsEnabled(value);
+        // Plays only when switching on, as a sample of what's back.
+        AppHaptics.medium();
       },
     );
   }
