@@ -22,6 +22,9 @@ import 'package:metadata_god/metadata_god.dart';
 import 'package:looper_player/core/theme/theme_provider.dart';
 import 'package:looper_player/ui/widgets/common/keyboard_handler.dart';
 import 'core/utils/logger_helper.dart';
+import 'core/services/window/window_geometry.dart';
+import 'core/services/window/window_geometry_listener.dart';
+import 'core/utils/ui_utils.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 
 final dbInitializerProvider = FutureProvider<void>((ref) async {
@@ -80,16 +83,30 @@ void main(List<String> args) async {
     if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
       try {
         await windowManager.ensureInitialized();
-        WindowOptions windowOptions = const WindowOptions(
-          size: Size(1150, 700),
-          center: true,
+        final geometry = WindowGeometry.sanitize(
+          await WindowGeometryStore.load(),
+          WindowGeometry.desktopSize(),
+        );
+        final position = (geometry?.x != null && geometry?.y != null)
+            ? Offset(geometry!.x!, geometry.y!)
+            : null;
+        WindowOptions windowOptions = WindowOptions(
+          size: geometry?.size ?? WindowGeometry.defaultSize,
+          minimumSize: WindowGeometry.minimumSize,
+          center: position == null,
           skipTaskbar: false,
           titleBarStyle: TitleBarStyle.hidden,
           title: 'Looper Player',
-          backgroundColor: Color(0xFF121214),
+          backgroundColor: const Color(0xFF121214),
         );
         await windowManager.waitUntilReadyToShow(windowOptions, () async {
+          if (position != null) {
+            await windowManager.setPosition(position);
+          }
           await windowManager.show();
+          if (geometry?.maximized ?? false) {
+            await windowManager.maximize();
+          }
           await windowManager.focus();
         });
       } catch (e, s) {
@@ -175,7 +192,11 @@ class MyApp extends ConsumerWidget {
 
     Widget buildHome() {
       return dbInit.when(
-        data: (_) => const KeyboardHandler(child: HomeScreen()),
+        data: (_) => KeyboardHandler(
+          child: UiUtils.isDesktop
+              ? const WindowGeometryListener(child: HomeScreen())
+              : const HomeScreen(),
+        ),
         loading: () => const PreAppLoadingScreenContent(),
         error: (err, stack) {
           LoggerHelper.write(
