@@ -15,6 +15,7 @@ import '../../../android/player/equalizer/android_equalizer_screen.dart';
 import '../premium_progress_bar.dart';
 import 'equal_height_track_shape.dart';
 import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/ui/desktop/equalizer/desktop_equalizer_dialog.dart';
 part 'bouncy_tap.dart';
 
 class PlayerBar extends ConsumerWidget {
@@ -480,6 +481,10 @@ class _PremiumPlayerBar extends ConsumerWidget {
                 : Colors.white54,
           ),
           onPressed: () {
+            if (UiUtils.isDesktop) {
+              showDesktopEqualizer(context);
+              return;
+            }
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,

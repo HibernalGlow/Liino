@@ -23,6 +23,8 @@ import 'package:looper_player/ui/widgets/common/menu_option_tile.dart';
 import 'package:looper_player/ui/widgets/sheets/edit_song_sheet.dart';
 import 'package:looper_player/ui/widgets/sheets/sleep_timer_sheet_content.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
+import 'package:looper_player/ui/desktop/equalizer/desktop_equalizer_dialog.dart';
 
 void showSongOptionsBottomSheet({
   required BuildContext context,
@@ -460,6 +462,10 @@ class _SongOptionsSheetContent extends ConsumerWidget {
                           onTap: () {
                             AppHaptics.light();
                             Navigator.pop(context);
+                            if (UiUtils.isDesktop) {
+                              showDesktopEqualizer(parentContext);
+                              return;
+                            }
                             Navigator.push(
                               parentContext,
                               MaterialPageRoute(

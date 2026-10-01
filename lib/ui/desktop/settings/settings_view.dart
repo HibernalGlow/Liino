@@ -14,7 +14,7 @@ import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:looper_player/ui/android/widgets/premium_section.dart';
 import 'package:looper_player/core/providers/providers.dart';
-import 'package:looper_player/ui/android/player/equalizer/android_equalizer_screen.dart';
+import 'package:looper_player/ui/desktop/equalizer/desktop_equalizer_dialog.dart';
 import 'package:looper_player/ui/widgets/common/folder_picker_helper.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/theme/app_assets.dart';
@@ -522,15 +522,7 @@ class SettingsView extends ConsumerWidget {
                       subtitle: settings.equalizerEnabled
                           ? l10n.equalizerEnabled18Band
                           : l10n.disabled,
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => const AndroidEqualizerScreen(),
-                        );
-                      },
+                      onTap: () => showDesktopEqualizer(context),
                       trailing: const Icon(
                         LucideIcons.chevronRight,
                         color: Colors.white38,
