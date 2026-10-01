@@ -42,6 +42,9 @@ import 'package:looper_player/ui/widgets/sheets/apk_update_sheet.dart';
 import '../android/shell/android_main_screen.dart';
 import '../android/widgets/empty_library_view.dart';
 import 'custom_title_bar.dart';
+import 'desktop_shell_rules.dart';
+import 'package:looper_player/features/analyze/presentation/screens/looper_analyze_view.dart';
+import 'package:looper_player/ui/android/tabs/library/categories/genres_grid_view.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/theme/app_assets.dart';
 part 'sidebar.dart';
@@ -259,7 +262,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        if (nav.activeItem != NavItem.lyrics)
+                                        if (DesktopShellRules.showTopBar(
+                                          nav.activeItem,
+                                        ))
                                           Padding(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 24,
@@ -438,6 +443,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return library.songs.isEmpty
             ? _buildEmptyState(context, l10n)
             : SongsList(songs: library.songs);
+      case NavItem.genres:
+        return const GenresGridView();
+      case NavItem.analyze:
+        return const LooperAnalyzeView();
       case NavItem.home:
       default:
         return library.songs.isEmpty

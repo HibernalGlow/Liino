@@ -74,6 +74,13 @@ class Sidebar extends ConsumerWidget {
                       isSelected: activeItem == NavItem.artists,
                       onTap: () => navigateTo(NavItem.artists),
                     ),
+                    if (ref.watch(songsByGenreProvider).isNotEmpty)
+                      _SidebarItem(
+                        icon: LucideIcons.music,
+                        label: l10n.genres,
+                        isSelected: activeItem == NavItem.genres,
+                        onTap: () => navigateTo(NavItem.genres),
+                      ),
                     _SidebarItem(
                       customIcon: AppIcons.library,
                       label: l10n.playlists,
@@ -91,6 +98,12 @@ class Sidebar extends ConsumerWidget {
                       label: l10n.favorites,
                       isSelected: activeItem == NavItem.favorites,
                       onTap: () => navigateTo(NavItem.favorites),
+                    ),
+                    _SidebarItem(
+                      icon: LucideIcons.barChart3,
+                      label: l10n.looperAnalyze,
+                      isSelected: activeItem == NavItem.analyze,
+                      onTap: () => navigateTo(NavItem.analyze),
                     ),
                     _SidebarItem(
                       icon: LucideIcons.listOrdered,
@@ -239,6 +252,11 @@ class _SidebarItem extends StatelessWidget {
         ),
         dense: true,
         visualDensity: VisualDensity.compact,
+        // Tight gaps so longer labels (Recently Played, Looper Analyze) fit
+        // the sidebar without being cut off.
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        horizontalTitleGap: 12,
+        minLeadingWidth: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onTap: onTap,
       ),
