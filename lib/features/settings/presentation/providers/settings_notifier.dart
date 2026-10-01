@@ -6,6 +6,8 @@ import '../../../../core/services/storage/db_service.dart';
 
 import '../../../library/data/services/artwork_downloader_service.dart';
 import '../../../../core/theme/app_fonts.dart';
+import '../../../../core/utils/ui_scale_steps.dart';
+import '../../../playback/presentation/widgets/lyrics/lyrics_scale.dart';
 import '../../domain/artwork_visualizer_style.dart';
 import '../../domain/quality_badge_style.dart';
 import '../../domain/progress_bar_style.dart';
@@ -378,7 +380,9 @@ class Settings extends _$Settings {
       ..stackSansDefaultMigrated = s.stackSansDefaultMigrated
       ..equalizerGlobalMode = s.equalizerGlobalMode
       ..firstTimeEqualizer = s.firstTimeEqualizer
-      ..lyricsGestureTutorialSeen = s.lyricsGestureTutorialSeen;
+      ..lyricsGestureTutorialSeen = s.lyricsGestureTutorialSeen
+      ..desktopUiScale = s.desktopUiScale
+      ..lyricsFontScale = s.lyricsFontScale;
   }
 
   Future<void> updateLibraryFolders(List<String> folders) =>
@@ -656,6 +660,12 @@ class Settings extends _$Settings {
 
   Future<void> updateLyricsAlignment(String alignment) =>
       _update((s) => s..lyricsAlignment = alignment);
+
+  Future<void> updateDesktopUiScale(double value) =>
+      _update((s) => s..desktopUiScale = UiScaleSteps.normalize(value));
+
+  Future<void> updateLyricsFontScale(double value) =>
+      _update((s) => s..lyricsFontScale = LyricsScale.normalize(value));
 
   Future<void> updateDynamicAccentColor(bool enabled) =>
       _update((s) => s..dynamicAccentColor = enabled);

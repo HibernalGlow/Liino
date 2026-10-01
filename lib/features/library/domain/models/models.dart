@@ -335,4 +335,14 @@ class AppSettings {
   /// tutorial on the Lyrics screen (tap to seek, long-press to select lines
   /// to share, pinch to resize, swipe down to close).
   bool lyricsGestureTutorialSeen = false;
+
+  /// Desktop only: whole-UI scale, one of UiScaleSteps.steps. Rows saved
+  /// before this field existed come back as NaN - read it through
+  /// UiScaleSteps.normalize.
+  double desktopUiScale = 1.0;
+
+  /// Desktop only: lyrics text scale chosen by the user, multiplied by the
+  /// automatic window-based scale. NaN on old rows - read it through
+  /// LyricsScale.normalize.
+  double lyricsFontScale = 1.0;
 }
