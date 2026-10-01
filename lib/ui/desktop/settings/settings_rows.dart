@@ -1,6 +1,6 @@
 part of 'settings_view.dart';
 
-class _Section extends StatelessWidget {
+class _Section extends ConsumerWidget {
   final String title;
   final IconData icon;
   final bool initiallyExpanded;
@@ -14,7 +14,12 @@ class _Section extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // With dynamic theming the card is a light accent tint, like the player
+    // bar, so the artwork background shows through instead of a solid surface.
+    final isDynamic = ref.watch(
+      settingsProvider.select((s) => s.enableDynamicTheming),
+    );
     return CollapsibleSettingsSection(
       // The title is unique per section and stable within a session.
       id: title,
@@ -25,6 +30,9 @@ class _Section extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         padding: EdgeInsets.zero,
         useExpanded: false,
+        backgroundColor: isDynamic
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)
+            : null,
         child: child,
       ),
       children: children,

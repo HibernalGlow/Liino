@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Previous / play-pause / next, shared by the card-style widgets -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <ImageButton
+        android:id="@+id/widget_prev"
+        android:layout_width="34dp"
+        android:layout_height="42dp"
+        android:background="@android:color/transparent"
+        android:scaleType="center"
+        android:src="@drawable/ic_widget_prev" />
+
+    <FrameLayout
+        android:id="@+id/widget_play_pause_container"
+        android:layout_width="43dp"
+        android:layout_height="42dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/widget_play_pause_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/widget_play_circle" />
+
+        <ImageView
+            android:id="@+id/widget_play_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_widget_play" />
+    </FrameLayout>
+
+    <ImageButton
+        android:id="@+id/widget_next"
+        android:layout_width="34dp"
+        android:layout_height="42dp"
+        android:background="@android:color/transparent"
+        android:scaleType="center"
+        android:src="@drawable/ic_widget_next" />
+</LinearLayout>

@@ -3185,4 +3185,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Options des paroles';
+
+  @override
+  String get lyricsFullscreen => 'Paroles en plein écran';
+
+  @override
+  String get lyricsExitFullscreen => 'Quitter le plein écran';
 }

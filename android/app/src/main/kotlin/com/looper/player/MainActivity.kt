@@ -90,6 +90,15 @@ class MainActivity : FlutterActivity() {
                 context.startActivity(launchIntent)
             }
         }
+
+        // Asks Dart to push the current song to the widgets. Dart skips that
+        // work while no widget is pinned, so a widget placed mid-session has
+        // nothing to show until it is told one now exists.
+        fun requestWidgetRefresh() {
+            val engine = activeEngine ?: return
+            MethodChannel(engine.dartExecutor.binaryMessenger, "com.looper.player/widget")
+                .invokeMethod("onWidgetRefresh", null)
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -391,14 +400,9 @@ class MainActivity : FlutterActivity() {
                     apply()
                 }
 
-                // Trigger widget update for all 4 providers
+                // Trigger widget update for every provider
                 val appWidgetManager = AppWidgetManager.getInstance(this)
-                val providers = listOf(
-                    PlayerWidgetProvider::class.java,
-                    PlayerWidgetProviderSquareArtwork::class.java,
-                    PlayerWidgetProviderSquareProgress::class.java,
-                    PlayerWidgetProviderLargeLyrics::class.java
-                )
+                val providers = PlayerWidgetProvider.ALL_PROVIDERS
                 for (provider in providers) {
                     val componentName = ComponentName(this, provider)
                     val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)

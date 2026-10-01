@@ -2977,4 +2977,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lyricsOptions => '歌词选项';
+
+  @override
+  String get lyricsFullscreen => '全屏歌词';
+
+  @override
+  String get lyricsExitFullscreen => '退出全屏';
 }

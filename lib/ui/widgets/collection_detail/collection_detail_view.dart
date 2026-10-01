@@ -18,7 +18,13 @@ import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/library/presentation/widgets/library_grids.dart';
 import 'package:looper_player/ui/widgets/sheets/edit_album_sheet.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
+import 'package:looper_player/features/library/presentation/providers/library/library_notifier.dart';
+import 'package:looper_player/ui/widgets/sheets/song_options_bottom_sheet.dart';
 part 'collection_header.dart';
+part 'desktop_collection.dart';
 part 'sort_sheet.dart';
 part 'playlist_options.dart';
 
@@ -163,6 +169,21 @@ class CollectionDetailView extends ConsumerWidget {
     final canReorderPlaylist =
         reactivePlaylist != null &&
         sortOption == CollectionSortOption.defaultOrder;
+
+    if (UiUtils.isDesktop) {
+      return _buildDesktop(
+        context,
+        ref,
+        title: titleToRender,
+        subtitle: subtitleToRender,
+        art: artToRender,
+        songs: sortedSongs,
+        reactivePlaylist: reactivePlaylist,
+        reactiveAlbum: reactiveAlbum,
+        canReorder: canReorderPlaylist && sortedSongs.isNotEmpty,
+        activePath: activeSong?.path,
+      );
+    }
 
     return Scaffold(
       // Not Colors.transparent - see the comment on CategoryDetailWrapper's

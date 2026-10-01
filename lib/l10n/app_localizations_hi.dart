@@ -3148,4 +3148,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'लिरिक्स विकल्प';
+
+  @override
+  String get lyricsFullscreen => 'फ़ुल स्क्रीन लिरिक्स';
+
+  @override
+  String get lyricsExitFullscreen => 'फ़ुल स्क्रीन से बाहर निकलें';
 }

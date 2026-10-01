@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "Taille du texte sur l'écran des paroles",
   "lyricsSizeSmaller": "Paroles plus petites",
   "lyricsSizeLarger": "Paroles plus grandes",
-  "lyricsOptions": "Options des paroles"
+  "lyricsOptions": "Options des paroles",
+  "lyricsFullscreen": "Paroles en plein écran",
+  "lyricsExitFullscreen": "Quitter le plein écran"
 }

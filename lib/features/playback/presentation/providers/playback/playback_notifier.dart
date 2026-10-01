@@ -1912,20 +1912,29 @@ class Playback extends _$Playback {
   bool? _hasHomeWidgetsPinned;
   int _lastHomeWidgetPinCheckMs = 0;
   static const int _homeWidgetPinCheckIntervalMs = 60000;
-  static const Set<String> _homeWidgetProviderClasses = {
-    'com.looper.player.PlayerWidgetProvider',
-    'com.looper.player.PlayerWidgetProviderSquareArtwork',
-    'com.looper.player.PlayerWidgetProviderSquareProgress',
-    'com.looper.player.PlayerWidgetProviderLargeLyrics',
-  };
+  static const List<String> _homeWidgetProviders = [
+    'PlayerWidgetProvider',
+    'PlayerWidgetProviderSquareArtwork',
+    'PlayerWidgetProviderSquareProgress',
+    'PlayerWidgetProviderLargeLyrics',
+    'PlayerWidgetProviderBar',
+    'PlayerWidgetProviderMedium',
+    'PlayerWidgetProviderLargeArtwork',
+    'PlayerWidgetProviderLargeArtworkInfo',
+    'PlayerWidgetProviderTallArtwork',
+    'PlayerWidgetProviderTallArtworkInfo',
+    'PlayerWidgetProviderDial',
+    'PlayerWidgetProviderArtworkSide',
+  ];
 
-  /// Whether any of this app's 4 home-screen widgets is actually pinned to
+  /// Whether any of this app's home-screen widgets is actually pinned to
   /// a launcher, cached for [_homeWidgetPinCheckIntervalMs] so checking
   /// costs one platform-channel round trip a minute rather than one per
   /// call. _updateWidgetState() used to unconditionally push 11
-  /// saveWidgetData writes + 4 updateWidget broadcasts on every throttle
-  /// tick even for the (typical) user who never placed any of these
-  /// widgets on their home screen.
+  /// saveWidgetData writes + one updateWidget broadcast per widget type on
+  /// every throttle tick even for the (typical) user who never placed any
+  /// of these widgets on their home screen. The native side sends
+  /// onWidgetRefresh when a widget is placed, so the cache never hides one.
   Future<bool> _anyHomeWidgetPinned() async {
     final now = DateTime.now().millisecondsSinceEpoch;
     if (_hasHomeWidgetsPinned != null &&
@@ -1935,8 +1944,12 @@ class Playback extends _$Playback {
     _lastHomeWidgetPinCheckMs = now;
     try {
       final installed = await HomeWidget.getInstalledWidgets();
+      // home_widget reports Android's *short* class name, which for a class
+      // inside the app's own package is ".PlayerWidgetProvider" rather than
+      // the fully qualified name - so compare on the simple name only.
       _hasHomeWidgetsPinned = installed.any(
-        (w) => _homeWidgetProviderClasses.contains(w.androidClassName),
+        (w) =>
+            _homeWidgetProviders.contains(w.androidClassName?.split('.').last),
       );
     } catch (_) {
       // Can't tell - fail open so a widget the user actually placed never
@@ -2096,6 +2109,17 @@ class Playback extends _$Playback {
             nextRepeatMode();
           }
           break;
+        case 'onWidgetRefresh':
+          // Native side saw a widget being placed. If we believed none was
+          // pinned, nothing has been saved for it to show - re-check and
+          // push now rather than at the next cache expiry. Ignored while
+          // widgets are known pinned: our own updateWidget broadcasts land
+          // here too.
+          if (_hasHomeWidgetsPinned != true) {
+            _hasHomeWidgetsPinned = null;
+            _updateWidgetState();
+          }
+          break;
       }
     });
   }
@@ -2177,25 +2201,12 @@ class Playback extends _$Playback {
         state.duration.inMilliseconds,
       );
 
-      await HomeWidget.updateWidget(
-        name: 'PlayerWidgetProvider',
-        qualifiedAndroidName: 'com.looper.player.PlayerWidgetProvider',
-      );
-      await HomeWidget.updateWidget(
-        name: 'PlayerWidgetProviderSquareArtwork',
-        qualifiedAndroidName:
-            'com.looper.player.PlayerWidgetProviderSquareArtwork',
-      );
-      await HomeWidget.updateWidget(
-        name: 'PlayerWidgetProviderSquareProgress',
-        qualifiedAndroidName:
-            'com.looper.player.PlayerWidgetProviderSquareProgress',
-      );
-      await HomeWidget.updateWidget(
-        name: 'PlayerWidgetProviderLargeLyrics',
-        qualifiedAndroidName:
-            'com.looper.player.PlayerWidgetProviderLargeLyrics',
-      );
+      for (final name in _homeWidgetProviders) {
+        await HomeWidget.updateWidget(
+          name: name,
+          qualifiedAndroidName: 'com.looper.player.$name',
+        );
+      }
     } catch (e) {}
   }
 

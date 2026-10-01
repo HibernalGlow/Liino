@@ -5689,6 +5689,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lyrics options'**
   String get lyricsOptions;
+
+  /// No description provided for @lyricsFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen lyrics'**
+  String get lyricsFullscreen;
+
+  /// No description provided for @lyricsExitFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get lyricsExitFullscreen;
 }
 
 class _AppLocalizationsDelegate

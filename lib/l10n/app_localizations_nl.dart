@@ -3174,4 +3174,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Songtekstopties';
+
+  @override
+  String get lyricsFullscreen => 'Songtekst op volledig scherm';
+
+  @override
+  String get lyricsExitFullscreen => 'Volledig scherm sluiten';
 }

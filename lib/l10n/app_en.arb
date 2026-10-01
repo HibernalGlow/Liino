@@ -1315,5 +1315,7 @@
   "lyricsSizeDesc": "Text size on the lyrics screen",
   "lyricsSizeSmaller": "Smaller lyrics",
   "lyricsSizeLarger": "Larger lyrics",
-  "lyricsOptions": "Lyrics options"
+  "lyricsOptions": "Lyrics options",
+  "lyricsFullscreen": "Full screen lyrics",
+  "lyricsExitFullscreen": "Exit full screen"
 }

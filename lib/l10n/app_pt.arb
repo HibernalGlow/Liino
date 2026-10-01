@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "Tamanho do texto na tela de letras",
   "lyricsSizeSmaller": "Letra menor",
   "lyricsSizeLarger": "Letra maior",
-  "lyricsOptions": "Opções de letra"
+  "lyricsOptions": "Opções de letra",
+  "lyricsFullscreen": "Letra em tela cheia",
+  "lyricsExitFullscreen": "Sair da tela cheia"
 }

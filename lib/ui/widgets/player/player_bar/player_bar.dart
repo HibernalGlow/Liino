@@ -203,53 +203,65 @@ class _PremiumPlayerBar extends ConsumerWidget {
     String? artPath,
     bool isVeryNarrow,
   ) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Container(
-          width: (isVeryNarrow ? 40 : 56).s,
-          height: (isVeryNarrow ? 40 : 56).s,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-          child: OptimizedImage(
-            imagePath: artPath,
-            borderRadius: BorderRadius.circular(6),
-            fit: BoxFit.cover,
-            placeholder: Icon(
-              LucideIcons.music,
-              color: Colors.white24,
-              size: (isVeryNarrow ? 16 : 24).s,
+    final artSize = (isVeryNarrow ? 40 : 56).s;
+    // On a narrow window the slot can be smaller than the artwork: shrink the
+    // artwork to fit and drop the text rather than overflow.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final art = artSize.clamp(0.0, constraints.maxWidth);
+        final showText = constraints.maxWidth >= artSize + 12 + 24;
+        return Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Container(
+              width: art,
+              height: art,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: OptimizedImage(
+                imagePath: artPath,
+                borderRadius: BorderRadius.circular(6),
+                fit: BoxFit.cover,
+                placeholder: Icon(
+                  LucideIcons.music,
+                  color: Colors.white24,
+                  size: (isVeryNarrow ? 16 : 24).s,
+                ),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.normal,
-                  fontSize: (isVeryNarrow ? 12 : 14).ts,
+            if (showText) const SizedBox(width: 12),
+            if (showText)
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.normal,
+                        fontSize: (isVeryNarrow ? 12 : 14).ts,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      artist,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontSize: (isVeryNarrow ? 10 : 12).ts,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-              Text(
-                artist,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  fontSize: (isVeryNarrow ? 10 : 12).ts,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 

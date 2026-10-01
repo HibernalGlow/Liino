@@ -3145,4 +3145,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Şarkı sözü seçenekleri';
+
+  @override
+  String get lyricsFullscreen => 'Tam ekran şarkı sözleri';
+
+  @override
+  String get lyricsExitFullscreen => 'Tam ekrandan çık';
 }

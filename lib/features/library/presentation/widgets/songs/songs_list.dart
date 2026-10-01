@@ -262,43 +262,6 @@ class _SongsListState extends ConsumerState<SongsList> {
                   foregroundColor: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              if (!Platform.isAndroid)
-                TextButton.icon(
-                  onPressed: () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(l10n.resetLibrary),
-                        content: Text(l10n.resetLibraryConfirm),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: Text(l10n.cancel),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: Text(
-                              l10n.reset,
-                              style: AppFonts.jostStyle(color: Colors.red),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true) {
-                      await ref.read(libraryProvider.notifier).resetAndRescan();
-                    }
-                  },
-                  icon: const Icon(LucideIcons.refreshCw, size: 16),
-                  label: Text(
-                    l10n.resetLibrary,
-                    style: AppFonts.jostStyle(fontSize: 13),
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    foregroundColor: Colors.red[300],
-                  ),
-                ),
             ],
           ),
         ],

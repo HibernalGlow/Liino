@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "歌词页面的文字大小",
   "lyricsSizeSmaller": "缩小歌词",
   "lyricsSizeLarger": "放大歌词",
-  "lyricsOptions": "歌词选项"
+  "lyricsOptions": "歌词选项",
+  "lyricsFullscreen": "全屏歌词",
+  "lyricsExitFullscreen": "退出全屏"
 }

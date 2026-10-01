@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "Textgröße in der Songtext-Ansicht",
   "lyricsSizeSmaller": "Songtext kleiner",
   "lyricsSizeLarger": "Songtext größer",
-  "lyricsOptions": "Songtext-Optionen"
+  "lyricsOptions": "Songtext-Optionen",
+  "lyricsFullscreen": "Songtext im Vollbild",
+  "lyricsExitFullscreen": "Vollbild beenden"
 }

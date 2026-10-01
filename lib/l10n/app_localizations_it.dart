@@ -3173,4 +3173,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Opzioni del testo';
+
+  @override
+  String get lyricsFullscreen => 'Testo a schermo intero';
+
+  @override
+  String get lyricsExitFullscreen => 'Esci da schermo intero';
 }

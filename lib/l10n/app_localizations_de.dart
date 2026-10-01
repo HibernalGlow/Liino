@@ -3173,4 +3173,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Songtext-Optionen';
+
+  @override
+  String get lyricsFullscreen => 'Songtext im Vollbild';
+
+  @override
+  String get lyricsExitFullscreen => 'Vollbild beenden';
 }

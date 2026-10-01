@@ -3016,4 +3016,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get lyricsOptions => '가사 옵션';
+
+  @override
+  String get lyricsFullscreen => '가사 전체 화면';
+
+  @override
+  String get lyricsExitFullscreen => '전체 화면 종료';
 }

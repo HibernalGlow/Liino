@@ -52,39 +52,44 @@ class LooperAnalyzeView extends ConsumerWidget {
           backgroundColor: Colors.transparent,
           body: Stack(
             children: [
-              Positioned.fill(
-                child: topSong?.artPath != null
-                    ? _BlurredBackgroundArt(artPath: topSong!.artPath!)
-                    : Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              accent.withValues(alpha: 0.25),
-                              Colors.black,
-                            ],
+              // The Linux shell already paints the current song's artwork
+              // behind every page, so this page adds no background of its own.
+              if (!Platform.isLinux)
+                Positioned.fill(
+                  child: topSong?.artPath != null
+                      ? _BlurredBackgroundArt(artPath: topSong!.artPath!)
+                      : Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                accent.withValues(alpha: 0.25),
+                                Colors.black,
+                              ],
+                            ),
                           ),
                         ),
+                ),
+              if (!Platform.isLinux)
+                Positioned.fill(
+                  child: Container(color: Colors.black.withValues(alpha: 0.72)),
+                ),
+              if (!Platform.isLinux)
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.center,
+                        colors: [
+                          accent.withValues(alpha: 0.16),
+                          Colors.transparent,
+                        ],
                       ),
-              ),
-              Positioned.fill(
-                child: Container(color: Colors.black.withValues(alpha: 0.72)),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.center,
-                      colors: [
-                        accent.withValues(alpha: 0.16),
-                        Colors.transparent,
-                      ],
                     ),
                   ),
                 ),
-              ),
               SafeArea(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,15 +268,19 @@ class _BlurredBackgroundArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // On a desktop window the 80px art is stretched much further than on a
+    // phone, so it needs a wider blur and smooth upscaling to not look blocky.
+    final desktop = Platform.isLinux;
+    final sigma = desktop ? 48.0 : 18.0;
     return RepaintBoundary(
       child: ImageFiltered(
-        imageFilter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        imageFilter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
         child: Image.file(
           File(artPath),
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
-          filterQuality: FilterQuality.low,
+          filterQuality: desktop ? FilterQuality.medium : FilterQuality.low,
           cacheWidth: 80,
           cacheHeight: 80,
           gaplessPlayback: true,

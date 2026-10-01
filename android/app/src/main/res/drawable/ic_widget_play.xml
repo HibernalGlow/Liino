@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="9dp"
+    android:height="12dp"
+    android:viewportWidth="9"
+    android:viewportHeight="12">
+    <!-- The triangle of ic_widget_next: the design only draws the pause state -->
+    <group android:translateX="0.75">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,1.22945C0,0.238909 1.0205,-0.343636 1.7665,0.221454L8.0185,4.956C8.1672,5.06856 8.28881,5.2186 8.373,5.39338C8.4572,5.56817 8.50149,5.76253 8.50213,5.95997C8.50277,6.15742 8.45973,6.35211 8.37667,6.52754C8.2936,6.70296 8.17297,6.85393 8.025,6.96764L1.773,11.7731C1.028,12.3458 0,11.7655 0,10.77V1.22945Z"/>
+    </group>
+</vector>

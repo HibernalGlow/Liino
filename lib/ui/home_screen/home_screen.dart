@@ -4,7 +4,10 @@ import 'package:looper_player/core/utils/ui_utils.dart';
 import 'package:looper_player/core/utils/responsive.dart';
 import 'package:looper_player/core/theme/app_icons.dart';
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:looper_player/features/library/domain/models/models.dart';
+import 'package:looper_player/ui/desktop/folders/folders_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/ui/widgets/common/app_loading_indicator.dart';
 import 'package:looper_player/ui/widgets/common/color_maper.dart';
@@ -112,6 +115,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         WindowClass.compact;
 
     final isOverlayMode = ref.watch(overlayModeProvider);
+    // Background darkness slider (Settings); NaN on rows saved before it.
+    final bgDarkness =
+        (settings.desktopBackgroundDarkness.isNaN
+                ? AppSettings.defaultDesktopBackgroundDarkness
+                : settings.desktopBackgroundDarkness)
+            .clamp(0.0, 1.0);
+
+    // Lyrics-only full screen hides the rest of the shell; leaving the lyrics
+    // page (or Esc) ends it.
+    final lyricsOnly =
+        ref.watch(lyricsFullscreenProvider) && nav.activeItem == NavItem.lyrics;
+    ref.listen(appNavigationProvider.select((n) => n.activeItem), (_, item) {
+      if (item != NavItem.lyrics) {
+        ref.read(lyricsFullscreenProvider.notifier).set(false);
+      }
+    });
 
     if (isOverlayMode) {
       return const Scaffold(
@@ -145,9 +164,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 (settings.enableDynamicTheming ||
                     settings.keepBackgroundGradient)) ...[
               if (currentSongArtPath != null &&
-                  settings.enableDynamicTheming &&
-                  (settings.keepBackgroundGradient ||
-                      nav.activeItem != NavItem.settings)) ...[
+                  settings.enableDynamicTheming) ...[
                 Positioned.fill(
                   child: RepaintBoundary(
                     child: Stack(
@@ -158,16 +175,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             // duration (android_main_screen.dart) for the
                             // same blurred-background-art effect.
                             duration: const Duration(milliseconds: 800),
+                            // Outgoing and incoming artwork both fill the
+                            // window while they cross-fade.
+                            layoutBuilder: (current, previous) => Stack(
+                              fit: StackFit.expand,
+                              children: [...previous, ?current],
+                            ),
                             child: ImageFiltered(
+                              // The key must sit on the switcher's direct
+                              // child, or a new song swaps in with no fade.
+                              key: ValueKey(currentSongArtPath),
+                              // The 80px art is stretched across a whole
+                              // desktop window: a wide blur plus smooth
+                              // upscaling keeps it from looking blocky.
                               imageFilter: ImageFilter.blur(
-                                sigmaX: 16,
-                                sigmaY: 16,
+                                sigmaX: 64,
+                                sigmaY: 64,
+                                tileMode: TileMode.clamp,
                               ),
                               child: Image.file(
                                 File(currentSongArtPath),
-                                key: ValueKey(currentSongArtPath),
+                                // Without a size the image keeps its own
+                                // (tiny) size instead of filling the window.
+                                width: double.infinity,
+                                height: double.infinity,
                                 fit: BoxFit.cover,
-                                filterQuality: FilterQuality.low,
+                                filterQuality: FilterQuality.medium,
                                 // Downsample before blurring, same as every
                                 // other blurred-background usage in the app
                                 // (BlurredBackgroundArt, android_lyrics_screen,
@@ -184,9 +217,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                           ),
                         ),
+                        // Near-black at the top, letting the artwork's
+                        // colour glow through towards the bottom.
                         Positioned.fill(
-                          child: Container(
-                            color: Colors.black.withValues(alpha: 0.8),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.black.withValues(
+                                    alpha: math.sqrt(bgDarkness),
+                                  ),
+                                  Colors.black.withValues(alpha: bgDarkness),
+                                  Colors.black.withValues(
+                                    alpha: bgDarkness * 0.75,
+                                  ),
+                                ],
+                                stops: const [0.0, 0.45, 1.0],
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -233,7 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 // Sidebar - hidden on narrow screens
-                                if (!isNarrowLayout)
+                                if (!isNarrowLayout && !lyricsOnly)
                                   Container(
                                     width: 240.s,
                                     decoration: BoxDecoration(
@@ -262,9 +312,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        if (DesktopShellRules.showTopBar(
-                                          nav.activeItem,
-                                        ))
+                                        if (!lyricsOnly &&
+                                            DesktopShellRules.showTopBar(
+                                              nav.activeItem,
+                                            ))
                                           Padding(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 24,
@@ -280,30 +331,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                       ? 0
                                                       : 120,
                                                   child: ClipRect(
-                                                    child: AnimatedScale(
-                                                      scale: nav.history.isEmpty
-                                                          ? 0.0
-                                                          : 1.0,
-                                                      duration: const Duration(
-                                                        milliseconds: 300,
-                                                      ),
-                                                      curve: Curves.easeOutBack,
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                              right: 16,
+                                                    // Lay the button out at its full width while the slot
+                                                    // animates, so it is clipped instead of overflowing.
+                                                    child: SizedBox(
+                                                      height: 55.s,
+                                                      child: OverflowBox(
+                                                        alignment: Alignment
+                                                            .centerLeft,
+                                                        minWidth: 120,
+                                                        maxWidth: 120,
+                                                        child: AnimatedScale(
+                                                          scale:
+                                                              nav
+                                                                  .history
+                                                                  .isEmpty
+                                                              ? 0.0
+                                                              : 1.0,
+                                                          duration:
+                                                              const Duration(
+                                                                milliseconds:
+                                                                    300,
+                                                              ),
+                                                          curve: Curves
+                                                              .easeOutBack,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets.only(
+                                                                  right: 16,
+                                                                ),
+                                                            child: _HeaderButton(
+                                                              onTap: () => ref
+                                                                  .read(
+                                                                    appNavigationProvider
+                                                                        .notifier,
+                                                                  )
+                                                                  .goBack(),
+                                                              icon: LucideIcons
+                                                                  .arrowLeft,
+                                                              label: l10n.back,
+                                                              isDynamic:
+                                                                  isDynamic,
                                                             ),
-                                                        child: _HeaderButton(
-                                                          onTap: () => ref
-                                                              .read(
-                                                                appNavigationProvider
-                                                                    .notifier,
-                                                              )
-                                                              .goBack(),
-                                                          icon: LucideIcons
-                                                              .arrowLeft,
-                                                          label: l10n.back,
-                                                          isDynamic: isDynamic,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
@@ -368,7 +437,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                 ),
                 // Global Player Bar always at the bottom
-                if (!nav.isPlayerExpanded)
+                if (!nav.isPlayerExpanded && !lyricsOnly)
                   GestureDetector(
                     onVerticalDragUpdate: (details) {
                       if (Platform.isAndroid || Platform.isIOS) {
@@ -467,6 +536,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             : SongsList(songs: library.songs);
       case NavItem.genres:
         return const GenresGridView();
+      case NavItem.folders:
+        return const DesktopFoldersView();
       case NavItem.analyze:
         return const LooperAnalyzeView();
       case NavItem.home:

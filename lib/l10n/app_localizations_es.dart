@@ -3182,4 +3182,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Opciones de letra';
+
+  @override
+  String get lyricsFullscreen => 'Letra en pantalla completa';
+
+  @override
+  String get lyricsExitFullscreen => 'Salir de pantalla completa';
 }

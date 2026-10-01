@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "Tekstgrootte op het songtekstscherm",
   "lyricsSizeSmaller": "Kleinere songtekst",
   "lyricsSizeLarger": "Grotere songtekst",
-  "lyricsOptions": "Songtekstopties"
+  "lyricsOptions": "Songtekstopties",
+  "lyricsFullscreen": "Songtekst op volledig scherm",
+  "lyricsExitFullscreen": "Volledig scherm sluiten"
 }

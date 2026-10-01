@@ -3166,4 +3166,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Opções de letra';
+
+  @override
+  String get lyricsFullscreen => 'Letra em tela cheia';
+
+  @override
+  String get lyricsExitFullscreen => 'Sair da tela cheia';
 }

@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/utils/ui_utils.dart';
@@ -91,9 +93,17 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     );
     final song = ref.watch(playbackProvider.select((s) => s.currentSong));
     final settingsNotifier = ref.read(settingsProvider.notifier);
-    final syncSelector = _buildModeSelector(true);
+    final isFullscreen = ref.watch(lyricsFullscreenProvider);
+    // Offered once the user has scrolled the active line out of view.
+    final showResync =
+        ref.watch(lyricsManualScrollProvider) &&
+        !ref.watch(lyricsActiveLineVisibleProvider);
+    final fullscreenNotifier = ref.read(lyricsFullscreenProvider.notifier);
+    final alignment = ref.watch(
+      settingsProvider.select((s) => s.lyricsAlignment),
+    );
 
-    return LayoutBuilder(
+    final lyricsPane = LayoutBuilder(
       builder: (context, constraints) {
         final paneWidth = constraints.maxWidth;
         final autoScale = LyricsScale.auto(paneWidth);
@@ -107,33 +117,110 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
                 fontScale: userScale * autoScale,
                 onFontScaleChanged: (scale) =>
                     settingsNotifier.updateLyricsFontScale(scale / autoScale),
-                // Cap the lyrics column at 900px, centred, while the whole
-                // pane keeps scrolling.
-                horizontalPadding: math.max(24.0, (paneWidth - 900) / 2),
+                // Centred lyrics keep a 900px column in the middle of the
+                // pane. Left/right aligned lyrics use the full pane width.
+                horizontalPadding: alignment == 'center'
+                    ? math.max(24.0, (paneWidth - 900) / 2)
+                    : 24.0,
                 bottomPadding: constraints.maxHeight * 0.45,
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 24,
+              child: IgnorePointer(
+                ignoring: !showResync,
+                child: AnimatedOpacity(
+                  opacity: showResync ? 1 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Center(
+                    child: Material(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.9),
+                      shape: const StadiumBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        key: const ValueKey('lyrics-resync'),
+                        onTap: () => ref
+                            .read(lyricsManualScrollProvider.notifier)
+                            .set(false),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 9,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                LucideIcons.refreshCw,
+                                size: 14,
+                                color: Colors.black,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                context.l10n.resync,
+                                style: AppFonts.jostStyle(
+                                  color: Colors.black,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
             Positioned(
               top: 8,
               right: 16,
               child: DesktopLyricsToolbar(
-                scale: userScale,
-                onSmaller: () => settingsNotifier.updateLyricsFontScale(
-                  LyricsScale.stepBy(userScale, -1),
-                ),
-                onLarger: () => settingsNotifier.updateLyricsFontScale(
-                  LyricsScale.stepBy(userScale, 1),
-                ),
-                onReset: () => settingsNotifier.updateLyricsFontScale(1.0),
-                syncSelector: paneWidth >= 520 ? syncSelector : null,
                 onMenu: song == null
                     ? null
                     : () => showLyricsMenuDialog(context, ref, song),
+                isFullscreen: isFullscreen,
+                onToggleFullscreen: () => fullscreenNotifier.set(!isFullscreen),
               ),
             ),
           ],
         );
       },
+    );
+    // Scrolling by hand (wheel, touchpad or drag) pauses auto-follow, as on
+    // Android; the Re-sync button or the renderer's own timer resumes it.
+    void markManualScroll() =>
+        ref.read(lyricsManualScrollProvider.notifier).set(true);
+    final pane = Listener(
+      onPointerSignal: (event) {
+        if (event is PointerScrollEvent) markManualScroll();
+      },
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if ((notification is ScrollUpdateNotification &&
+                  notification.dragDetails != null) ||
+              (notification is ScrollStartNotification &&
+                  notification.dragDetails != null)) {
+            markManualScroll();
+          }
+          return false;
+        },
+        child: lyricsPane,
+      ),
+    );
+    if (!isFullscreen) return pane;
+    // Esc leaves lyrics-only full screen.
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.escape): () =>
+            fullscreenNotifier.set(false),
+      },
+      child: Focus(autofocus: true, child: pane),
     );
   }
 

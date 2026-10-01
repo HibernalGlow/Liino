@@ -244,20 +244,28 @@ class _ExpressiveSliderState extends ConsumerState<ExpressiveSlider> {
           );
 
     if (ExpressiveSlider.useDesktopLayout) {
-      return Row(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (widget.showTimestamps) ...[
-            _buildAnimatedDuration(_formatDuration(displayPosition), false),
-            const SizedBox(width: 12),
-          ],
-          Expanded(child: sliderWidget),
-          if (widget.showTimestamps) ...[
-            const SizedBox(width: 12),
-            _buildAnimatedDuration(_formatDuration(widget.duration), true),
-          ],
-        ],
+      // In a narrow window the two timestamps alone are wider than the bar's
+      // slot: drop them and keep the slider.
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final showTimestamps =
+              widget.showTimestamps && constraints.maxWidth >= 180;
+          return Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (showTimestamps) ...[
+                _buildAnimatedDuration(_formatDuration(displayPosition), false),
+                const SizedBox(width: 12),
+              ],
+              Expanded(child: sliderWidget),
+              if (showTimestamps) ...[
+                const SizedBox(width: 12),
+                _buildAnimatedDuration(_formatDuration(widget.duration), true),
+              ],
+            ],
+          );
+        },
       );
     }
 

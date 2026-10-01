@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="12dp"
+        android:paddingTop="2dp">
+
+        <!-- Artwork with the title over its (darkened) bottom edge -->
+        <FrameLayout
+            android:layout_width="156dp"
+            android:layout_height="152dp">
+
+            <ImageView
+                android:id="@+id/widget_artwork"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY" />
+
+            <include
+                layout="@layout/widget_part_text_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="9dp" />
+        </FrameLayout>
+
+        <!-- Control ring: prev / next sit in the ring, play-pause in its hub -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="143dp"
+            android:layout_weight="1">
+
+            <FrameLayout
+                android:layout_width="143dp"
+                android:layout_height="143dp"
+                android:layout_gravity="center">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/widget_play_circle" />
+
+                <ImageView
+                    android:layout_width="61dp"
+                    android:layout_height="61dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/widget_dial_inner" />
+
+                <ImageButton
+                    android:id="@+id/widget_prev"
+                    android:layout_width="34dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="left|center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_widget_prev" />
+
+                <FrameLayout
+                    android:id="@+id/widget_play_pause_container"
+                    android:layout_width="43dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/widget_play_pause_background"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/widget_play_circle" />
+
+                    <ImageView
+                        android:id="@+id/widget_play_pause"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_widget_play" />
+                </FrameLayout>
+
+                <ImageButton
+                    android:id="@+id/widget_next"
+                    android:layout_width="34dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="right|center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_widget_next" />
+            </FrameLayout>
+        </FrameLayout>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/widget_progress"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_marginLeft="14dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="16dp"
+        android:max="100"
+        android:progress="0"
+        android:progressDrawable="@drawable/widget_progress_drawable" />
+</LinearLayout>

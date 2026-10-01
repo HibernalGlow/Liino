@@ -3122,4 +3122,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'خيارات الكلمات';
+
+  @override
+  String get lyricsFullscreen => 'كلمات بملء الشاشة';
+
+  @override
+  String get lyricsExitFullscreen => 'الخروج من ملء الشاشة';
 }

@@ -481,8 +481,9 @@ class SettingsCategoryScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(14),
                           useExpanded: false,
                           padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Column(
-                            children: children.sublist(2, 7), //.sublist(2, 5),
+                          child: CollapsibleMaintainers(
+                            first: children[2],
+                            rest: children.sublist(3, 7),
                           ),
                         ),
                         const SizedBox(height: 32),

@@ -3018,4 +3018,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get lyricsOptions => '歌詞オプション';
+
+  @override
+  String get lyricsFullscreen => '歌詞を全画面表示';
+
+  @override
+  String get lyricsExitFullscreen => '全画面表示を終了';
 }

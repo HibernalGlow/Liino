@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "Размер текста на экране текста песни",
   "lyricsSizeSmaller": "Текст меньше",
   "lyricsSizeLarger": "Текст больше",
-  "lyricsOptions": "Параметры текста песни"
+  "lyricsOptions": "Параметры текста песни",
+  "lyricsFullscreen": "Текст на весь экран",
+  "lyricsExitFullscreen": "Выйти из полноэкранного режима"
 }

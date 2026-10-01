@@ -64,6 +64,46 @@ class SettingsView extends ConsumerWidget {
               ),
             ),
 
+            // Donate
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: PremiumSection(
+                  borderRadius: BorderRadius.circular(20),
+                  padding: EdgeInsets.zero,
+                  useExpanded: false,
+                  useCenter: false,
+                  backgroundColor: dynamicTheming
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.06)
+                      : null,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: _PremiumActionRow(
+                      icon: LucideIcons.heart,
+                      title: l10n.supportUs,
+                      subtitle: l10n.supportUsDesc,
+                      textColor: Theme.of(context).colorScheme.primary,
+                      trailing: const Icon(
+                        LucideIcons.externalLink,
+                        size: 16,
+                        color: Colors.white38,
+                      ),
+                      onTap: () {
+                        AppHaptics.light();
+                        launchUrl(
+                          Uri.parse(AppLinks.buyMeACoffee),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      isLast: true,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
             // Appearance Section
             SliverToBoxAdapter(
               child: Padding(
@@ -98,6 +138,24 @@ class SettingsView extends ConsumerWidget {
                               .read(settingsProvider.notifier)
                               .updateDisableBlur(value);
                         },
+                        isLast: false,
+                      ),
+                    if (settings.enableDynamicTheming)
+                      _PremiumSliderRow(
+                        icon: LucideIcons.moon,
+                        title: l10n.homeDarkness,
+                        subtitle: l10n.homeDarknessDesc,
+                        value:
+                            (settings.desktopBackgroundDarkness.isNaN
+                                ? AppSettings.defaultDesktopBackgroundDarkness
+                                : settings.desktopBackgroundDarkness) *
+                            100,
+                        min: 0,
+                        max: 100,
+                        suffix: '%',
+                        onChanged: (val) => ref
+                            .read(settingsProvider.notifier)
+                            .updateDesktopBackgroundDarkness(val / 100.0),
                         isLast: false,
                       ),
                     if (!settings.enableDynamicTheming) ...[
@@ -137,19 +195,6 @@ class SettingsView extends ConsumerWidget {
                         ref
                             .read(settingsProvider.notifier)
                             .updateDarkTheme(value);
-                      },
-                      isLast: false,
-                    ),
-                    _PremiumSwitchRow(
-                      icon: LucideIcons.music,
-                      title: l10n.dynamicLyricsBg,
-                      subtitle: l10n.dynamicLyricsBgDesc,
-                      value: settings.dynamicLyrics,
-                      onChanged: (value) {
-                        AppHaptics.light();
-                        ref
-                            .read(settingsProvider.notifier)
-                            .updateDynamicLyrics(value);
                       },
                       isLast: false,
                     ),
@@ -413,49 +458,7 @@ class SettingsView extends ConsumerWidget {
                 child: _Section(
                   title: l10n.lyrics,
                   icon: LucideIcons.micVocal,
-                  children: [
-                    const AmbientLyricsBgTile(),
-                    divider,
-                    const BlurredArtworkLyricsTile(),
-                    if (dynamicTheming ||
-                        settings.ambientColorBackground ||
-                        settings.keepBackgroundGradient ||
-                        settings.blurredArtworkForLyrics) ...[
-                      divider,
-                      const LyricsDarknessSlider(),
-                    ],
-                    divider,
-                    const LyricsProviderTile(),
-                  ],
-                ),
-              ),
-            ),
-
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: _Section(
-                  title: l10n.nowPlaying,
-                  icon: LucideIcons.playCircle,
-                  children: [
-                    const ProgressBarStyleTile(),
-                    divider,
-                    const EnablePlayerGradientTile(),
-                    if (settings.enablePlayerGradient) ...[
-                      divider,
-                      const AnimatePlayerGradientTile(),
-                      divider,
-                      const KeepBackgroundGradientTile(),
-                      if (settings.keepBackgroundGradient) ...[
-                        divider,
-                        const AnimateBackgroundGradientTile(),
-                      ],
-                    ],
-                    if (!dynamicTheming) ...[
-                      divider,
-                      const AlwaysBlurSheetsTile(),
-                    ],
-                  ],
+                  children: [const LyricsProviderTile()],
                 ),
               ),
             ),
@@ -652,10 +655,10 @@ class SettingsView extends ConsumerWidget {
                       icon: LucideIcons.trash2,
                       title: l10n.resetLibrary,
                       textColor: Colors.redAccent,
-                      subtitle: l10n.resetLibraryDesc,
+                      subtitle: l10n.resetLibraryConfirm,
                       onTap: () {
                         AppHaptics.heavy();
-                        _showClearDialog(context, l10n);
+                        _showClearDialog(context, ref, l10n);
                       },
                       isLast: true,
                     ),
@@ -856,7 +859,11 @@ class SettingsView extends ConsumerWidget {
     );
   }
 
-  void _showClearDialog(BuildContext context, AppLocalizations l10n) {
+  void _showClearDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -867,7 +874,7 @@ class SettingsView extends ConsumerWidget {
           style: const TextStyle(color: Colors.white),
         ),
         content: Text(
-          l10n.resetLibraryConfirmNew,
+          l10n.resetLibraryConfirm,
           style: const TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -879,16 +886,12 @@ class SettingsView extends ConsumerWidget {
             ),
           ),
           TextButton(
-            onPressed: () async {
-              await DbService.isar.writeTxn(() async {
-                await DbService.isar.songs.clear();
-                await DbService.isar.albums.clear();
-                await DbService.isar.artists.clear();
-              });
+            onPressed: () {
               Navigator.pop(context);
+              ref.read(libraryProvider.notifier).resetAndRescan();
             },
             child: Text(
-              l10n.clear,
+              l10n.reset,
               style: const TextStyle(color: Colors.redAccent),
             ),
           ),

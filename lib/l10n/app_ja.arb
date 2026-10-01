@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "歌詞画面の文字サイズ",
   "lyricsSizeSmaller": "歌詞を小さく",
   "lyricsSizeLarger": "歌詞を大きく",
-  "lyricsOptions": "歌詞オプション"
+  "lyricsOptions": "歌詞オプション",
+  "lyricsFullscreen": "歌詞を全画面表示",
+  "lyricsExitFullscreen": "全画面表示を終了"
 }

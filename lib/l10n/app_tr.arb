@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "Şarkı sözleri ekranındaki metin boyutu",
   "lyricsSizeSmaller": "Sözleri küçült",
   "lyricsSizeLarger": "Sözleri büyüt",
-  "lyricsOptions": "Şarkı sözü seçenekleri"
+  "lyricsOptions": "Şarkı sözü seçenekleri",
+  "lyricsFullscreen": "Tam ekran şarkı sözleri",
+  "lyricsExitFullscreen": "Tam ekrandan çık"
 }

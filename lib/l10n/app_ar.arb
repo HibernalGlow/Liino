@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "حجم النص في شاشة الكلمات",
   "lyricsSizeSmaller": "كلمات أصغر",
   "lyricsSizeLarger": "كلمات أكبر",
-  "lyricsOptions": "خيارات الكلمات"
+  "lyricsOptions": "خيارات الكلمات",
+  "lyricsFullscreen": "كلمات بملء الشاشة",
+  "lyricsExitFullscreen": "الخروج من ملء الشاشة"
 }

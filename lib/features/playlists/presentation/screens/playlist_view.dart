@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
@@ -83,8 +84,11 @@ class PlaylistView extends ConsumerWidget {
 
     return Scaffold(
       // Not Colors.transparent - see the comment on CategoryDetailWrapper's
-      // Scaffold in library_categories_views.dart for why.
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      // Scaffold in library_categories_views.dart for why. The desktop shell
+      // paints its own background behind every page, so there it stays clear.
+      backgroundColor: UiUtils.isDesktop
+          ? Colors.transparent
+          : Theme.of(context).colorScheme.surface,
       body: playlists.isEmpty
           ? Center(
               child: Column(

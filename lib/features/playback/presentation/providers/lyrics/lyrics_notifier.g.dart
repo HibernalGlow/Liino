@@ -113,6 +113,68 @@ abstract class _$LyricsManualScroll extends $Notifier<bool> {
   }
 }
 
+/// Desktop only: the lyrics page shown alone (no sidebar, top bar or player
+/// bar) with the window in full screen.
+
+@ProviderFor(LyricsFullscreen)
+final lyricsFullscreenProvider = LyricsFullscreenProvider._();
+
+/// Desktop only: the lyrics page shown alone (no sidebar, top bar or player
+/// bar) with the window in full screen.
+final class LyricsFullscreenProvider
+    extends $NotifierProvider<LyricsFullscreen, bool> {
+  /// Desktop only: the lyrics page shown alone (no sidebar, top bar or player
+  /// bar) with the window in full screen.
+  LyricsFullscreenProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'lyricsFullscreenProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$lyricsFullscreenHash();
+
+  @$internal
+  @override
+  LyricsFullscreen create() => LyricsFullscreen();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$lyricsFullscreenHash() => r'd747664526d554131231ad2c6d510f5ce768ff74';
+
+/// Desktop only: the lyrics page shown alone (no sidebar, top bar or player
+/// bar) with the window in full screen.
+
+abstract class _$LyricsFullscreen extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 /// Whether the currently active lyric line's row is within the lyrics
 /// list's visible viewport right now - kept up to date by
 /// AdvancedLyricRenderer. Lets the "re-sync" button (see

@@ -426,6 +426,63 @@ class AboutMaintainerRow extends StatelessWidget {
   }
 }
 
+/// The About screen's maintainers card body: shows only the first row until
+/// tapped, then reveals [rest]. The rows' own link buttons keep their taps.
+class CollapsibleMaintainers extends StatefulWidget {
+  final Widget first;
+  final List<Widget> rest;
+
+  const CollapsibleMaintainers({
+    super.key,
+    required this.first,
+    required this.rest,
+  });
+
+  @override
+  State<CollapsibleMaintainers> createState() => _CollapsibleMaintainersState();
+}
+
+class _CollapsibleMaintainersState extends State<CollapsibleMaintainers> {
+  static const _duration = Duration(milliseconds: 260);
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        AppHaptics.light();
+        setState(() => _expanded = !_expanded);
+      },
+      child: Column(
+        children: [
+          widget.first,
+          ClipRect(
+            child: AnimatedSize(
+              duration: _duration,
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: _expanded
+                  ? Column(children: widget.rest)
+                  : const SizedBox(width: double.infinity),
+            ),
+          ),
+          AnimatedRotation(
+            turns: _expanded ? 0.5 : 0,
+            duration: _duration,
+            curve: Curves.easeOutCubic,
+            child: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 22,
+              color: Colors.white.withValues(alpha: 0.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Services and projects Looper's online lyrics rely on, credited in About on
 /// both Android and desktop. None publish terms of use, so each gets a name,
 /// what it provides, its license where it has one, and a link.

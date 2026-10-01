@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "लिरिक्स स्क्रीन पर टेक्स्ट का आकार",
   "lyricsSizeSmaller": "लिरिक्स छोटे करें",
   "lyricsSizeLarger": "लिरिक्स बड़े करें",
-  "lyricsOptions": "लिरिक्स विकल्प"
+  "lyricsOptions": "लिरिक्स विकल्प",
+  "lyricsFullscreen": "फ़ुल स्क्रीन लिरिक्स",
+  "lyricsExitFullscreen": "फ़ुल स्क्रीन से बाहर निकलें"
 }

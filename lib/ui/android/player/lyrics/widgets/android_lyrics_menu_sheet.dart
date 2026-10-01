@@ -8,6 +8,8 @@ import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/library/domain/models/models.dart';
 import 'package:looper_player/features/playback/data/lyrics_fetcher.dart';
 import 'package:looper_player/features/playback/presentation/providers/lyrics/lyrics_notifier.dart';
+import 'package:looper_player/features/playback/presentation/widgets/lyrics/desktop_lyrics_toolbar.dart';
+import 'package:looper_player/features/playback/presentation/widgets/lyrics/lyrics_scale.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
 import 'package:looper_player/ui/widgets/sheets/app_bottom_sheet.dart';
@@ -110,6 +112,7 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
 
     final accent = Color(currentAccent);
     final hasLyrics = lyricsState.parsedLines.isNotEmpty;
+    final lyricsScale = LyricsScale.normalize(settings.lyricsFontScale);
 
     return AppBottomSheetContainer(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
@@ -435,16 +438,52 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
               // Section 3: look & feel of the lyrics screen
               _MenuSection(
                 children: [
-                  _MenuSwitchTile(
-                    icon: LucideIcons.palette,
-                    title: l10n.ambientColorBackground,
-                    subtitle: l10n.ambientColorBackgroundDesc,
-                    value: settings.ambientColorBackground,
-                    accent: accent,
-                    onChanged: (val) => ref
-                        .read(settingsProvider.notifier)
-                        .updateAmbientColorBackground(val),
-                  ),
+                  // Only the Android lyrics screen has an ambient background.
+                  if (!desktop)
+                    _MenuSwitchTile(
+                      icon: LucideIcons.palette,
+                      title: l10n.ambientColorBackground,
+                      subtitle: l10n.ambientColorBackgroundDesc,
+                      value: settings.ambientColorBackground,
+                      accent: accent,
+                      onChanged: (val) => ref
+                          .read(settingsProvider.notifier)
+                          .updateAmbientColorBackground(val),
+                    ),
+                  if (desktop)
+                    ListTile(
+                      contentPadding: const EdgeInsets.only(
+                        left: 16,
+                        right: 10,
+                      ),
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      leading: const _MenuIcon(LucideIcons.type),
+                      title: Text(
+                        l10n.lyricsSize,
+                        style: AppFonts.jostStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                        ),
+                      ),
+                      trailing: LyricsSizeControl(
+                        scale: lyricsScale,
+                        onSmaller: () => ref
+                            .read(settingsProvider.notifier)
+                            .updateLyricsFontScale(
+                              LyricsScale.stepBy(lyricsScale, -1),
+                            ),
+                        onLarger: () => ref
+                            .read(settingsProvider.notifier)
+                            .updateLyricsFontScale(
+                              LyricsScale.stepBy(lyricsScale, 1),
+                            ),
+                        onReset: () => ref
+                            .read(settingsProvider.notifier)
+                            .updateLyricsFontScale(1.0),
+                      ),
+                    ),
                   if (!desktop)
                     _MenuActionTile(
                       icon: LucideIcons.hand,

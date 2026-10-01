@@ -948,5 +948,7 @@
   "lyricsSizeDesc": "가사 화면의 글자 크기",
   "lyricsSizeSmaller": "가사 작게",
   "lyricsSizeLarger": "가사 크게",
-  "lyricsOptions": "가사 옵션"
+  "lyricsOptions": "가사 옵션",
+  "lyricsFullscreen": "가사 전체 화면",
+  "lyricsExitFullscreen": "전체 화면 종료"
 }

@@ -9,6 +9,7 @@ class DesktopShellRules {
     NavItem.albums,
     NavItem.artists,
     NavItem.genres,
+    NavItem.folders,
   };
 
   /// Lyrics and Analyze are full-pane views with their own header.

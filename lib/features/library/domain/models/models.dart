@@ -279,6 +279,12 @@ class AppSettings {
   double musicDarkness = 0.62;
   double lyricsDarkness = 0.35;
 
+  /// Desktop only: darkness of the overlay on the window's artwork background.
+  /// Rows saved before the setting existed read back as NaN (treated as the
+  /// default).
+  static const double defaultDesktopBackgroundDarkness = 0.92;
+  double desktopBackgroundDarkness = defaultDesktopBackgroundDarkness;
+
   // Home screen app-bar avatar. Filename only (not a full path) - it's
   // always resolved against AppAssets.avatarDir, so renaming that
   // folder is a one-place change instead of a data migration.

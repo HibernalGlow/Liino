@@ -3135,4 +3135,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Lyrics options';
+
+  @override
+  String get lyricsFullscreen => 'Full screen lyrics';
+
+  @override
+  String get lyricsExitFullscreen => 'Exit full screen';
 }

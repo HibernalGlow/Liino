@@ -145,13 +145,11 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
       _lineKeys.clear();
       // The lines changed (new song, or a different lyrics source/provider
       // was picked) — any in-progress share selection no longer points at
-      // the right text, so drop it.
-      ref.read(lyricsSelectionProvider.notifier).clear();
-      // Queued before _updateActiveLine's scroll below, so the new lines
-      // start from the top and ease to the active line from there rather
-      // than from the old lyrics' offset.
+      // the right text, so drop it in the next frame to avoid modifying
+      // providers while building.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
+          ref.read(lyricsSelectionProvider.notifier).clear();
           if (_scrollController.hasClients) _scrollController.jumpTo(0);
           ref.read(lyricsManualScrollProvider.notifier).set(false);
         }

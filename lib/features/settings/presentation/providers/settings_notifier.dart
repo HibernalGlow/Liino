@@ -179,6 +179,8 @@ class Settings extends _$Settings {
           'recent',
         ]
         ..homeDarkness = 0.72
+        ..desktopBackgroundDarkness =
+            AppSettings.defaultDesktopBackgroundDarkness
         ..songsDarkness = 0.72
         ..libraryDarkness = 0.72
         ..musicDarkness = 0.62
@@ -344,6 +346,7 @@ class Settings extends _$Settings {
       ..genreSortOptionIndex = s.genreSortOptionIndex
       ..collectionSortOptionIndex = s.collectionSortOptionIndex
       ..homeDarkness = s.homeDarkness
+      ..desktopBackgroundDarkness = s.desktopBackgroundDarkness
       ..songsDarkness = s.songsDarkness
       ..libraryDarkness = s.libraryDarkness
       ..musicDarkness = s.musicDarkness
@@ -690,6 +693,9 @@ class Settings extends _$Settings {
 
   Future<void> updateHomeDarkness(double value) =>
       _update((s) => s..homeDarkness = value);
+
+  Future<void> updateDesktopBackgroundDarkness(double value) =>
+      _update((s) => s..desktopBackgroundDarkness = value);
 
   Future<void> updateSongsDarkness(double value) =>
       _update((s) => s..songsDarkness = value);

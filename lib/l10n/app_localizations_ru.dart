@@ -3190,4 +3190,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get lyricsOptions => 'Параметры текста песни';
+
+  @override
+  String get lyricsFullscreen => 'Текст на весь экран';
+
+  @override
+  String get lyricsExitFullscreen => 'Выйти из полноэкранного режима';
 }

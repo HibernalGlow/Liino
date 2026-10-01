@@ -91,6 +91,7 @@ Options:
 Environment:
   ANDROID_ABIS            Split-APK ABIs to collect (default: "arm64-v8a armeabi-v7a x86_64")
   LINUX_ICON              Icon for the Linux packages (default: assets/branding/linux_icon.png)
+  RPM_LICENSE             License: tag for the .rpm (default: guessed from the LICENSE file)
 
 Android output: artifacts are copied to dist/android/ with a SHA256SUMS-v<version>.txt.
 With --build, any missing artifact fails the run (non-zero exit) instead of being skipped.
@@ -267,6 +268,24 @@ detect_icon() {
     echo ""
 }
 
+detect_license() {
+    # SPDX-ish identifier for the .rpm License: tag, guessed from the license file.
+    local file
+    for file in LICENSE LICENSE.md LICENSE.txt COPYING; do
+        [[ -f "$file" ]] || continue
+        if grep -qi "GNU AFFERO GENERAL PUBLIC LICENSE" "$file"; then echo "AGPL-3.0-or-later"; return; fi
+        if grep -qi "GNU LESSER GENERAL PUBLIC LICENSE" "$file"; then echo "LGPL-3.0-or-later"; return; fi
+        if grep -qi "GNU GENERAL PUBLIC LICENSE" "$file"; then
+            if grep -qiE "Version 2,? " "$file"; then echo "GPL-2.0-or-later"; else echo "GPL-3.0-or-later"; fi
+            return
+        fi
+        if grep -qi "Apache License" "$file"; then echo "Apache-2.0"; return; fi
+        if grep -qi "MIT License" "$file"; then echo "MIT"; return; fi
+        if grep -qi "Mozilla Public License" "$file"; then echo "MPL-2.0"; return; fi
+    done
+    echo "Unknown"
+}
+
 detect_deb_depends() {
     # Add libmpv when the project depends on mpv_audio_kit; otherwise a plain
     # GTK dependency is enough for a generic Flutter Linux build.
@@ -286,6 +305,8 @@ ICON_SOURCE="${OVERRIDE_ICON:-$(detect_icon)}"
 CATEGORIES="${OVERRIDE_CATEGORIES:-AudioVideo;Audio;Music;Player;}"
 MIME_TYPES="${OVERRIDE_MIME_TYPES:-audio/mpeg;audio/ogg;audio/x-wav;audio/flac;audio/mp4;audio/x-mp3;audio/x-m4a;}"
 DEB_DEPENDS="${OVERRIDE_DEB_DEPENDS:-$(detect_deb_depends)}"
+RPM_LICENSE="${RPM_LICENSE:-$(detect_license)}"
+LINUX_APP_ID=""          # GTK application id, resolved in package_linux
 
 # --- Version Extraction from pubspec.yaml ---
 RAW_VERSION=$(detect_pubspec_field "version")
@@ -319,6 +340,56 @@ if [[ "$CLEAN_FLAG" == true ]]; then
 fi
 
 # --- Linux Packaging Function ---
+# Installed layout shared by the .deb and .rpm (and mirrored under ~/.local by
+# the tarball's install.sh):
+#   /usr/lib/<app>/                       the Flutter bundle (binary, lib/, data/)
+#   /usr/bin/<app>                        launcher script
+#   /usr/share/applications/<id>.desktop  named after the GTK application id so
+#                                         Wayland shells match the window to it
+#   /usr/share/icons/hicolor/<N>x<N>/apps/<app>.png
+
+# Writes the .desktop entry to $1 with Exec= set to $2.
+write_desktop_entry() {
+    cat <<EOF > "$1"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$DISPLAY_NAME
+Comment=$DESCRIPTION
+Exec=$2 %F
+Icon=$APP_NAME
+Terminal=false
+StartupNotify=true
+StartupWMClass=$LINUX_APP_ID
+Categories=$CATEGORIES
+MimeType=$MIME_TYPES
+EOF
+}
+
+# Installs the icon into the hicolor theme under $1 (a .../share/icons/hicolor
+# directory), one file per standard size when ImageMagick is available.
+install_hicolor_icons() {
+    local hicolor="$1" size src_size resizer=""
+    [[ -n "$ICON_SOURCE" && -f "$ICON_SOURCE" ]] || return 0
+    if command -v magick &> /dev/null; then
+        resizer="magick"
+    elif command -v convert &> /dev/null; then
+        resizer="convert"
+    fi
+    if [[ -n "$resizer" ]]; then
+        for size in 48 64 128 256 512; do
+            mkdir -p "$hicolor/${size}x${size}/apps"
+            "$resizer" "$ICON_SOURCE" -resize "${size}x${size}" "$hicolor/${size}x${size}/apps/$APP_NAME.png"
+        done
+    else
+        # No resizer: file it under its real size so the theme isn't lied to.
+        src_size=$(file "$ICON_SOURCE" | grep -oE '[0-9]+ x [0-9]+' | head -n1 | cut -d' ' -f1)
+        [[ -z "$src_size" ]] && src_size=256
+        mkdir -p "$hicolor/${src_size}x${src_size}/apps"
+        cp "$ICON_SOURCE" "$hicolor/${src_size}x${src_size}/apps/$APP_NAME.png"
+    fi
+}
+
 package_linux() {
     echo ""
     echo "--------------------------------------------------"
@@ -352,140 +423,248 @@ package_linux() {
     executable_name=$(basename "$executable_name")
     echo "🎯 Detected Linux executable: $executable_name"
 
-    mkdir -p "$LINUX_DIST_DIR"
-    local deb_root="$OUTPUT_DIR/deb_root_local"
-    rm -rf "$deb_root"
-    mkdir -p "$deb_root/DEBIAN"
-    mkdir -p "$deb_root/usr/bin"
-    mkdir -p "$deb_root/usr/lib/$APP_NAME"
-    mkdir -p "$deb_root/usr/share/applications"
-    mkdir -p "$deb_root/usr/share/icons/hicolor/256x256/apps"
+    # The GTK application id (what the window reports to the desktop shell).
+    LINUX_APP_ID=$(grep -m1 -oE 'set\(APPLICATION_ID "[^"]+"' linux/CMakeLists.txt 2>/dev/null | sed -E 's/.*"(.*)"/\1/' || true)
+    [[ -z "$LINUX_APP_ID" ]] && LINUX_APP_ID="$APP_NAME"
 
-    # Copy files
-    cp -r "$build_dir/"* "$deb_root/usr/lib/$APP_NAME/"
+    # Newest glibc the binaries were linked against: they cannot start on
+    # anything older, so the packages declare it instead of failing at launch.
+    local glibc_min
+    glibc_min=$(find "$build_dir" -maxdepth 2 -type f \( -name "*.so*" -o -name "$executable_name" \) \
+        -exec objdump -T {} + 2>/dev/null | grep -oE 'GLIBC_[0-9]+\.[0-9]+' | sed 's/GLIBC_//' | sort -uV | tail -n1 || true)
+    echo "🧬 Needs glibc >= ${glibc_min:-unknown} (set by the machine this was built on)"
 
-    if [[ -n "$ICON_SOURCE" && -f "$ICON_SOURCE" ]]; then
-        cp "$ICON_SOURCE" "$deb_root/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png"
+    # mpv_audio_kit ships its own libmpv in the bundle; only depend on the
+    # distro's when it doesn't.
+    local deb_depends="$DEB_DEPENDS"
+    if [[ -z "$OVERRIDE_DEB_DEPENDS" ]]; then
+        if compgen -G "$build_dir/lib/libmpv.so*" > /dev/null; then
+            deb_depends="libgtk-3-0, libasound2, libpulse0, libpipewire-0.3-0"
+        fi
+        [[ -n "$glibc_min" ]] && deb_depends="libc6 (>= $glibc_min), $deb_depends"
     fi
 
-    # Create Debian Control File
-    cat <<EOF > "$deb_root/DEBIAN/control"
+    mkdir -p "$LINUX_DIST_DIR"
+
+    # --- Stage the installed tree once; the .deb and .rpm are both made from it ---
+    local stage="$OUTPUT_DIR/linux_stage"
+    rm -rf "$stage"
+    mkdir -p "$stage/usr/bin" "$stage/usr/lib/$APP_NAME" "$stage/usr/share/applications"
+
+    cp -r "$build_dir/"* "$stage/usr/lib/$APP_NAME/"
+    # The bundle carries a stray share/ (desktop file + icon from CMake's
+    # install step) that is meaningless under /usr/lib.
+    rm -rf "$stage/usr/lib/$APP_NAME/share"
+
+    cat <<EOF > "$stage/usr/bin/$APP_NAME"
+#!/bin/sh
+export GDK_BACKEND=wayland,x11
+exec /usr/lib/$APP_NAME/$executable_name "\$@"
+EOF
+
+    write_desktop_entry "$stage/usr/share/applications/$LINUX_APP_ID.desktop" "$APP_NAME"
+    install_hicolor_icons "$stage/usr/share/icons/hicolor"
+
+    find "$stage" -type d -exec chmod 755 {} +
+    find "$stage" -type f -exec chmod 644 {} +
+    chmod 755 "$stage/usr/bin/$APP_NAME" "$stage/usr/lib/$APP_NAME/$executable_name"
+
+    if command -v desktop-file-validate &> /dev/null; then
+        desktop-file-validate "$stage/usr/share/applications/$LINUX_APP_ID.desktop" \
+            || echo "⚠️  desktop-file-validate reported problems (see above)."
+    fi
+
+    # 1. Debian Package (.deb)
+    if command -v dpkg-deb &> /dev/null; then
+        echo "📦 Building .deb package..."
+        local deb_root="$OUTPUT_DIR/deb_root_local"
+        rm -rf "$deb_root"
+        cp -a "$stage" "$deb_root"
+        mkdir -p "$deb_root/DEBIAN"
+        chmod 755 "$deb_root/DEBIAN"
+        cat <<EOF > "$deb_root/DEBIAN/control"
 Package: $APP_NAME
 Version: $VERSION
 Section: sound
 Priority: optional
 Architecture: amd64
 Maintainer: $MAINTAINER
+Installed-Size: $(du -sk "$stage/usr" | cut -f1)
+Depends: $deb_depends
 Description: $DESCRIPTION
-Depends: $DEB_DEPENDS
 EOF
-
-    # Create Launcher Script
-    cat <<EOF > "$deb_root/usr/bin/$APP_NAME"
-#!/bin/bash
-export GDK_BACKEND=wayland,x11
-exec /usr/lib/$APP_NAME/$executable_name "\$@"
-EOF
-    chmod +x "$deb_root/usr/bin/$APP_NAME"
-
-    # Create Desktop Entry
-    cat <<EOF > "$deb_root/usr/share/applications/$APP_NAME.desktop"
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=$DISPLAY_NAME
-Comment=$DESCRIPTION
-Exec=$APP_NAME %F
-Icon=$APP_NAME
-Terminal=false
-StartupNotify=true
-Categories=$CATEGORIES
-MimeType=$MIME_TYPES
-EOF
-
-    # Fix permissions
-    find "$deb_root/usr" -type d -exec chmod 755 {} +
-    find "$deb_root/usr" -type f -exec chmod 644 {} +
-    chmod +x "$deb_root/usr/bin/$APP_NAME"
-    chmod +x "$deb_root/usr/lib/$APP_NAME/$executable_name"
-
-    # 1. Debian Package (.deb)
-    echo "📦 Building .deb package..."
-    local deb_file="$LINUX_DIST_DIR/${APP_NAME}_${VERSION}_amd64.deb"
-    dpkg-deb --build "$deb_root" "$deb_file"
-    echo "✅ .deb package: $deb_file"
+        local deb_file="$LINUX_DIST_DIR/${APP_NAME}_${VERSION}_amd64.deb"
+        # --root-owner-group: files belong to root in the package, not to
+        # whoever happened to build it.
+        dpkg-deb --root-owner-group --build "$deb_root" "$deb_file"
+        rm -rf "$deb_root"
+        echo "✅ .deb package: $deb_file"
+    else
+        echo "⚠️  Skipping .deb generation (dpkg-deb not installed)."
+    fi
 
     # 2. RPM Package (.rpm)
-    if command -v alien &> /dev/null && command -v fakeroot &> /dev/null; then
-        echo "📦 Building .rpm package via alien..."
-        fakeroot alien --to-rpm --keep-version "$deb_file"
-        local gen_rpm
-        gen_rpm=$(find . -maxdepth 1 -name "${APP_NAME}-*.rpm" | head -n 1)
-        if [[ -n "$gen_rpm" && -f "$gen_rpm" ]]; then
-            mv "$gen_rpm" "$LINUX_DIST_DIR/"
-            echo "✅ .rpm package: $LINUX_DIST_DIR/$(basename "$gen_rpm")"
+    # Built natively with rpmbuild. (Converting the .deb with alien produced a
+    # package that owned /usr, /usr/bin and /usr/lib - which rpm refuses to
+    # install because the 'filesystem' package owns them - and that required
+    # the bundle's own private libraries from the system.)
+    if command -v rpmbuild &> /dev/null; then
+        echo "📦 Building .rpm package..."
+        local rpm_top stage_abs private_libs
+        rpm_top="$(pwd)/$OUTPUT_DIR/rpmbuild"
+        stage_abs="$(pwd)/$stage"
+        rm -rf "$rpm_top"
+        mkdir -p "$rpm_top/SPECS" "$rpm_top/RPMS"
+
+        # Libraries inside the bundle must be neither required from nor
+        # provided to the system. libjvm.so is wanted only by the Android-side
+        # JNI helper that Flutter bundles regardless; nothing loads it on Linux.
+        private_libs=$(find "$build_dir/lib" -maxdepth 1 -name "*.so*" -printf '%f\n' \
+            | sed -E 's/\.so.*$//; s/[.+]/\\\\&/g' | sort -u | paste -sd'|')
+        private_libs="${private_libs:+$private_libs|}libjvm"
+
+        cat <<EOF > "$rpm_top/SPECS/$APP_NAME.spec"
+%global debug_package %{nil}
+%global _build_id_links none
+%global __os_install_post %{nil}
+%global __requires_exclude ^($private_libs)\\\\.so.*\$
+%global __provides_exclude_from ^/usr/lib/$APP_NAME/.*\$
+
+Name:           $APP_NAME
+Version:        $VERSION
+Release:        1
+Summary:        $DISPLAY_NAME
+License:        $RPM_LICENSE
+BuildArch:      x86_64
+
+%description
+$DESCRIPTION
+
+%install
+mkdir -p %{buildroot}
+cp -a "$stage_abs/." %{buildroot}/
+
+%files
+%attr(755, root, root) /usr/bin/$APP_NAME
+%defattr(-, root, root, -)
+/usr/lib/$APP_NAME
+/usr/share/applications/$LINUX_APP_ID.desktop
+/usr/share/icons/hicolor/*/apps/$APP_NAME.png
+EOF
+        if rpmbuild -bb --quiet \
+                --define "_topdir $rpm_top" \
+                --define "_rpmdir $rpm_top/RPMS" \
+                "$rpm_top/SPECS/$APP_NAME.spec"; then
+            local gen_rpm
+            gen_rpm=$(find "$rpm_top/RPMS" -name "*.rpm" | head -n 1)
+            if [[ -n "$gen_rpm" ]]; then
+                mv "$gen_rpm" "$LINUX_DIST_DIR/"
+                echo "✅ .rpm package: $LINUX_DIST_DIR/$(basename "$gen_rpm")"
+            fi
+        else
+            PACKAGING_FAILED=true
+            echo "❌ rpmbuild failed — see above."
         fi
+        rm -rf "$rpm_top"
     else
-        echo "⚠️  Skipping RPM generation (alien or fakeroot not installed)."
+        echo "⚠️  Skipping RPM generation (rpmbuild not installed — 'dnf install rpm-build' or 'apt install rpm')."
     fi
 
     # 3. Portable Tarball (.tar.gz)
+    # Runs in place (./$executable_name) and carries install.sh / uninstall.sh
+    # to add a menu entry and icon without root.
     echo "📦 Building portable .tar.gz archive..."
     local tar_file="$LINUX_DIST_DIR/${APP_NAME}_${VERSION}_linux_x64.tar.gz"
     local tar_stage="$OUTPUT_DIR/${APP_NAME}_${VERSION}_linux_x64"
     rm -rf "$tar_stage"
     mkdir -p "$tar_stage"
-    cp -r "$build_dir/"* "$tar_stage/"
-    tar -czf "$tar_file" -C "$OUTPUT_DIR" "$(basename "$tar_stage")"
+    cp -r "$stage/usr/lib/$APP_NAME/." "$tar_stage/"
+    mkdir -p "$tar_stage/share/applications"
+    cp "$stage/usr/share/applications/$LINUX_APP_ID.desktop" "$tar_stage/share/applications/"
+    [[ -d "$stage/usr/share/icons" ]] && cp -r "$stage/usr/share/icons" "$tar_stage/share/"
+
+    cat <<EOF > "$tar_stage/install.sh"
+#!/bin/sh
+# Installs $DISPLAY_NAME for the current user (or system-wide when run as root).
+#   PREFIX=/some/dir ./install.sh   to choose another location
+set -e
+HERE=\$(cd "\$(dirname "\$0")" && pwd)
+if [ -z "\$PREFIX" ]; then
+    if [ "\$(id -u)" = 0 ]; then PREFIX=/usr/local; else PREFIX="\$HOME/.local"; fi
+fi
+APP_DIR="\$PREFIX/lib/$APP_NAME"
+
+rm -rf "\$APP_DIR"
+mkdir -p "\$APP_DIR" "\$PREFIX/bin" "\$PREFIX/share/applications"
+cp -r "\$HERE/$executable_name" "\$HERE/lib" "\$HERE/data" "\$APP_DIR/"
+
+cat > "\$PREFIX/bin/$APP_NAME" <<LAUNCHER
+#!/bin/sh
+export GDK_BACKEND=wayland,x11
+exec "\$APP_DIR/$executable_name" "\\\$@"
+LAUNCHER
+chmod 755 "\$PREFIX/bin/$APP_NAME"
+
+# Absolute Exec=: \$PREFIX/bin is often not on the desktop session's PATH.
+sed "s|^Exec=.*|Exec=\$PREFIX/bin/$APP_NAME %F|" \\
+    "\$HERE/share/applications/$LINUX_APP_ID.desktop" > "\$PREFIX/share/applications/$LINUX_APP_ID.desktop"
+if [ -d "\$HERE/share/icons" ]; then
+    mkdir -p "\$PREFIX/share/icons"
+    cp -r "\$HERE/share/icons/." "\$PREFIX/share/icons/"
+fi
+
+command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "\$PREFIX/share/applications" 2>/dev/null || true
+command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -q -t "\$PREFIX/share/icons/hicolor" 2>/dev/null || true
+
+echo "Installed $DISPLAY_NAME to \$APP_DIR"
+echo "Start it from your application menu, or run: \$PREFIX/bin/$APP_NAME"
+EOF
+
+    cat <<EOF > "$tar_stage/uninstall.sh"
+#!/bin/sh
+# Removes what install.sh installed (use the same PREFIX, if you set one).
+if [ -z "\$PREFIX" ]; then
+    if [ "\$(id -u)" = 0 ]; then PREFIX=/usr/local; else PREFIX="\$HOME/.local"; fi
+fi
+rm -rf "\$PREFIX/lib/$APP_NAME"
+rm -f "\$PREFIX/bin/$APP_NAME" "\$PREFIX/share/applications/$LINUX_APP_ID.desktop"
+rm -f "\$PREFIX"/share/icons/hicolor/*/apps/$APP_NAME.png
+echo "Removed $DISPLAY_NAME from \$PREFIX"
+EOF
+    chmod 755 "$tar_stage/install.sh" "$tar_stage/uninstall.sh"
+
+    tar -czf "$tar_file" --owner=0 --group=0 -C "$OUTPUT_DIR" "$(basename "$tar_stage")"
     rm -rf "$tar_stage"
     echo "✅ Tarball archive: $tar_file"
 
     # 4. AppImage (.AppImage)
     local appdir="$OUTPUT_DIR/AppDir"
     rm -rf "$appdir"
-    mkdir -p "$appdir/usr/bin"
-    mkdir -p "$appdir/usr/lib"
-    mkdir -p "$appdir/usr/share/metainfo"
-    cp -r "$build_dir/"* "$appdir/usr/bin/"
-
+    mkdir -p "$appdir/usr/bin" "$appdir/usr/share"
+    cp -r "$stage/usr/lib/$APP_NAME/." "$appdir/usr/bin/"
+    cp -r "$stage/usr/share/." "$appdir/usr/share/"
+    # appimagetool wants the desktop file and its icon at the AppDir root.
+    cp "$stage/usr/share/applications/$LINUX_APP_ID.desktop" "$appdir/$LINUX_APP_ID.desktop"
     if [[ -n "$ICON_SOURCE" && -f "$ICON_SOURCE" ]]; then
         cp "$ICON_SOURCE" "$appdir/$APP_NAME.png"
-        mkdir -p "$appdir/usr/share/icons/hicolor/256x256/apps"
-        cp "$ICON_SOURCE" "$appdir/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png"
         ln -sf "$APP_NAME.png" "$appdir/.DirIcon"
     fi
 
-    cat <<EOF > "$appdir/$APP_NAME.desktop"
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=$DISPLAY_NAME
-Comment=$DESCRIPTION
-Exec=$APP_NAME %F
-Icon=$APP_NAME
-Terminal=false
-StartupNotify=true
-Categories=$CATEGORIES
-MimeType=$MIME_TYPES
-EOF
-
     cat <<EOF > "$appdir/AppRun"
-#!/bin/bash
-SELF=\$(readlink -f "\$0")
-HERE=\${SELF%/*}
+#!/bin/sh
+HERE=\$(dirname "\$(readlink -f "\$0")")
 export GDK_BACKEND=wayland,x11
-export LD_LIBRARY_PATH="\$HERE/usr/bin:\$HERE/usr/bin/lib:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="\$HERE/usr/bin/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
 exec "\$HERE/usr/bin/$executable_name" "\$@"
 EOF
-    chmod +x "$appdir/AppRun"
+    chmod 755 "$appdir/AppRun"
 
-    find "$appdir" -type d -exec chmod 755 {} +
-    find "$appdir" -type f -exec chmod 644 {} +
-    chmod +x "$appdir/AppRun"
-    chmod +x "$appdir/usr/bin/$executable_name"
-
-    local appimage_tool=""
-    for candidate in "$(command -v appimagetool 2>/dev/null || true)" "$HOME/.local/bin/appimagetool" "./appimagetool"; do
+    local appimage_tool="" candidate
+    for candidate in "$(command -v appimagetool 2>/dev/null || true)" \
+                     "$(command -v appimagetool-x86_64.AppImage 2>/dev/null || true)" \
+                     "$HOME/.local/bin/appimagetool" "$HOME/.local/bin/appimagetool-x86_64.AppImage" \
+                     "$HOME/Applications/appimagetool-x86_64.AppImage" \
+                     "./appimagetool" "./appimagetool-x86_64.AppImage"; do
         if [[ -n "$candidate" && -x "$candidate" ]]; then
             appimage_tool="$candidate"
             break
@@ -494,15 +673,24 @@ EOF
 
     if [[ -n "$appimage_tool" ]]; then
         echo "📦 Building .AppImage bundle..."
-        export ARCH=x86_64
-        "$appimage_tool" "$appdir" "$LINUX_DIST_DIR/${APP_NAME}_${VERSION}_x86_64.AppImage"
-        echo "✅ AppImage bundle: $LINUX_DIST_DIR/${APP_NAME}_${VERSION}_x86_64.AppImage"
+        local appimage_file="$LINUX_DIST_DIR/${APP_NAME}_${VERSION}_x86_64.AppImage"
+        if ARCH=x86_64 "$appimage_tool" "$appdir" "$appimage_file"; then
+            chmod 755 "$appimage_file"
+            echo "✅ AppImage bundle: $appimage_file"
+        else
+            PACKAGING_FAILED=true
+            echo "❌ appimagetool failed — see above."
+        fi
     else
-        echo "⚠️  Skipping AppImage generation (appimagetool not found in PATH or ~/.local/bin)."
+        echo "⚠️  Skipping AppImage generation: appimagetool not found. Download"
+        echo "    https://github.com/AppImage/appimagetool/releases (appimagetool-x86_64.AppImage),"
+        echo "    chmod +x it and put it in ~/.local/bin or next to this script."
     fi
 
-    rm -rf "$appdir"
-    rm -rf "$deb_root"
+    rm -rf "$appdir" "$stage"
+
+    # Checksums for this version's packages, in `sha256sum -c` format.
+    (cd "$LINUX_DIST_DIR" && sha256sum -- "${APP_NAME}"[-_]"${VERSION}"[-_]* > "SHA256SUMS-v${VERSION}.txt")
 }
 
 # --- Android Packaging Function ---

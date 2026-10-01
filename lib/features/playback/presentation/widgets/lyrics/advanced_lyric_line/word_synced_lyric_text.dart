@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
 
 import '../../../../domain/lyric_models.dart';
 
@@ -385,12 +386,17 @@ class _SungWord extends StatelessWidget {
     // part of the line reads clearly even over a bright artwork backdrop.
     // The glow fades with the line's emphasis, so a finishing line doesn't
     // drop it in one frame.
+    // Desktop lyrics are much larger, where the phone-sized glow reads as a
+    // heavy halo, so it is toned down there.
+    final desktop = UiUtils.isDesktop;
+    final glowAlpha = desktop ? 0.3 : 0.6;
+    final glowBlur = fontSize * (desktop ? 0.2 : 0.4);
     List<Shadow> glowAt(double strength) => strength <= 0
         ? const <Shadow>[]
         : [
             Shadow(
-              color: activeColor.withValues(alpha: 0.6 * strength),
-              blurRadius: fontSize * 0.4,
+              color: activeColor.withValues(alpha: glowAlpha * strength),
+              blurRadius: glowBlur,
             ),
           ];
     final glow = glowAt(emphasis);

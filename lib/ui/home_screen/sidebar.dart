@@ -81,6 +81,13 @@ class Sidebar extends ConsumerWidget {
                         isSelected: activeItem == NavItem.genres,
                         onTap: () => navigateTo(NavItem.genres),
                       ),
+                    if (ref.watch(songsByFolderProvider).isNotEmpty)
+                      _SidebarItem(
+                        icon: LucideIcons.folder,
+                        label: l10n.folders,
+                        isSelected: activeItem == NavItem.folders,
+                        onTap: () => navigateTo(NavItem.folders),
+                      ),
                     _SidebarItem(
                       customIcon: AppIcons.library,
                       label: l10n.playlists,
@@ -232,44 +239,49 @@ class _SidebarItem extends StatelessWidget {
     final Color selectedColor = colorScheme.primary;
     final Color unselectedColor = Colors.white.withValues(alpha: 0.4);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: const BoxDecoration(color: Colors.transparent),
-      child: ListTile(
-        leading: customIcon != null
-            ? SvgPicture.asset(
-                customIcon!,
-                width: AppIcons.sidebarIcon.s,
-                height: AppIcons.sidebarIcon.s,
-                colorFilter: ColorFilter.mode(
-                  isSelected ? selectedColor : unselectedColor,
-                  BlendMode.srcIn,
+    // Own Material so the tile's ink is not hidden by the tinted sidebar box.
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: Material(
+        type: MaterialType.transparency,
+        child: ListTile(
+          leading: customIcon != null
+              ? SvgPicture.asset(
+                  customIcon!,
+                  width: AppIcons.sidebarIcon.s,
+                  height: AppIcons.sidebarIcon.s,
+                  colorFilter: ColorFilter.mode(
+                    isSelected ? selectedColor : unselectedColor,
+                    BlendMode.srcIn,
+                  ),
+                )
+              : Icon(
+                  icon,
+                  size: AppIcons.sidebarIcon.s,
+                  color: isSelected ? selectedColor : unselectedColor,
                 ),
-              )
-            : Icon(
-                icon,
-                size: AppIcons.sidebarIcon.s,
-                color: isSelected ? selectedColor : unselectedColor,
-              ),
-        title: Text(
-          label,
-          style: AppFonts.jostStyle(
-            fontSize: 14.ts,
-            color: isSelected ? selectedColor : unselectedColor,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          title: Text(
+            label,
+            style: AppFonts.jostStyle(
+              fontSize: 14.ts,
+              color: isSelected ? selectedColor : unselectedColor,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          dense: true,
+          visualDensity: VisualDensity.compact,
+          // Tight gaps so longer labels (Recently Played, Looper Analyze) fit
+          // the sidebar without being cut off.
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          horizontalTitleGap: 12,
+          minLeadingWidth: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          onTap: onTap,
         ),
-        dense: true,
-        visualDensity: VisualDensity.compact,
-        // Tight gaps so longer labels (Recently Played, Looper Analyze) fit
-        // the sidebar without being cut off.
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-        horizontalTitleGap: 12,
-        minLeadingWidth: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onTap: onTap,
       ),
     );
   }
