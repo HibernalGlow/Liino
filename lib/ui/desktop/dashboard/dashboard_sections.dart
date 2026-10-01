@@ -1,105 +1,8 @@
 part of 'home_dashboard.dart';
 
 extension _DashboardSections on HomeDashboard {
-  Widget _buildAlbumsIfSmall(
-    WidgetRef ref,
-    bool isNarrow,
-    bool isDynamic,
-    AppLocalizations l10n,
-  ) {
-    final albums = ref.watch(albumsProvider).value ?? [];
-    if (albums.length >= 6 || albums.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.myAlbums,
-          style: TextStyle(
-            fontSize: (isNarrow ? 14 : 18).ts,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: isNarrow ? 200 : 230,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: albums.length,
-            itemBuilder: (context, index) {
-              final album = albums[index];
-              return Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: InkWell(
-                  onTap: () async {
-                    final songs = await DbService.isar.songs
-                        .filter()
-                        .albumEqualTo(album.name)
-                        .findAll();
-                    ref
-                        .read(appNavigationProvider.notifier)
-                        .showCollection(
-                          title: album.name,
-                          subtitle: album.artist,
-                          art: album.artPath,
-                          songs: songs,
-                        );
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    width: isNarrow ? 120 : 140,
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        OptimizedImage(
-                          imagePath: album.artPath,
-                          height: isNarrow ? 104 : 124,
-                          width: isNarrow ? 104 : 124,
-                          borderRadius: BorderRadius.circular(12),
-                          placeholder: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withValues(
-                                alpha: isDynamic ? 0.8 : 0.1,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Center(child: Icon(LucideIcons.disc)),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          album.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.normal,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          album.artist ?? context.l10n.unknown,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildRecentlyPlayed(
+    BuildContext context,
     WidgetRef ref,
     bool isNarrow,
     bool isDynamic,
@@ -112,16 +15,16 @@ extension _DashboardSections on HomeDashboard {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        _buildSectionHeader(
+          context,
           l10n.playedLabel,
-          style: TextStyle(
-            fontSize: (isNarrow ? 14 : 18).ts,
-            fontWeight: FontWeight.w400,
-          ),
+          onViewAll: () => ref
+              .read(appNavigationProvider.notifier)
+              .setItem(NavItem.recentlyPlayed),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         SizedBox(
-          height: isNarrow ? 200 : 230,
+          height: isNarrow ? 176 : 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: recentSongs.length.clamp(0, 10),
@@ -186,9 +89,9 @@ extension _DashboardSections on HomeDashboard {
   }
 
   Widget _buildQuickPicks(
+    BuildContext context,
     WidgetRef ref,
     bool isNarrow,
-    bool isMedium,
     bool isDynamic,
     AppLocalizations l10n,
   ) {
@@ -198,29 +101,16 @@ extension _DashboardSections on HomeDashboard {
       data: (songs) {
         if (songs.isEmpty) return const SizedBox.shrink();
 
-        int crossAxisCount = 4;
-        if (isNarrow) {
-          crossAxisCount = 2;
-        } else if (isMedium) {
-          crossAxisCount = 3;
-        }
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.quickPicks,
-              style: TextStyle(
-                fontSize: isNarrow ? 14 : 18,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            const SizedBox(height: 16),
+            _buildSectionHeader(context, l10n.quickPicks),
+            const SizedBox(height: 12),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 340,
                 mainAxisExtent: 70,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
@@ -309,6 +199,7 @@ extension _DashboardSections on HomeDashboard {
   }
 
   Widget _buildTopArtists(
+    BuildContext context,
     WidgetRef ref,
     bool isNarrow,
     bool isDynamic,
@@ -326,14 +217,14 @@ extension _DashboardSections on HomeDashboard {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            _buildSectionHeader(
+              context,
               l10n.featuredArtists,
-              style: TextStyle(
-                fontSize: isNarrow ? 14 : 18,
-                fontWeight: FontWeight.w400,
-              ),
+              onViewAll: () => ref
+                  .read(appNavigationProvider.notifier)
+                  .setItem(NavItem.artists),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             SizedBox(
               height: isNarrow ? 110 : 130,
               child: ListView.builder(
@@ -375,35 +266,16 @@ extension _DashboardSections on HomeDashboard {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.albums,
-                  style: TextStyle(
-                    fontSize: isNarrow ? 14 : 18,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    ref
-                        .read(appNavigationProvider.notifier)
-                        .setItem(NavItem.albums);
-                  },
-                  child: Text(
-                    l10n.viewAll,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
-              ],
+            _buildSectionHeader(
+              context,
+              l10n.albums,
+              onViewAll: () => ref
+                  .read(appNavigationProvider.notifier)
+                  .setItem(NavItem.albums),
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: isNarrow ? 200 : 230,
+              height: isNarrow ? 176 : 200,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: featuredAlbums.length,

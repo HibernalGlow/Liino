@@ -1,34 +1,36 @@
 part of 'home_dashboard.dart';
 
 extension _DashboardDesktopItems on HomeDashboard {
-  Widget _buildDesktopHorizontalSection({
-    required String title,
-    required VoidCallback onViewAll,
-    required int itemCount,
-    required Widget Function(BuildContext, int) itemBuilder,
-    required AppLocalizations l10n,
+  /// The one header every home row uses, so titles and "View all" line up.
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    VoidCallback? onViewAll,
   }) {
-    if (itemCount == 0) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
+    return SizedBox(
+      height: 40,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
               title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 18.ts,
+                fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
             ),
+          ),
+          if (onViewAll != null)
             TextButton(
               onPressed: onViewAll,
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    l10n.viewAll,
+                    context.l10n.viewAll,
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                   const SizedBox(width: 4),
@@ -40,8 +42,24 @@ extension _DashboardDesktopItems on HomeDashboard {
                 ],
               ),
             ),
-          ],
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopHorizontalSection(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onViewAll,
+    required int itemCount,
+    required Widget Function(BuildContext, int) itemBuilder,
+    required AppLocalizations l10n,
+  }) {
+    if (itemCount == 0) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, title, onViewAll: onViewAll),
         const SizedBox(height: 12),
         SizedBox(
           height: 180,

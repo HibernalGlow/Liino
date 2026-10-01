@@ -16,6 +16,7 @@ import 'package:looper_player/core/services/storage/db_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/theme/app_assets.dart';
+import 'package:looper_player/ui/desktop/dashboard/desktop_home_sections.dart';
 part 'featured_artist_card.dart';
 part 'dashboard_sections.dart';
 part 'desktop_items.dart';
@@ -40,7 +41,6 @@ class HomeDashboard extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isNarrow = constraints.maxWidth < 600;
-        final bool isMedium = constraints.maxWidth < 1000;
         final bool showLogo = MediaQuery.of(context).size.width < 800;
 
         final orderedChildren = <Widget>[];
@@ -67,79 +67,50 @@ class HomeDashboard extends ConsumerWidget {
           );
         }
 
-        // Support desktop-specific helper rows at the very top
-        orderedChildren.add(
-          _buildRecentlyPlayed(ref, isNarrow, isDynamic, l10n),
-        );
-        orderedChildren.add(const SizedBox(height: 16));
-        orderedChildren.add(
-          _buildAlbumsIfSmall(ref, isNarrow, isDynamic, l10n),
-        );
-        orderedChildren.add(const SizedBox(height: 16));
+        const gap = SizedBox(height: 28);
 
-        // Render sections dynamically in user's customized order
-        for (final section in settings.homeSectionOrder) {
-          if (section == 'quick_picks') {
-            orderedChildren.add(
-              _buildQuickPicks(ref, isNarrow, isMedium, isDynamic, l10n),
-            );
-            orderedChildren.add(const SizedBox(height: 16));
-          } else if (section == 'songs') {
-            // Render Featured Artists and Albums for the "songs" slot on desktop
-            orderedChildren.add(
-              _buildTopArtists(ref, isNarrow, isDynamic, l10n),
-            );
-            orderedChildren.add(const SizedBox(height: 16));
-            orderedChildren.add(
-              _buildFeaturedAlbums(ref, isNarrow, isDynamic, context),
-            );
-            orderedChildren.add(const SizedBox(height: 16));
-          } else if (section == 'artists') {
-            if (settings.showHomeArtists && library.artists.isNotEmpty) {
+        // Fixed desktop order; a row with nothing to show is skipped whole,
+        // so it leaves no gap behind.
+        for (final section in desktopHomeSections(
+          showRecent: settings.showHomeRecent,
+          showGenres: settings.showHomeGenres,
+          showArtists: settings.showHomeArtists,
+        )) {
+          switch (section) {
+            case DesktopHomeSection.quickPicks:
+              if ((ref.watch(topSongsProvider).value ?? const []).isEmpty) {
+                continue;
+              }
               orderedChildren.add(
-                _buildDesktopHorizontalSection(
-                  title: l10n.artists,
-                  l10n: l10n,
-                  onViewAll: () => ref
-                      .read(appNavigationProvider.notifier)
-                      .setItem(NavItem.artists),
-                  itemCount: library.artists.length,
-                  itemBuilder: (context, index) {
-                    return _buildDesktopArtistItem(
-                      ref,
-                      library.artists[index],
-                      l10n,
-                    );
-                  },
-                ),
+                _buildQuickPicks(context, ref, isNarrow, isDynamic, l10n),
               );
-              orderedChildren.add(const SizedBox(height: 16));
-            }
-          } else if (section == 'albums') {
-            if (settings.showHomeAlbums && library.albums.isNotEmpty) {
+            case DesktopHomeSection.recentlyPlayed:
+              if ((ref.watch(dashboardRecentlyPlayedProvider).value ?? const [])
+                  .isEmpty) {
+                continue;
+              }
               orderedChildren.add(
-                _buildDesktopHorizontalSection(
-                  title: l10n.albums,
-                  l10n: l10n,
-                  onViewAll: () => ref
-                      .read(appNavigationProvider.notifier)
-                      .setItem(NavItem.albums),
-                  itemCount: library.albums.length,
-                  itemBuilder: (context, index) {
-                    return _buildDesktopAlbumItem(
-                      ref,
-                      library.albums[index],
-                      l10n,
-                    );
-                  },
-                ),
+                _buildRecentlyPlayed(context, ref, isNarrow, isDynamic, l10n),
               );
-              orderedChildren.add(const SizedBox(height: 16));
-            }
-          } else if (section == 'genres') {
-            if (settings.showHomeGenres && genres.isNotEmpty) {
+            case DesktopHomeSection.featuredArtists:
+              if ((ref.watch(artistsProvider).value ?? const []).isEmpty) {
+                continue;
+              }
+              orderedChildren.add(
+                _buildTopArtists(context, ref, isNarrow, isDynamic, l10n),
+              );
+            case DesktopHomeSection.albums:
+              if ((ref.watch(albumsProvider).value ?? const []).isEmpty) {
+                continue;
+              }
+              orderedChildren.add(
+                _buildFeaturedAlbums(ref, isNarrow, isDynamic, context),
+              );
+            case DesktopHomeSection.genres:
+              if (genres.isEmpty) continue;
               orderedChildren.add(
                 _buildDesktopHorizontalSection(
+                  context,
                   title: l10n.genres,
                   l10n: l10n,
                   onViewAll: () => ref
@@ -157,9 +128,26 @@ class HomeDashboard extends ConsumerWidget {
                   },
                 ),
               );
-              orderedChildren.add(const SizedBox(height: 16));
-            }
+            case DesktopHomeSection.artists:
+              if (library.artists.isEmpty) continue;
+              orderedChildren.add(
+                _buildDesktopHorizontalSection(
+                  context,
+                  title: l10n.artists,
+                  l10n: l10n,
+                  onViewAll: () => ref
+                      .read(appNavigationProvider.notifier)
+                      .setItem(NavItem.artists),
+                  itemCount: library.artists.length,
+                  itemBuilder: (context, index) => _buildDesktopArtistItem(
+                    ref,
+                    library.artists[index],
+                    l10n,
+                  ),
+                ),
+              );
           }
+          orderedChildren.add(gap);
         }
 
         orderedChildren.add(const SizedBox(height: 120));
