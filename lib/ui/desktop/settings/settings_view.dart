@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:looper_player/core/utils/ui_scale_steps.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
+import 'package:looper_player/features/playback/presentation/widgets/lyrics/lyrics_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:looper_player/features/playback/presentation/widgets/lyrics/advanced_lyric_line/advanced_lyric_line.dart'
     show activeLyricsIsWhite;
@@ -212,6 +215,44 @@ class SettingsView extends ConsumerWidget {
                       },
                       isLast: false,
                     ),
+                    if (UiUtils.isDesktop) ...[
+                      _PremiumSliderRow(
+                        icon: LucideIcons.languages,
+                        title: l10n.lyricsSize,
+                        subtitle: l10n.lyricsSizeDesc,
+                        value:
+                            LyricsScale.normalize(settings.lyricsFontScale) *
+                            100,
+                        min: LyricsScale.min * 100,
+                        max: LyricsScale.max * 100,
+                        divisions: 19,
+                        suffix: '%',
+                        onChanged: (val) => ref
+                            .read(settingsProvider.notifier)
+                            .updateLyricsFontScale((val / 10).round() / 10),
+                        isLast: false,
+                      ),
+                      _PremiumDropdownRow<double>(
+                        icon: LucideIcons.sliders,
+                        title: l10n.uiScale,
+                        value: UiScaleSteps.normalize(settings.desktopUiScale),
+                        items: [
+                          for (final step in UiScaleSteps.steps)
+                            DropdownMenuItem(
+                              value: step,
+                              child: Text('${(step * 100).round()}%'),
+                            ),
+                        ],
+                        onChanged: (step) {
+                          if (step != null) {
+                            ref
+                                .read(settingsProvider.notifier)
+                                .updateDesktopUiScale(step);
+                          }
+                        },
+                        isLast: false,
+                      ),
+                    ],
                     _PremiumSwitchRow(
                       icon: LucideIcons.sliders,
                       title: l10n.flatProgressBar,

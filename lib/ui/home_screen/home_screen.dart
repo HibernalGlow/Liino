@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/core/utils/ui_utils.dart';
+import 'package:looper_player/core/utils/responsive.dart';
 import 'package:looper_player/core/theme/app_icons.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -103,7 +104,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final isSetupComplete = ref.watch(welcomeBypassedProvider);
     final bool showWelcome = !isSetupComplete && !library.isScanning;
-    final bool isNarrow = MediaQuery.of(context).size.width < 800;
+    final bool isNarrow =
+        Responsive.windowClass(MediaQuery.of(context).size.width) ==
+        WindowClass.compact;
 
     final isOverlayMode = ref.watch(overlayModeProvider);
 
@@ -220,7 +223,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       : LayoutBuilder(
                           builder: (context, constraints) {
                             final bool isNarrowLayout =
-                                constraints.maxWidth < 800;
+                                Responsive.windowClass(constraints.maxWidth) ==
+                                WindowClass.compact;
 
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
