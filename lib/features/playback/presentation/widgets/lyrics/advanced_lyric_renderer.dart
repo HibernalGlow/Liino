@@ -21,11 +21,26 @@ class AdvancedLyricRenderer extends ConsumerStatefulWidget {
   final LyricsSyncMode mode;
   final Function(Duration) onSeek;
 
+  /// Text scale supplied by the parent. Null keeps the renderer's own
+  /// pinch-driven scale.
+  final double? fontScale;
+
+  /// With [fontScale] set, a pinch reports the scale it asks for here.
+  final ValueChanged<double>? onFontScaleChanged;
+
+  /// Left/right and bottom padding of the list. Null keeps the defaults.
+  final double? horizontalPadding;
+  final double? bottomPadding;
+
   const AdvancedLyricRenderer({
     super.key,
     required this.lines,
     required this.mode,
     required this.onSeek,
+    this.fontScale,
+    this.onFontScaleChanged,
+    this.horizontalPadding,
+    this.bottomPadding,
   });
 
   @override
@@ -52,6 +67,8 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
   static const Duration _tapHold = Duration(seconds: 1);
   double _fontScale = 1.0;
   double _baseScale = 1.0;
+
+  double get _effectiveFontScale => widget.fontScale ?? _fontScale;
 
   // Pinch-to-zoom is tracked by hand from raw pointer events (via Listener)
   // instead of a GestureDetector's ScaleGestureRecognizer. A real scale
@@ -377,7 +394,7 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
     _activePointers[event.pointer] = event.position;
     if (_activePointers.length == 2) {
       _pinchStartDistance = _distanceBetweenFirstTwoPointers();
-      _baseScale = _fontScale;
+      _baseScale = _effectiveFontScale;
     }
   }
 
@@ -394,8 +411,13 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
 
     final scale = _distanceBetweenFirstTwoPointers() / startDistance;
     final newFontScale = (_baseScale * scale).clamp(0.6, 2.5);
-    if (newFontScale != _fontScale) {
-      setState(() => _fontScale = newFontScale);
+    if (newFontScale != _effectiveFontScale) {
+      final onChanged = widget.onFontScaleChanged;
+      if (widget.fontScale != null && onChanged != null) {
+        onChanged(newFontScale);
+      } else {
+        setState(() => _fontScale = newFontScale);
+      }
     }
   }
 
@@ -409,7 +431,7 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
     } else {
       _pinchStartDistance = null;
     }
-    _baseScale = _fontScale;
+    _baseScale = _effectiveFontScale;
   }
 
   @override
@@ -460,9 +482,11 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
           itemCount: widget.lines.length + 1,
           padding: EdgeInsets.only(
             top: 60.s,
-            bottom: (Platform.isAndroid || Platform.isIOS) ? 120.s : 400.s,
-            left: 24.s,
-            right: 24.s,
+            bottom:
+                widget.bottomPadding ??
+                ((Platform.isAndroid || Platform.isIOS) ? 120.s : 400.s),
+            left: widget.horizontalPadding ?? 24.s,
+            right: widget.horizontalPadding ?? 24.s,
           ),
           itemBuilder: (context, index) {
             if (index == widget.lines.length) {
@@ -515,7 +539,7 @@ class _AdvancedLyricRendererState extends ConsumerState<AdvancedLyricRenderer> {
                 line: line,
                 mode: widget.mode,
                 isActive: isActive,
-                fontScale: _fontScale,
+                fontScale: _effectiveFontScale,
                 relativeIndex: _currentLineIndex == -1
                     ? index
                     : index - _currentLineIndex,
