@@ -1,4 +1,6 @@
+import 'package:looper_player/core/utils/motion.dart';
 import 'package:flutter/material.dart';
+
 import 'dart:math' as math;
 
 class GlobalPlayingIndicator extends StatefulWidget {
@@ -21,7 +23,14 @@ class _GlobalPlayingIndicatorState extends State<GlobalPlayingIndicator>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
-    )..repeat();
+    );
+    // With system animations off the bars hold one uneven still frame, so
+    // the row still reads as "now playing".
+    if (Motion.reduced) {
+      _controller.value = 0.2;
+    } else {
+      _controller.repeat();
+    }
   }
 
   @override

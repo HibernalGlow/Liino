@@ -1,3 +1,4 @@
+import 'package:looper_player/core/utils/motion.dart';
 import 'package:flutter/material.dart';
 import 'package:marqueer/marqueer.dart';
 
@@ -44,7 +45,9 @@ class ScrollingText extends StatelessWidget {
         final double measuredHeight = textPainter.height;
         textPainter.dispose();
 
-        if (overflows) {
+        // A marquee never stops moving, so with system animations off the
+        // title is ellipsized like any other long text.
+        if (overflows && !Motion.reducedOf(context)) {
           // Not a guessed fontSize * 1.5 - that under-measures scripts like
           // Devanagari, which need more vertical room than Latin text at the
           // same font size (ascent/descent plus vowel signs above and below

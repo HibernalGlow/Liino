@@ -40,7 +40,7 @@ final class LyricsProvider extends $NotifierProvider<Lyrics, LyricsState> {
   }
 }
 
-String _$lyricsHash() => r'70c22acd72ca5a00b8ab9a22621911f35c332d64';
+String _$lyricsHash() => r'f65470949a7df39796032f0bfaddeb81a3fffaf3';
 
 abstract class _$Lyrics extends $Notifier<LyricsState> {
   LyricsState build();

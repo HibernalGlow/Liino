@@ -5,8 +5,6 @@ extension _WelcomeStates on _WelcomeScreenState {
     switch (_currentState) {
       case WelcomeState.scanning:
         return _buildScanningState(colorScheme, l10n);
-      case WelcomeState.indexing:
-        return _buildIndexingState(colorScheme, l10n);
       case WelcomeState.noSongs:
         return _buildNoSongsState(colorScheme, l10n);
       case WelcomeState.initial:
@@ -402,44 +400,6 @@ extension _WelcomeStates on _WelcomeScreenState {
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Text(
             l10n.welcomeScanningFoldersDesc,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13.ts,
-              color: Colors.white.withValues(alpha: 0.4),
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // State 2b: Brief final "Indexing..." beat shown after the scan itself
-  // finds songs but before handing off to Home - covers the moment Pass 2
-  // enrichment (tags/art/lyrics) is just getting started in the background,
-  // so the app doesn't cut straight from "scanning" to a Home screen full
-  // of half-populated song rows.
-  Widget _buildIndexingState(ColorScheme colorScheme, AppLocalizations l10n) {
-    return Column(
-      key: const ValueKey('indexing_state'),
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const _ScanningLottieAnimation(),
-        const SizedBox(height: 24),
-        Text(
-          context.l10n.indexingYourLibrary,
-          style: TextStyle(
-            fontSize: 16.ts,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            letterSpacing: 2,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            context.l10n.indexingYourLibraryDesc,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13.ts,

@@ -2576,13 +2576,6 @@ class AppLocalizationsTr extends AppLocalizations {
       'Müziğin farklı adlı bir klasörde veya SD kartta ise doğrudan ekle.';
 
   @override
-  String get indexingYourLibrary => 'KÜTÜPHANEN DİZİNE EKLENİYOR...';
-
-  @override
-  String get indexingYourLibraryDesc =>
-      'Şarkılarının adları, kapakları ve sözleri tamamlanıyor.';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'ADIM $step: $title';
   }
@@ -2905,11 +2898,30 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu şarkı için kelime senkronlu şarkı sözü bulunamadı';
 
   @override
+  String get lyricsNotSynced => 'Senkronize değil';
+
+  @override
+  String get findSyncedLyrics => 'Senkronize şarkı sözü bul';
+
+  @override
+  String get searchingSyncedLyrics => 'Senkronize şarkı sözü aranıyor…';
+
+  @override
+  String get syncedLyricsLoaded => 'Senkronize şarkı sözü yüklendi';
+
+  @override
+  String get noSyncedLyricsFound => 'Bu şarkı için senkronize söz bulunamadı';
+
+  @override
+  String get tipFindSyncedDesc =>
+      'Sözlerde zamanlama yoksa şarkıyı takip eden bir sürüm arar.';
+
+  @override
   String get lyricsTiming => 'Şarkı sözü zamanlaması';
 
   @override
   String get lyricsTimingDesc =>
-      'Pozitif değer sözleri daha erken, negatif daha geç gösterir. Sözler şarkının önünde gidiyorsa (Bluetooth\'ta yaygın), değeri düşürün.';
+      'Pozitif değer sözleri daha erken, negatif daha geç gösterir. Sözler şarkının önünde gidiyorsa (Bluetooth\'ta yaygın), değeri düşürün. Yalnızca bu şarkı için kaydedilir.';
 
   @override
   String get lyricsTimingEarlier => 'Daha erken';
@@ -3151,4 +3163,46 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => 'Tam ekrandan çık';
+
+  @override
+  String get importM3uPlaylist => 'Çalma listesi içe aktar (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      'Bir .m3u veya .m3u8 dosyasından çalma listesi oluşturur ve parçalarını kitaplığınızdaki şarkılarla eşleştirir.';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '\"$name\" içe aktarıldı: $total şarkıdan $found tanesi bulundu';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return '$playlists çalma listesi içe aktarıldı: $total şarkıdan $found tanesi bulundu';
+  }
+
+  @override
+  String get m3uImportNoSongs =>
+      'Bu çalma listesindeki şarkıların hiçbiri kitaplığınızda bulunamadı.';
+
+  @override
+  String get m3uImportFailed =>
+      'Çalma listesi içe aktarılamadı: dosya okunamadı veya bir M3U çalma listesi değil.';
+
+  @override
+  String get mostFullyPlayed => 'En çok sonuna kadar dinlenen';
+
+  @override
+  String get lyricsServices => 'Şarkı sözü servisleri';
+
+  @override
+  String get lyricsServicesDesc =>
+      'Sözlerin aranma sırasını belirlemek için sürükleyin. Kapattığınız servisler atlanır.';
+
+  @override
+  String get creditWordSyncedDesc => 'Kelime kelime senkronize sözler';
+
+  @override
+  String get creditMorpheDesc =>
+      'NetEase, KuGou, Musixmatch ve Lyricify aramaları için referans · GPL-3.0';
 }

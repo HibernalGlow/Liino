@@ -2473,12 +2473,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get addCustomFolderDesc => '音楽が別の名前のフォルダや SD カードにある場合は、直接追加してください。';
 
   @override
-  String get indexingYourLibrary => 'ライブラリをインデックス中...';
-
-  @override
-  String get indexingYourLibraryDesc => '曲のタイトル、アートワーク、歌詞を補完しています。';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'ステップ $step: $title';
   }
@@ -2789,11 +2783,29 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noWordSyncedLyricsFound => 'この曲の単語同期の歌詞は見つかりませんでした';
 
   @override
+  String get lyricsNotSynced => '同期なし';
+
+  @override
+  String get findSyncedLyrics => '同期歌詞を探す';
+
+  @override
+  String get searchingSyncedLyrics => '同期歌詞を検索中…';
+
+  @override
+  String get syncedLyricsLoaded => '同期歌詞を読み込みました';
+
+  @override
+  String get noSyncedLyricsFound => 'この曲の同期歌詞が見つかりません';
+
+  @override
+  String get tipFindSyncedDesc => '歌詞にタイミングがない場合、曲に合わせて進む歌詞を探します。';
+
+  @override
   String get lyricsTiming => '歌詞のタイミング';
 
   @override
   String get lyricsTimingDesc =>
-      'プラスで歌詞を早く、マイナスで遅く表示します。歌詞が曲より先に進む場合（Bluetoothでよくあります）は値を下げてください。';
+      'プラスで歌詞を早く、マイナスで遅く表示します。歌詞が曲より先に進む場合（Bluetoothでよくあります）は値を下げてください。この曲にのみ保存されます。';
 
   @override
   String get lyricsTimingEarlier => '早く';
@@ -3024,4 +3036,44 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => '全画面表示を終了';
+
+  @override
+  String get importM3uPlaylist => 'プレイリストをインポート (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      '.m3u または .m3u8 ファイルからプレイリストを作成し、ライブラリ内の曲と照合します。';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '「$name」をインポートしました: $total 曲中 $found 曲が見つかりました';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return '$playlists 件のプレイリストをインポートしました: $total 曲中 $found 曲が見つかりました';
+  }
+
+  @override
+  String get m3uImportNoSongs => 'このプレイリストの曲はライブラリに見つかりませんでした。';
+
+  @override
+  String get m3uImportFailed =>
+      'プレイリストをインポートできませんでした: ファイルを読み込めないか、M3U プレイリストではありません。';
+
+  @override
+  String get mostFullyPlayed => '最後まで再生した回数順';
+
+  @override
+  String get lyricsServices => '歌詞サービス';
+
+  @override
+  String get lyricsServicesDesc => 'ドラッグして歌詞を検索する順番を設定します。オフにしたサービスはスキップされます。';
+
+  @override
+  String get creditWordSyncedDesc => '単語単位で同期した歌詞';
+
+  @override
+  String get creditMorpheDesc =>
+      'NetEase、KuGou、Musixmatch、Lyricify の検索処理の参考 · GPL-3.0';
 }

@@ -2555,13 +2555,6 @@ class AppLocalizationsAr extends AppLocalizations {
       'إذا كانت موسيقاك في مجلد باسم مختلف أو على بطاقة SD، فأضفه مباشرة.';
 
   @override
-  String get indexingYourLibrary => 'جارٍ فهرسة مكتبتك...';
-
-  @override
-  String get indexingYourLibraryDesc =>
-      'جارٍ استكمال العناوين والأغلفة والكلمات لأغانيك.';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'الخطوة $step: $title';
   }
@@ -2883,11 +2876,30 @@ class AppLocalizationsAr extends AppLocalizations {
       'لم يتم العثور على كلمات متزامنة بالكلمات لهذه الأغنية';
 
   @override
+  String get lyricsNotSynced => 'غير متزامنة';
+
+  @override
+  String get findSyncedLyrics => 'البحث عن كلمات متزامنة';
+
+  @override
+  String get searchingSyncedLyrics => 'جارٍ البحث عن كلمات متزامنة…';
+
+  @override
+  String get syncedLyricsLoaded => 'تم تحميل الكلمات المتزامنة';
+
+  @override
+  String get noSyncedLyricsFound => 'لم يُعثر على كلمات متزامنة لهذه الأغنية';
+
+  @override
+  String get tipFindSyncedDesc =>
+      'عندما تكون الكلمات بلا توقيت، ابحث عن نسخة تتابع الأغنية.';
+
+  @override
   String get lyricsTiming => 'توقيت الكلمات';
 
   @override
   String get lyricsTimingDesc =>
-      'القيمة الموجبة تُظهر الكلمات أبكر، والسالبة أبطأ. إذا سبقت الكلمات الأغنية (شائع مع البلوتوث)، فاخفضها.';
+      'القيمة الموجبة تُظهر الكلمات أبكر، والسالبة أبطأ. إذا سبقت الكلمات الأغنية (شائع مع البلوتوث)، فاخفضها. يُحفظ لهذه الأغنية فقط.';
 
   @override
   String get lyricsTimingEarlier => 'أبكر';
@@ -3128,4 +3140,46 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => 'الخروج من ملء الشاشة';
+
+  @override
+  String get importM3uPlaylist => 'استيراد قائمة تشغيل (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      'ينشئ قائمة تشغيل من ملف ‎.m3u أو ‎.m3u8 ويطابق مقاطعها مع الأغاني في مكتبتك.';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return 'تم استيراد \"$name\": عُثر على $found من $total أغنية';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return 'تم استيراد $playlists قوائم تشغيل: عُثر على $found من $total أغنية';
+  }
+
+  @override
+  String get m3uImportNoSongs =>
+      'لم يُعثر في مكتبتك على أي أغنية من هذه القائمة.';
+
+  @override
+  String get m3uImportFailed =>
+      'تعذّر استيراد قائمة التشغيل: تعذّرت قراءة الملف أو أنه ليس قائمة M3U.';
+
+  @override
+  String get mostFullyPlayed => 'الأكثر استماعًا حتى النهاية';
+
+  @override
+  String get lyricsServices => 'خدمات كلمات الأغاني';
+
+  @override
+  String get lyricsServicesDesc =>
+      'اسحب لتحديد ترتيب البحث عن الكلمات. يتم تخطي الخدمات التي توقفها.';
+
+  @override
+  String get creditWordSyncedDesc => 'كلمات متزامنة كلمة بكلمة';
+
+  @override
+  String get creditMorpheDesc =>
+      'مرجع لعمليات البحث في NetEase وKuGou وMusixmatch وLyricify · GPL-3.0';
 }

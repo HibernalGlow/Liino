@@ -33,6 +33,7 @@ class LyricsPlusClient {
         'artist': name,
         if (durationSeconds > 0) 'duration': '$durationSeconds',
       };
+      var answered = false;
       for (final base in AppLinks.lyricsPlusMirrors) {
         try {
           final uri = Uri.parse(
@@ -42,10 +43,14 @@ class LyricsPlusClient {
               .get(uri, headers: LyricsHttp.headers)
               .timeout(LyricsHttp.timeout);
           // 404: the mirrors share one catalogue - try the next credit.
-          if (response.statusCode == 404) break;
+          if (response.statusCode == 404) {
+            answered = true;
+            break;
+          }
           if (response.statusCode != 200) continue;
 
           final payload = jsonDecode(utf8.decode(response.bodyBytes));
+          answered = true;
           final lines = KpoeLyricsParser.parse(payload);
           final lrc = lines == null ? null : TimedLrcWriter.write(lines);
           if (lrc == null) break;
@@ -56,6 +61,8 @@ class LyricsPlusClient {
           LoggerHelper.write('LyricsPlusClient: $base failed ($e)');
         }
       }
+      // No mirror answered at all: the lookup didn't get through.
+      if (!answered) LyricsHttp.failed();
       // A line-synced hit already means the song matched; another credit
       // won't turn it word-synced.
       if (lineSyncedFallback != null) break;

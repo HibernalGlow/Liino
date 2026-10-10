@@ -2605,13 +2605,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Si votre musique se trouve dans un dossier au nom différent ou sur une carte SD, ajoutez-le directement.';
 
   @override
-  String get indexingYourLibrary => 'INDEXATION DE VOTRE BIBLIOTHÈQUE...';
-
-  @override
-  String get indexingYourLibraryDesc =>
-      'Ajout des titres, pochettes et paroles de vos morceaux.';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'ÉTAPE $step : $title';
   }
@@ -2942,11 +2935,31 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucunes paroles synchronisées mot à mot trouvées pour ce titre';
 
   @override
+  String get lyricsNotSynced => 'Non synchronisées';
+
+  @override
+  String get findSyncedLyrics => 'Rechercher des paroles synchronisées';
+
+  @override
+  String get searchingSyncedLyrics => 'Recherche de paroles synchronisées…';
+
+  @override
+  String get syncedLyricsLoaded => 'Paroles synchronisées chargées';
+
+  @override
+  String get noSyncedLyricsFound =>
+      'Aucune parole synchronisée trouvée pour ce morceau';
+
+  @override
+  String get tipFindSyncedDesc =>
+      'Si les paroles n\'ont pas de minutage, cherche une version qui suit le morceau.';
+
+  @override
   String get lyricsTiming => 'Synchronisation des paroles';
 
   @override
   String get lyricsTimingDesc =>
-      'Une valeur positive affiche les paroles plus tôt, une valeur négative plus tard. Si les paroles sont en avance sur la chanson (courant en Bluetooth), baissez-la.';
+      'Une valeur positive affiche les paroles plus tôt, une valeur négative plus tard. Si les paroles sont en avance sur la chanson (courant en Bluetooth), baissez-la. Enregistré pour ce titre uniquement.';
 
   @override
   String get lyricsTimingEarlier => 'Plus tôt';
@@ -3191,4 +3204,46 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => 'Quitter le plein écran';
+
+  @override
+  String get importM3uPlaylist => 'Importer une playlist (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      'Crée une playlist à partir d\'un fichier .m3u ou .m3u8 en associant ses pistes aux titres de votre bibliothèque.';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '« $name » importée : $found titres trouvés sur $total';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return '$playlists playlists importées : $found titres trouvés sur $total';
+  }
+
+  @override
+  String get m3uImportNoSongs =>
+      'Aucun titre de cette playlist n\'a été trouvé dans votre bibliothèque.';
+
+  @override
+  String get m3uImportFailed =>
+      'Échec de l\'importation : le fichier est illisible ou n\'est pas une playlist M3U.';
+
+  @override
+  String get mostFullyPlayed => 'Les plus écoutées en entier';
+
+  @override
+  String get lyricsServices => 'Services de paroles';
+
+  @override
+  String get lyricsServicesDesc =>
+      'Faites glisser pour définir l\'ordre de recherche des paroles. Les services désactivés sont ignorés.';
+
+  @override
+  String get creditWordSyncedDesc => 'Paroles synchronisées mot à mot';
+
+  @override
+  String get creditMorpheDesc =>
+      'Référence pour les recherches NetEase, KuGou, Musixmatch et Lyricify · GPL-3.0';
 }

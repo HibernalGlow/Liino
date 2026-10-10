@@ -24,7 +24,7 @@ part 'premium_button.dart';
 part 'scanning_lottie_animation.dart';
 part 'welcome_states.dart';
 
-enum WelcomeState { initial, scanning, indexing, noSongs }
+enum WelcomeState { initial, scanning, noSongs }
 
 @Riverpod(keepAlive: true)
 class WelcomeBypassed extends _$WelcomeBypassed {
@@ -342,17 +342,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
       }
       return;
     }
-
-    // A brief fixed pause here (not tied to actual enrichment progress,
-    // which can take much longer for a large library - that's the whole
-    // point of the quick first pass) just smooths the handoff to Home
-    // instead of cutting straight from "scanning" to a screen full of
-    // still-enriching placeholder rows.
-    setState(() {
-      _currentState = WelcomeState.indexing;
-    });
-    await Future.delayed(const Duration(seconds: 5));
-    if (!mounted) return;
 
     ref.read(forceWelcomeProvider.notifier).set(false);
     ref.read(welcomeBypassedProvider.notifier).set(true);

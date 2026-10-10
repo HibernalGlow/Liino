@@ -17,6 +17,7 @@ import 'package:looper_player/ui/widgets/sheets/app_bottom_sheet.dart';
 import 'package:looper_player/ui/widgets/player/lyrics_share_card.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:looper_player/core/services/haptics/haptic_snack_bar.dart';
 
 /// Opens the "Share Lyrics" preview sheet for [lines] of [song]. Pre-caches
 /// the album art first so the card's first paint (the one that gets
@@ -221,15 +222,15 @@ class _LyricsShareSheetContentState
         name: 'lyrics_${safeTitle}_${DateTime.now().millisecondsSinceEpoch}',
       );
       if (mounted) {
-        AppHaptics.success();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(context.l10n.savedToGallery)));
+        ScaffoldMessenger.of(context).showHapticSnackBar(
+          AppHaptics.success,
+          SnackBar(content: Text(context.l10n.savedToGallery)),
+        );
       }
     } on GalException catch (e) {
       if (mounted) {
-        AppHaptics.error();
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showHapticSnackBar(
+          AppHaptics.error,
           SnackBar(
             content: Text(
               e.type == GalExceptionType.accessDenied
@@ -241,8 +242,8 @@ class _LyricsShareSheetContentState
       }
     } catch (_) {
       if (mounted) {
-        AppHaptics.error();
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showHapticSnackBar(
+          AppHaptics.error,
           SnackBar(content: Text(context.l10n.couldNotSaveToGallery)),
         );
       }

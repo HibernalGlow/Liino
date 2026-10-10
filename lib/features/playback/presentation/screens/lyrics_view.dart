@@ -23,6 +23,7 @@ import '../widgets/lyrics/lyrics_scale.dart';
 import '../widgets/lyrics/lyrics_skeleton.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:looper_player/core/services/haptics/haptic_snack_bar.dart';
 
 enum LyricsSyncMode {
   line,
@@ -273,6 +274,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
                     : AdvancedLyricRenderer(
                         key: const ValueKey('lyrics'),
                         lines: lyricsState.parsedLines,
+                        synced: lyricsState.isSynced,
                         mode: syncMode,
                         onSeek: (pos) =>
                             ref.read(playbackProvider.notifier).seek(pos),
@@ -415,15 +417,15 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       await ref.read(lyricsProvider.notifier).applyCustomLyrics(song, content);
 
       if (mounted) {
-        AppHaptics.success();
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showHapticSnackBar(
+          AppHaptics.success,
           SnackBar(content: Text(l10n.customLyricsAppliedSuccess)),
         );
       }
     } catch (e) {
       if (mounted) {
-        AppHaptics.error();
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showHapticSnackBar(
+          AppHaptics.error,
           SnackBar(content: Text(context.l10n.failedToImportLyrics('$e'))),
         );
       }

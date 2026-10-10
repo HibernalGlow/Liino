@@ -185,7 +185,7 @@ class _PremiumMusicBarState extends ConsumerState<PremiumMusicBar>
             final dy = _dragOffset.dy;
 
             if (dy > 70 && dy.abs() > dx.abs()) {
-              AppHaptics.heavy();
+              AppHaptics.medium();
               ref.read(playbackProvider.notifier).clearQueue();
             } else if (dy < -70 && dy.abs() > dx.abs()) {
               _pushExpandedPlayer(context, settings);

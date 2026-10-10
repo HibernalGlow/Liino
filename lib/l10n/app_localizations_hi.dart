@@ -2575,13 +2575,6 @@ class AppLocalizationsHi extends AppLocalizations {
       'अगर आपका संगीत किसी अलग नाम वाले फ़ोल्डर में या SD कार्ड पर है, तो उसे सीधे जोड़ें।';
 
   @override
-  String get indexingYourLibrary => 'आपकी लाइब्रेरी इंडेक्स हो रही है...';
-
-  @override
-  String get indexingYourLibraryDesc =>
-      'आपके गानों के नाम, आर्टवर्क और बोल भरे जा रहे हैं।';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'चरण $step: $title';
   }
@@ -2908,11 +2901,30 @@ class AppLocalizationsHi extends AppLocalizations {
       'इस गाने के लिए शब्द-सिंक बोल नहीं मिले';
 
   @override
+  String get lyricsNotSynced => 'सिंक नहीं';
+
+  @override
+  String get findSyncedLyrics => 'सिंक किए हुए बोल खोजें';
+
+  @override
+  String get searchingSyncedLyrics => 'सिंक किए हुए बोल खोज रहे हैं…';
+
+  @override
+  String get syncedLyricsLoaded => 'सिंक किए हुए बोल लोड हो गए';
+
+  @override
+  String get noSyncedLyricsFound => 'इस गाने के लिए सिंक किए हुए बोल नहीं मिले';
+
+  @override
+  String get tipFindSyncedDesc =>
+      'जब बोल में टाइमिंग न हो, तो गाने के साथ चलने वाला संस्करण खोजें।';
+
+  @override
   String get lyricsTiming => 'बोल की टाइमिंग';
 
   @override
   String get lyricsTimingDesc =>
-      'धनात्मक मान लिरिक्स पहले दिखाता है, ऋणात्मक बाद में। अगर लिरिक्स गाने से आगे चल रहे हैं (ब्लूटूथ पर आम), तो इसे घटाएँ।';
+      'धनात्मक मान लिरिक्स पहले दिखाता है, ऋणात्मक बाद में। अगर लिरिक्स गाने से आगे चल रहे हैं (ब्लूटूथ पर आम), तो इसे घटाएँ। सिर्फ़ इसी गाने के लिए सेव होता है।';
 
   @override
   String get lyricsTimingEarlier => 'पहले';
@@ -3154,4 +3166,46 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => 'फ़ुल स्क्रीन से बाहर निकलें';
+
+  @override
+  String get importM3uPlaylist => 'प्लेलिस्ट आयात करें (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      '.m3u या .m3u8 फ़ाइल से प्लेलिस्ट बनाता है और उसके ट्रैक को आपकी लाइब्रेरी के गानों से मिलाता है।';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '\"$name\" आयात हुई: $total में से $found गाने मिले';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return '$playlists प्लेलिस्ट आयात हुईं: $total में से $found गाने मिले';
+  }
+
+  @override
+  String get m3uImportNoSongs =>
+      'इस प्लेलिस्ट का कोई भी गाना आपकी लाइब्रेरी में नहीं मिला।';
+
+  @override
+  String get m3uImportFailed =>
+      'प्लेलिस्ट आयात नहीं हो सकी: फ़ाइल पढ़ी नहीं जा सकी या यह M3U प्लेलिस्ट नहीं है।';
+
+  @override
+  String get mostFullyPlayed => 'सबसे ज़्यादा पूरे सुने गए';
+
+  @override
+  String get lyricsServices => 'लिरिक्स सेवाएँ';
+
+  @override
+  String get lyricsServicesDesc =>
+      'लिरिक्स किस क्रम में खोजे जाएँ, यह खींचकर तय करें। बंद की गई सेवाएँ छोड़ दी जाती हैं।';
+
+  @override
+  String get creditWordSyncedDesc => 'शब्द-सिंक बोल';
+
+  @override
+  String get creditMorpheDesc =>
+      'NetEase, KuGou, Musixmatch और Lyricify खोज के लिए संदर्भ · GPL-3.0';
 }

@@ -2595,13 +2595,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Liegt deine Musik in einem anders benannten Ordner oder auf einer SD-Karte, füge ihn direkt hinzu.';
 
   @override
-  String get indexingYourLibrary => 'BIBLIOTHEK WIRD INDIZIERT...';
-
-  @override
-  String get indexingYourLibraryDesc =>
-      'Titel, Cover und Songtexte deiner Songs werden ergänzt.';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'SCHRITT $step: $title';
   }
@@ -2929,11 +2922,31 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine wortgenauen Songtexte für diesen Song gefunden';
 
   @override
+  String get lyricsNotSynced => 'Nicht synchronisiert';
+
+  @override
+  String get findSyncedLyrics => 'Synchronisierte Songtexte suchen';
+
+  @override
+  String get searchingSyncedLyrics => 'Suche nach synchronisierten Songtexten…';
+
+  @override
+  String get syncedLyricsLoaded => 'Synchronisierte Songtexte geladen';
+
+  @override
+  String get noSyncedLyricsFound =>
+      'Keine synchronisierten Songtexte für diesen Song gefunden';
+
+  @override
+  String get tipFindSyncedDesc =>
+      'Hat ein Songtext kein Timing, wird nach einer Version gesucht, die dem Song folgt.';
+
+  @override
   String get lyricsTiming => 'Songtext-Timing';
 
   @override
   String get lyricsTimingDesc =>
-      'Positiv zeigt den Songtext früher, negativ später. Läuft der Text dem Song voraus (häufig bei Bluetooth), verringere den Wert.';
+      'Positiv zeigt den Songtext früher, negativ später. Läuft der Text dem Song voraus (häufig bei Bluetooth), verringere den Wert. Wird nur für diesen Song gespeichert.';
 
   @override
   String get lyricsTimingEarlier => 'Früher';
@@ -3179,4 +3192,46 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => 'Vollbild beenden';
+
+  @override
+  String get importM3uPlaylist => 'Playlist importieren (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      'Erstellt eine Playlist aus einer .m3u- oder .m3u8-Datei und ordnet ihre Titel den Songs in deiner Bibliothek zu.';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '„$name“ importiert: $found von $total Songs gefunden';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return '$playlists Playlists importiert: $found von $total Songs gefunden';
+  }
+
+  @override
+  String get m3uImportNoSongs =>
+      'Keiner der Songs dieser Playlist wurde in deiner Bibliothek gefunden.';
+
+  @override
+  String get m3uImportFailed =>
+      'Playlist konnte nicht importiert werden: Die Datei ist nicht lesbar oder keine M3U-Playlist.';
+
+  @override
+  String get mostFullyPlayed => 'Am häufigsten ganz gehört';
+
+  @override
+  String get lyricsServices => 'Songtext-Dienste';
+
+  @override
+  String get lyricsServicesDesc =>
+      'Ziehe, um die Reihenfolge der Songtextsuche festzulegen. Ausgeschaltete Dienste werden übersprungen.';
+
+  @override
+  String get creditWordSyncedDesc => 'Wortgenaue Songtexte';
+
+  @override
+  String get creditMorpheDesc =>
+      'Vorlage für die Abfragen bei NetEase, KuGou, Musixmatch und Lyricify · GPL-3.0';
 }

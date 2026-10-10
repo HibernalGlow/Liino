@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:looper_player/features/library/domain/models/models.dart';
 import 'package:looper_player/features/playback/data/lyrics_fetcher.dart';
+import 'package:looper_player/features/playback/data/lyrics_providers/lyrics_provider_info.dart';
 import 'package:looper_player/features/playback/presentation/providers/lyrics/lyrics_notifier.dart';
 import 'package:looper_player/features/playback/presentation/widgets/lyrics/desktop_lyrics_toolbar.dart';
 import 'package:looper_player/features/playback/presentation/widgets/lyrics/lyrics_scale.dart';
@@ -18,6 +19,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'lyrics_gestures_tutorial_sheet.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:looper_player/core/services/haptics/haptic_snack_bar.dart';
 
 void showLyricsMenuBottomSheet(BuildContext context, WidgetRef ref, Song song) {
   showModalBottomSheet(
@@ -93,21 +95,18 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
     final lyricsState = ref.watch(lyricsProvider);
     final currentAccent = settings.accentColor;
     final isWordSynced = lyricsState.parsedLines.any((l) => l.hasWordTiming);
+    final isSynced = lyricsState.isSynced;
     final syncStyle = switch (settings.lyricsSyncStyle) {
       'line' || 'word' => settings.lyricsSyncStyle,
       _ => 'char',
     };
 
+    // The services in the user's order; one that is switched off for
+    // automatic lookups can still be picked here for this song.
     final availableProviders = [
       'Local',
-      'lrc.red',
-      'LyricsPlus',
-      'LRCLIB',
-      'Genius',
-      'Musixmatch',
-      'AZLyrics',
-      'LyricsMINT',
-      'LyricFind',
+      for (final id in LyricsFetcher.providerOrder(settings))
+        LyricsProviderInfo.of(id)?.label ?? id,
     ];
 
     final accent = Color(currentAccent);
@@ -216,7 +215,11 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                     ),
                   ),
                   if (hasLyrics)
-                    _SyncBadge(wordSynced: isWordSynced, accent: accent),
+                    _SyncBadge(
+                      wordSynced: isWordSynced,
+                      synced: isSynced,
+                      accent: accent,
+                    ),
                 ],
               ),
 
@@ -261,6 +264,37 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                         ],
                       ),
                     )
+                  else if (hasLyrics && !isSynced)
+                    // No timestamps at all: any synced lyrics would do.
+                    _MenuActionTile(
+                      icon: LucideIcons.searchCheck,
+                      iconColor: accent,
+                      title: l10n.findSyncedLyrics,
+                      onTap: () async {
+                        AppHaptics.medium();
+                        final messenger = ScaffoldMessenger.of(context);
+                        Navigator.pop(context);
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.searchingSyncedLyrics),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                        final found = await ref
+                            .read(lyricsProvider.notifier)
+                            .findSynced(song);
+                        messenger.showHapticSnackBar(
+                          found ? AppHaptics.success : AppHaptics.error,
+                          SnackBar(
+                            content: Text(
+                              found
+                                  ? l10n.syncedLyricsLoaded
+                                  : l10n.noSyncedLyricsFound,
+                            ),
+                          ),
+                        );
+                      },
+                    )
                   else
                     _MenuActionTile(
                       icon: LucideIcons.sparkles,
@@ -281,8 +315,8 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                         final found = await ref
                             .read(lyricsProvider.notifier)
                             .findWordSynced(song);
-                        found ? AppHaptics.success() : AppHaptics.error();
-                        messenger.showSnackBar(
+                        messenger.showHapticSnackBar(
+                          found ? AppHaptics.success : AppHaptics.error,
                           SnackBar(
                             content: Text(
                               found
@@ -293,15 +327,18 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                         );
                       },
                     ),
-                  if (hasLyrics)
+                  // Nothing to shift without timestamps.
+                  if (hasLyrics && isSynced)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 10, 8, 2),
                       child: _LyricsOffsetControl(
-                        offsetMs: settings.lyricsOffsetMs,
+                        offsetMs: lyricsState.songId == song.id
+                            ? lyricsState.songOffsetMs
+                            : lyricsShiftMs(song.lyricsOffsetMs),
                         accent: accent,
                         onChanged: (ms) => ref
-                            .read(settingsProvider.notifier)
-                            .updateLyricsOffsetMs(ms),
+                            .read(lyricsProvider.notifier)
+                            .updateSongOffsetMs(song, ms),
                       ),
                     ),
                 ],
@@ -370,7 +407,7 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                                     // a download: the song's own files and
                                     // saved provider copies load instantly.
                                     if (provider != 'Local' &&
-                                        !await LyricsFetcher.hasSavedCopy(
+                                        !await LyricsFetcher.hasAnswer(
                                           song,
                                           provider,
                                         )) {
@@ -389,9 +426,6 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                                     final source = await ref
                                         .read(lyricsProvider.notifier)
                                         .fetchWithProvider(song, provider);
-                                    source == null
-                                        ? AppHaptics.error()
-                                        : AppHaptics.success();
                                     final String resultMsg;
                                     if (source == null) {
                                       resultMsg = provider == 'Local'
@@ -408,7 +442,10 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                                         ),
                                       );
                                     }
-                                    messenger.showSnackBar(
+                                    messenger.showHapticSnackBar(
+                                      source == null
+                                          ? AppHaptics.error
+                                          : AppHaptics.success,
                                       SnackBar(content: Text(resultMsg)),
                                     );
                                   },
@@ -551,8 +588,8 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                         ))?.path;
 
                         if (context.mounted && exportPath != null) {
-                          AppHaptics.success();
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(context).showHapticSnackBar(
+                            AppHaptics.success,
                             SnackBar(
                               content: Text(l10n.lyricsExportedTo(exportPath)),
                             ),
@@ -560,8 +597,8 @@ class _LyricsMenuSheetContent extends ConsumerWidget {
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          AppHaptics.error();
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(context).showHapticSnackBar(
+                            AppHaptics.error,
                             SnackBar(
                               content: Text(l10n.failedToExportLyrics('$e')),
                             ),
@@ -776,12 +813,18 @@ class _MenuSwitchTile extends StatelessWidget {
   }
 }
 
-/// "Word-synced" / "Line-synced" pill next to the lyrics source.
+/// "Word-synced" / "Line-synced" / "Not synced" pill next to the lyrics
+/// source.
 class _SyncBadge extends StatelessWidget {
   final bool wordSynced;
+  final bool synced;
   final Color accent;
 
-  const _SyncBadge({required this.wordSynced, required this.accent});
+  const _SyncBadge({
+    required this.wordSynced,
+    required this.synced,
+    required this.accent,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -798,13 +841,21 @@ class _SyncBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            wordSynced ? LucideIcons.sparkles : LucideIcons.alignLeft,
+            wordSynced
+                ? LucideIcons.sparkles
+                : synced
+                ? LucideIcons.alignLeft
+                : LucideIcons.timerOff,
             size: 13,
             color: color,
           ),
           const SizedBox(width: 6),
           Text(
-            wordSynced ? l10n.lyricsWordSynced : l10n.lyricsLineSynced,
+            wordSynced
+                ? l10n.lyricsWordSynced
+                : synced
+                ? l10n.lyricsLineSynced
+                : l10n.lyricsNotSynced,
             style: AppFonts.jostStyle(
               color: color,
               fontSize: 12,
@@ -859,14 +910,15 @@ class _MenuChip extends StatelessWidget {
   }
 }
 
-/// Lyrics timing offset: nudges all lyric timing later/earlier in 0.1 s
-/// steps, for audio that reaches the ears late (Bluetooth) or early.
+/// Lyrics timing offset: nudges this song's lyric timing later/earlier in
+/// 0.1 s steps. Every song starts at the app default; a change is saved for
+/// the song it was made on only.
 class _LyricsOffsetControl extends StatelessWidget {
+  static const int _step = 100;
+
   final int offsetMs;
   final Color accent;
   final ValueChanged<int> onChanged;
-
-  static const int _step = 100;
 
   const _LyricsOffsetControl({
     required this.offsetMs,

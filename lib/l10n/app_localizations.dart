@@ -4724,18 +4724,6 @@ abstract class AppLocalizations {
   /// **'If your music lives in a folder with a different name, or on an SD card, add it directly.'**
   String get addCustomFolderDesc;
 
-  /// No description provided for @indexingYourLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'INDEXING YOUR LIBRARY...'**
-  String get indexingYourLibrary;
-
-  /// No description provided for @indexingYourLibraryDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Filling in titles, artwork and lyrics for your songs.'**
-  String get indexingYourLibraryDesc;
-
   /// No description provided for @welcomeStep.
   ///
   /// In en, this message translates to:
@@ -5270,6 +5258,42 @@ abstract class AppLocalizations {
   /// **'No word-synced lyrics found for this song'**
   String get noWordSyncedLyricsFound;
 
+  /// No description provided for @lyricsNotSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced'**
+  String get lyricsNotSynced;
+
+  /// No description provided for @findSyncedLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Find synced lyrics'**
+  String get findSyncedLyrics;
+
+  /// No description provided for @searchingSyncedLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for synced lyrics…'**
+  String get searchingSyncedLyrics;
+
+  /// No description provided for @syncedLyricsLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced lyrics loaded'**
+  String get syncedLyricsLoaded;
+
+  /// No description provided for @noSyncedLyricsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No synced lyrics found for this song'**
+  String get noSyncedLyricsFound;
+
+  /// No description provided for @tipFindSyncedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When lyrics have no timing, look for a version that follows the song.'**
+  String get tipFindSyncedDesc;
+
   /// No description provided for @lyricsTiming.
   ///
   /// In en, this message translates to:
@@ -5279,7 +5303,7 @@ abstract class AppLocalizations {
   /// No description provided for @lyricsTimingDesc.
   ///
   /// In en, this message translates to:
-  /// **'Positive shows lyrics earlier, negative later. If lyrics run ahead of the song (common with Bluetooth), lower it.'**
+  /// **'Positive shows lyrics earlier, negative later. If lyrics run ahead of the song (common with Bluetooth), lower it. Saved for this song only.'**
   String get lyricsTimingDesc;
 
   /// No description provided for @lyricsTimingEarlier.
@@ -5701,6 +5725,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exit full screen'**
   String get lyricsExitFullscreen;
+
+  /// No description provided for @importM3uPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Playlist (M3U)'**
+  String get importM3uPlaylist;
+
+  /// No description provided for @importM3uPlaylistDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates a playlist from an .m3u or .m3u8 file, matching its tracks to the songs in your library.'**
+  String get importM3uPlaylistDesc;
+
+  /// No description provided for @m3uImportedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported \"{name}\": {found} of {total} songs found'**
+  String m3uImportedSummary(String name, int found, int total);
+
+  /// No description provided for @m3uImportedMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {playlists} playlists: {found} of {total} songs found'**
+  String m3uImportedMany(int playlists, int found, int total);
+
+  /// No description provided for @m3uImportNoSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'None of the songs in this playlist were found in your library.'**
+  String get m3uImportNoSongs;
+
+  /// No description provided for @m3uImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to import playlist: The file could not be read or is not an M3U playlist.'**
+  String get m3uImportFailed;
+
+  /// No description provided for @mostFullyPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Fully Played'**
+  String get mostFullyPlayed;
+
+  /// No description provided for @lyricsServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics services'**
+  String get lyricsServices;
+
+  /// No description provided for @lyricsServicesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to set the order lyrics are looked up in. Services you switch off are skipped.'**
+  String get lyricsServicesDesc;
+
+  /// No description provided for @creditWordSyncedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Word-synced lyrics'**
+  String get creditWordSyncedDesc;
+
+  /// No description provided for @creditMorpheDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference for the NetEase, KuGou, Musixmatch and Lyricify lookups · GPL-3.0'**
+  String get creditMorpheDesc;
 }
 
 class _AppLocalizationsDelegate

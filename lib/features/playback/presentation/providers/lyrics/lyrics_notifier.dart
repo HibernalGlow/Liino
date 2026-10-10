@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:looper_player/core/services/storage/db_service.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
+import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import '../../../data/lyrics_fetcher.dart';
 import '../../../domain/lyric_models.dart';
 
@@ -17,12 +17,22 @@ class LyricsState {
   final List<LyricLine> parsedLines;
   final String? source;
 
+  /// False for lyrics without timestamps: [parsedLines] then carry no
+  /// times, and nothing may follow the song with them.
+  final bool isSynced;
+
+  /// The shown song's timing offset: its own, or the app default (see
+  /// [lyricsShiftMs]).
+  final int songOffsetMs;
+
   LyricsState({
     this.rawLrc,
     this.isLoading = false,
     this.songId,
     this.parsedLines = const [],
     this.source,
+    this.isSynced = true,
+    this.songOffsetMs = AppSettings.defaultLyricsOffsetMs,
   });
 
   LyricsState copyWith({
@@ -38,6 +48,8 @@ class LyricsState {
       songId: songId ?? this.songId,
       parsedLines: parsedLines ?? this.parsedLines,
       source: source ?? this.source,
+      isSynced: isSynced,
+      songOffsetMs: songOffsetMs,
     );
   }
 }
@@ -50,15 +62,7 @@ class Lyrics extends _$Lyrics {
   String? _shownLrc;
 
   @override
-  LyricsState build() {
-    ref.listen(settingsProvider.select((s) => s.lyricsOffsetMs), (prev, next) {
-      final song = _shownSong;
-      if (prev != next && song != null && state.songId == song.id) {
-        _applyLrcToState(song, _shownLrc);
-      }
-    });
-    return LyricsState();
-  }
+  LyricsState build() => LyricsState();
 
   void fetchForSong(Song song, {bool force = false}) {
     _fetchLyrics(song, force: force);
@@ -81,24 +85,38 @@ class Lyrics extends _$Lyrics {
       _applyLrcToState(song, lrc);
     }
 
-    // Lyrics without word timing (embedded tags, sidecar files, LRCLIB...):
-    // shown right away (above), then swapped for word-synced ones if
-    // lrc.red/LyricsPlus have them. Asked once per song - the answer or a
-    // "checked" mark is saved.
-    if (lrc != null && LyricsFetcher.canUpgradeToWordSync(lrc)) {
-      final upgraded = await LyricsFetcher.upgradeToWordSync(song, lrc);
+    // Plain or line-synced lyrics are shown right away (above), then
+    // swapped for a better level - line, word or letter timing - if a
+    // service has one. Each service is asked about a song once; after
+    // that this reads its saved answers and costs no request.
+    if (lrc != null && LyricsFetcher.canUpgrade(lrc)) {
+      final upgraded = await LyricsFetcher.upgrade(song, lrc);
       if (upgraded != null && state.songId == song.id) {
         _applyLrcToState(song, upgraded);
       }
     }
   }
 
-  /// "Find word-synced lyrics" in the lyrics menu: an explicit, unmarked
-  /// lookup on lrc.red then LyricsPlus. Keeps the current lyrics (and
-  /// returns false) when neither has word timing for this song.
+  /// "Find word-synced lyrics" in the lyrics menu: the best word-timed
+  /// lyrics the switched-on services have. Keeps the current lyrics (and
+  /// returns false) when none has word timing for this song.
   Future<bool> findWordSynced(Song song) async {
     state = state.copyWith(isLoading: true);
     final lrc = await LyricsFetcher.findWordSynced(song);
+    if (lrc != null) {
+      _applyLrcToState(song, lrc);
+      return true;
+    }
+    state = state.copyWith(isLoading: false);
+    return false;
+  }
+
+  /// "Find synced lyrics" in the lyrics menu, for lyrics without
+  /// timestamps: asks the switched-on services for synced ones. Keeps the
+  /// current lyrics (and returns false) when none has them.
+  Future<bool> findSynced(Song song) async {
+    state = state.copyWith(isLoading: true);
+    final lrc = await LyricsFetcher.findSynced(song);
     if (lrc != null) {
       _applyLrcToState(song, lrc);
       return true;
@@ -133,6 +151,32 @@ class Lyrics extends _$Lyrics {
     _applyLrcToState(song, '[source:custom_file]\n$rawContent');
   }
 
+  /// Sets [song]'s lyrics timing offset (positive = earlier). It only ever
+  /// applies to that song; the default is stored as "none", so the song
+  /// follows [AppSettings.defaultLyricsOffsetMs] again.
+  Future<void> updateSongOffsetMs(Song song, int value) async {
+    final int clamped = value.clamp(-5000, 5000);
+    final int? offset = clamped == AppSettings.defaultLyricsOffsetMs
+        ? null
+        : clamped;
+
+    song.lyricsOffsetMs = offset;
+    ref.read(playbackProvider.notifier).updateSongLyricsOffset(song.id, offset);
+    final shown = _shownSong;
+    if (shown != null && shown.id == song.id && state.songId == song.id) {
+      shown.lyricsOffsetMs = offset;
+      _applyLrcToState(shown, _shownLrc);
+    }
+
+    await DbService.isar.writeTxn(() async {
+      final dbSong = await DbService.isar.songs.get(song.id);
+      if (dbSong != null) {
+        dbSong.lyricsOffsetMs = offset;
+        await DbService.isar.songs.put(dbSong);
+      }
+    });
+  }
+
   void _applyLrcToState(Song song, String? lrc) {
     // Keep cleanLrc nullable -- null means "no lyrics found" and must reach
     // LyricsState.rawLrc as null too (that's what the lyrics screen checks
@@ -156,11 +200,9 @@ class Lyrics extends _$Lyrics {
         ? LrcParser.parse(
             cleanLrc,
             Duration(milliseconds: song.duration ?? 0),
-            // The setting is positive = earlier; the parser's shift is
+            // The offset is positive = earlier; the parser's shift is
             // positive = later.
-            shift: Duration(
-              milliseconds: -ref.read(settingsProvider).lyricsOffsetMs,
-            ),
+            shift: Duration(milliseconds: -lyricsShiftMs(song.lyricsOffsetMs)),
           )
         : <LyricLine>[];
 
@@ -172,10 +214,16 @@ class Lyrics extends _$Lyrics {
       isLoading: false,
       parsedLines: lines,
       source: source,
+      isSynced: cleanLrc == null || LrcParser.isTimed(cleanLrc),
       songId: song.id,
+      songOffsetMs: lyricsShiftMs(song.lyricsOffsetMs),
     );
   }
 }
+
+/// A song's lyrics timing offset: its own when the user re-timed it, else
+/// the app default.
+int lyricsShiftMs(int? songMs) => songMs ?? AppSettings.defaultLyricsOffsetMs;
 
 @Riverpod(keepAlive: true)
 class LyricsManualScroll extends _$LyricsManualScroll {

@@ -1,4 +1,7 @@
+import 'package:looper_player/core/utils/motion.dart';
+
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,17 +24,23 @@ import '../tabs/home/android_home_tab.dart';
 import '../tabs/search/android_search_tab.dart';
 import '../tabs/library/android_library_tab.dart';
 import '../tabs/songs/android_songs_tab.dart';
+
 import 'package:looper_player/features/playback/presentation/providers/playback/playback_notifier.dart';
 import 'package:looper_player/core/providers/player_expand_provider.dart';
 import 'package:looper_player/core/services/storage/storage_access.dart';
+
 import 'premium_navbar.dart';
 import '../widgets/premium_section.dart';
+
 import 'package:looper_player/features/library/presentation/screens/smart_views.dart';
 import 'package:looper_player/features/library/presentation/screens/queue_view.dart';
 import 'package:looper_player/features/analyze/presentation/screens/looper_analyze_view.dart';
 import 'package:looper_player/ui/widgets/player/player_gradient/animated_player_gradient.dart';
+
 import 'blurred_background_art.dart';
+
 import 'package:looper_player/core/utils/l10n.dart';
+
 export 'blurred_background_art.dart';
 
 part 'android_main_screen.g.dart';
@@ -189,7 +198,9 @@ class _AndroidMainScreenState extends ConsumerState<AndroidMainScreen>
             final double opacity = isCurrent
                 ? _tabFadeInOpacity.transform(t)
                 : (isPrevious ? _tabFadeOutOpacity.transform(t) : 0.0);
-            final double scale = isCurrent ? _tabScaleIn.transform(t) : 1.0;
+            final double scale = isCurrent && !Motion.reducedOf(context)
+                ? _tabScaleIn.transform(t)
+                : 1.0;
 
             // Every tab keeps the exact same wrapper shape across frames
             // (only these bool/double params change) so Flutter updates
@@ -836,7 +847,7 @@ class _AndroidMainScreenState extends ConsumerState<AndroidMainScreen>
     return SlideTransition(
       position: Tween<Offset>(
         begin: Offset.zero,
-        end: const Offset(-0.06, 0),
+        end: Motion.reduced ? Offset.zero : const Offset(-0.06, 0),
       ).animate(covered),
       child: FadeTransition(
         opacity: Tween<double>(begin: 1, end: 0).animate(covered),
@@ -846,6 +857,17 @@ class _AndroidMainScreenState extends ConsumerState<AndroidMainScreen>
   }
 
   Route _createPremiumRoute(Widget page) {
+    // System animations off: a short plain crossfade, no slide.
+    if (Motion.reduced) {
+      return PageRouteBuilder(
+        opaque: true,
+        transitionDuration: const Duration(milliseconds: 120),
+        reverseTransitionDuration: const Duration(milliseconds: 120),
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
+      );
+    }
     return PageRouteBuilder(
       opaque: true,
       transitionDuration: const Duration(milliseconds: 320),

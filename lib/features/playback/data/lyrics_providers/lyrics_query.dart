@@ -55,6 +55,41 @@ class LyricsQuery {
     return variants.take(max).toList();
   }
 
+  /// Whether a catalogue hit ([title] by [artists]) is the song being
+  /// looked up: same cleaned title, and one of the wanted artist's names
+  /// among its credits. An untagged artist can't be checked, so the caller
+  /// has to rely on the duration then.
+  static bool sameSong({
+    required String wantTitle,
+    required String wantArtist,
+    required String title,
+    required Iterable<String> artists,
+  }) {
+    if (key(title) != key(wantTitle)) return false;
+    if (wantArtist.trim().isEmpty ||
+        wantArtist.trim().toLowerCase() == 'unknown artist') {
+      return true;
+    }
+    final credited = artists.map(key).where((a) => a.isNotEmpty).toList();
+    final all = credited.join();
+    return artistVariants(wantArtist, max: 6)
+        .map(key)
+        .any(
+          (want) =>
+              want.isNotEmpty &&
+              (all.contains(want) || credited.any(want.contains)),
+        );
+  }
+
+  /// Whether a hit lasting [seconds] is the same recording as a file
+  /// lasting [wantSeconds] - a different cut drifts out of sync. Unknown
+  /// lengths pass.
+  static bool sameLength(num? seconds, int wantSeconds, {int drift = 4}) =>
+      wantSeconds <= 0 ||
+      seconds == null ||
+      seconds <= 0 ||
+      (seconds - wantSeconds).abs() <= drift;
+
   /// Loose comparison key: lowercase letters and digits only (any script).
   static String key(String s) => cleanTitle(
     s,

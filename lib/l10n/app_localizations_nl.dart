@@ -2595,13 +2595,6 @@ class AppLocalizationsNl extends AppLocalizations {
       'Staat je muziek in een map met een andere naam of op een SD-kaart, voeg die dan direct toe.';
 
   @override
-  String get indexingYourLibrary => 'JE BIBLIOTHEEK WORDT GEÏNDEXEERD...';
-
-  @override
-  String get indexingYourLibraryDesc =>
-      'Titels, hoezen en songteksten van je nummers worden aangevuld.';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'STAP $step: $title';
   }
@@ -2931,11 +2924,31 @@ class AppLocalizationsNl extends AppLocalizations {
       'Geen per woord gesynchroniseerde songtekst gevonden voor dit nummer';
 
   @override
+  String get lyricsNotSynced => 'Niet gesynchroniseerd';
+
+  @override
+  String get findSyncedLyrics => 'Gesynchroniseerde songtekst zoeken';
+
+  @override
+  String get searchingSyncedLyrics => 'Gesynchroniseerde songtekst zoeken…';
+
+  @override
+  String get syncedLyricsLoaded => 'Gesynchroniseerde songtekst geladen';
+
+  @override
+  String get noSyncedLyricsFound =>
+      'Geen gesynchroniseerde songtekst gevonden voor dit nummer';
+
+  @override
+  String get tipFindSyncedDesc =>
+      'Heeft een songtekst geen timing, zoek dan een versie die het nummer volgt.';
+
+  @override
   String get lyricsTiming => 'Timing van songtekst';
 
   @override
   String get lyricsTimingDesc =>
-      'Positief toont de songtekst eerder, negatief later. Loopt de tekst voor op het nummer (vaak bij Bluetooth), verlaag de waarde dan.';
+      'Positief toont de songtekst eerder, negatief later. Loopt de tekst voor op het nummer (vaak bij Bluetooth), verlaag de waarde dan. Wordt alleen voor dit nummer opgeslagen.';
 
   @override
   String get lyricsTimingEarlier => 'Eerder';
@@ -3180,4 +3193,47 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => 'Volledig scherm sluiten';
+
+  @override
+  String get importM3uPlaylist => 'Afspeellijst importeren (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      'Maakt een afspeellijst van een .m3u- of .m3u8-bestand en koppelt de nummers aan je bibliotheek.';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '\"$name\" geïmporteerd: $found van $total nummers gevonden';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return '$playlists afspeellijsten geïmporteerd: $found van $total nummers gevonden';
+  }
+
+  @override
+  String get m3uImportNoSongs =>
+      'Geen van de nummers in deze afspeellijst is in je bibliotheek gevonden.';
+
+  @override
+  String get m3uImportFailed =>
+      'Afspeellijst importeren mislukt: het bestand kan niet worden gelezen of is geen M3U-afspeellijst.';
+
+  @override
+  String get mostFullyPlayed => 'Vaakst volledig beluisterd';
+
+  @override
+  String get lyricsServices => 'Songtekstdiensten';
+
+  @override
+  String get lyricsServicesDesc =>
+      'Sleep om de volgorde te bepalen waarin songteksten worden gezocht. Uitgeschakelde diensten worden overgeslagen.';
+
+  @override
+  String get creditWordSyncedDesc =>
+      'Woord voor woord gesynchroniseerde songteksten';
+
+  @override
+  String get creditMorpheDesc =>
+      'Referentie voor het opzoeken bij NetEase, KuGou, Musixmatch en Lyricify · GPL-3.0';
 }

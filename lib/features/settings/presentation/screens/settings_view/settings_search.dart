@@ -518,14 +518,14 @@ extension _SettingsSearch on _SettingsViewState {
           widget: const CheckForUpdatesTile(),
         ),
       SettingsSearchItem(
-        title: l10n.lyricsProvider,
-        subtitle: settings.lyricsProvider,
+        title: l10n.lyricsServices,
+        subtitle: lyricsServiceChain(settings),
         category: '${l10n.theme} · ${l10n.lyrics}',
         widget: const LyricsProviderTile(),
       ),
       SettingsSearchItem(
         title: l10n.lyricsSources,
-        subtitle: 'lrc.red · LyricsPlus · LRCLIB · MusicBrainz · am-lyrics',
+        subtitle: lyricsCredits(l10n).map((c) => c.name).join(' · '),
         category: l10n.aboutAndMaintainers,
         widget: LyricsCreditsSection(accentColor: Color(settings.accentColor)),
       ),

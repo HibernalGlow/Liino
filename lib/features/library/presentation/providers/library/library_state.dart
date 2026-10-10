@@ -9,6 +9,10 @@ enum SongSortStrategy {
   year,
   playCount,
   lastPlayed,
+
+  /// Most listened all the way through (see [songFullPlays]). Appended last:
+  /// the index is what settings store.
+  fullPlays,
 }
 
 /// True for a broad storage root such as "/storage/emulated/0" or a raw SD

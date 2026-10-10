@@ -199,13 +199,31 @@ void _showSortBottomSheet(
                                   state.sortStrategy ==
                                   SongSortStrategy.lastPlayed,
                               accentColor: accentColor,
-                              isLast: true,
+                              isLast: false,
                               onTap: () {
                                 AppHaptics.light();
                                 ref
                                     .read(libraryProvider.notifier)
                                     .setSortStrategy(
                                       SongSortStrategy.lastPlayed,
+                                    );
+                                Navigator.pop(context);
+                              },
+                            ),
+                            _SortOption(
+                              label: l10n.mostFullyPlayed,
+                              icon: LucideIcons.circleCheckBig,
+                              isSelected:
+                                  state.sortStrategy ==
+                                  SongSortStrategy.fullPlays,
+                              accentColor: accentColor,
+                              isLast: true,
+                              onTap: () {
+                                AppHaptics.light();
+                                ref
+                                    .read(libraryProvider.notifier)
+                                    .setSortStrategy(
+                                      SongSortStrategy.fullPlays,
                                     );
                                 Navigator.pop(context);
                               },

@@ -26,6 +26,8 @@ import 'package:looper_player/features/settings/presentation/widgets/tiles/audio
 import 'package:looper_player/features/settings/presentation/widgets/tiles/backup_logs_settings_tiles.dart';
 import 'package:looper_player/features/settings/presentation/widgets/tiles/dashboard_settings_tiles.dart';
 import 'package:looper_player/features/settings/presentation/widgets/tiles/theme/theme_settings_tiles.dart';
+import 'package:looper_player/features/playback/data/lyrics_fetcher.dart';
+import 'package:looper_player/features/playback/data/lyrics_providers/lyrics_provider_info.dart';
 import 'collapsible_settings_section.dart';
 part 'settings_rows.dart';
 part 'library_folders_list.dart';
@@ -657,7 +659,7 @@ class SettingsView extends ConsumerWidget {
                       textColor: Colors.redAccent,
                       subtitle: l10n.resetLibraryConfirm,
                       onTap: () {
-                        AppHaptics.heavy();
+                        AppHaptics.medium();
                         _showClearDialog(context, ref, l10n);
                       },
                       isLast: true,
@@ -677,6 +679,8 @@ class SettingsView extends ConsumerWidget {
                     ExportBackupTile(),
                     divider,
                     ImportBackupTile(),
+                    divider,
+                    ImportM3uPlaylistTile(),
                     divider,
                     ExportLogsTile(),
                     divider,
@@ -721,8 +725,11 @@ class SettingsView extends ConsumerWidget {
                       subtitle: l10n.lyricsProviderDesc,
                       onTap: () async {
                         final url = Uri.parse(
-                          AppLinks.lyricsProviderUrls[settings
-                                  .lyricsProvider] ??
+                          LyricsProviderInfo.of(
+                                LyricsFetcher.enabledProviders(
+                                  settings,
+                                ).firstOrNull,
+                              )?.url ??
                               AppLinks.lrcRedWeb,
                         );
                         if (await canLaunchUrl(url)) {

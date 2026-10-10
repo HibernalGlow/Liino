@@ -9,10 +9,15 @@ import 'package:path/path.dart' as p;
 /// Every online provider's answer is also kept on its own
 /// ([saveProvider]/[getProvider], under `by_provider/`), so switching
 /// providers in the lyrics menu - and back - reuses what was already
-/// downloaded instead of asking again.
+/// downloaded instead of asking again. A provider that has nothing for the
+/// song is remembered the same way ([saveProviderMiss]), so it isn't asked
+/// a second time either.
 class LyricsCache {
+  /// Tests: the folder used instead of the app's documents folder.
+  static Directory? debugDir;
+
   static Future<Directory> _getCacheDir() async {
-    final appDir = await getApplicationDocumentsDirectory();
+    final appDir = debugDir ?? await getApplicationDocumentsDirectory();
     final cacheDir = Directory(p.join(appDir.path, 'lyrics_cache'));
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
@@ -39,12 +44,49 @@ class LyricsCache {
   static Future<File> _providerFile(
     String artist,
     String title,
-    String provider,
-  ) async {
+    String provider, {
+    String extension = 'lrc',
+  }) async {
     final dir = Directory(p.join((await _getCacheDir()).path, 'by_provider'));
     if (!await dir.exists()) await dir.create(recursive: true);
     final name = provider.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
-    return File(p.join(dir.path, '${_generateKey(artist, title)}.$name.lrc'));
+    return File(
+      p.join(dir.path, '${_generateKey(artist, title)}.$name.$extension'),
+    );
+  }
+
+  /// Remembers that [provider] was asked and has no lyrics for this song.
+  static Future<void> saveProviderMiss(
+    String artist,
+    String title,
+    String provider,
+  ) async {
+    try {
+      final file = await _providerFile(
+        artist,
+        title,
+        provider,
+        extension: 'none',
+      );
+      await file.writeAsString('');
+    } catch (e) {}
+  }
+
+  static Future<bool> isProviderMiss(
+    String artist,
+    String title,
+    String provider,
+  ) async {
+    try {
+      final file = await _providerFile(
+        artist,
+        title,
+        provider,
+        extension: 'none',
+      );
+      return await file.exists();
+    } catch (e) {}
+    return false;
   }
 
   /// Keeps [provider]'s source-tagged answer for this song.

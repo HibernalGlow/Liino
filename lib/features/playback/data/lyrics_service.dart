@@ -2,8 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:looper_player/core/utils/logger_helper.dart';
 
+import 'lyrics_providers/amll_client.dart';
+import 'lyrics_providers/kugou_client.dart';
 import 'lyrics_providers/lrc_red_client.dart';
+import 'lyrics_providers/lyricify_client.dart';
+import 'lyrics_providers/lyrics_http.dart';
 import 'lyrics_providers/lyrics_plus_client.dart';
+import 'lyrics_providers/musixmatch_client.dart';
+import 'lyrics_providers/netease_client.dart';
 
 class LyricsResponse {
   final String? lyrics;
@@ -93,6 +99,7 @@ class LyricsService {
 
     if (_duckDuckGoCoolDownUntil != null &&
         DateTime.now().isBefore(_duckDuckGoCoolDownUntil!)) {
+      LyricsHttp.failed();
       return null;
     }
 
@@ -108,13 +115,14 @@ class LyricsService {
         _duckDuckGoCoolDownUntil = DateTime.now().add(
           const Duration(seconds: 60),
         );
+        LyricsHttp.failed();
         LoggerHelper.write(
           'LyricsService: DuckDuckGo rate limited (${response.statusCode}), pausing web searches for 60s',
         );
         return null;
       }
 
-      if (response.statusCode != 200) return null;
+      if (!LyricsHttp.ok(response.statusCode)) return null;
 
       final regex = RegExp(r'href="([^"]*' + RegExp.escape(site) + r'[^"]*)"');
       final matches = regex.allMatches(response.body);
@@ -139,6 +147,7 @@ class LyricsService {
       _duckDuckGoCoolDownUntil = DateTime.now().add(
         const Duration(seconds: 45),
       );
+      LyricsHttp.failed();
       LoggerHelper.write(
         'LyricsService: DuckDuckGo search unavailable for $site $query',
       );
@@ -157,29 +166,31 @@ class LyricsService {
       'LyricsService: Fetching lyrics using provider: $provider for $artistName - $trackName',
     );
 
+    // The API clients share one shape and hand back LRC (with Looper's
+    // word-timing lines when the source has word timing).
+    final client = switch (provider.toUpperCase()) {
+      'LRC.RED' => LrcRedClient.fetch,
+      'LYRICSPLUS' => LyricsPlusClient.fetch,
+      'AMLL' => AmllClient.fetch,
+      'NETEASE' => NetEaseClient.fetch,
+      'KUGOU' => KuGouClient.fetch,
+      'MUSIXMATCH' => MusixmatchClient.fetch,
+      'LYRICIFY' => LyricifyClient.fetch,
+      _ => null,
+    };
+    if (client != null) {
+      final lrc = await client(
+        title: trackName,
+        artist: artistName,
+        album: albumName,
+        durationSeconds: durationSeconds,
+      );
+      return lrc == null ? null : LyricsResponse(syncedLyrics: lrc);
+    }
+
     switch (provider.toUpperCase()) {
-      case 'LRC.RED':
-        return _wrapSynced(
-          await LrcRedClient.fetch(
-            title: trackName,
-            artist: artistName,
-            album: albumName,
-            durationSeconds: durationSeconds,
-          ),
-        );
-      case 'LYRICSPLUS':
-        return _wrapSynced(
-          await LyricsPlusClient.fetch(
-            title: trackName,
-            artist: artistName,
-            album: albumName,
-            durationSeconds: durationSeconds,
-          ),
-        );
       case 'GENIUS':
         return _fetchGeniusLyrics(trackName, artistName);
-      case 'MUSIXMATCH':
-        return _fetchMusixmatchLyrics(trackName, artistName);
       case 'AZLYRICS':
         return _fetchAZLyrics(trackName, artistName);
       case 'LYRICSMINT':
@@ -196,10 +207,6 @@ class LyricsService {
         );
     }
   }
-
-  /// lrc.red / LyricsPlus clients already hand back (enhanced) LRC.
-  LyricsResponse? _wrapSynced(String? lrc) =>
-      lrc == null ? null : LyricsResponse(syncedLyrics: lrc);
 
   // --- 1. LRCLIB ---
   Future<LyricsResponse?> _fetchLrcLibLyrics(
@@ -224,7 +231,7 @@ class LyricsService {
       ).replace(queryParameters: getParams);
       var response = await http.get(url).timeout(const Duration(seconds: 4));
 
-      if (response.statusCode == 200) {
+      if (LyricsHttp.ok(response.statusCode)) {
         return LyricsResponse.fromJson(jsonDecode(response.body));
       }
 
@@ -235,7 +242,7 @@ class LyricsService {
       ).replace(queryParameters: {'q': searchQuery});
       response = await http.get(url).timeout(const Duration(seconds: 4));
 
-      if (response.statusCode == 200) {
+      if (LyricsHttp.ok(response.statusCode)) {
         final List results = jsonDecode(response.body);
         if (results.isNotEmpty) {
           if (durationSeconds > 0) {
@@ -256,6 +263,7 @@ class LyricsService {
         }
       }
     } catch (_) {
+      LyricsHttp.failed();
       LoggerHelper.write(
         'LyricsService: LRCLIB request timed out or unavailable',
       );
@@ -276,7 +284,7 @@ class LyricsService {
       final response = await http
           .get(Uri.parse(pageUrl), headers: _browserHeaders)
           .timeout(const Duration(seconds: 4));
-      if (response.statusCode != 200) return null;
+      if (!LyricsHttp.ok(response.statusCode)) return null;
 
       final regex = RegExp(
         r'<div[^>]*data-lyrics-container="true"[^>]*>(.*?)</div>',
@@ -300,49 +308,13 @@ class LyricsService {
         return LyricsResponse(plainLyrics: _cleanHtml(matchOld.group(1)!));
       }
     } catch (_) {
+      LyricsHttp.failed();
       LoggerHelper.write('LyricsService: Genius lyrics fetch error');
     }
     return null;
   }
 
-  // --- 3. Musixmatch ---
-  Future<LyricsResponse?> _fetchMusixmatchLyrics(
-    String trackName,
-    String artistName,
-  ) async {
-    try {
-      final query = '$artistName $trackName';
-      final pageUrl = await _searchUrlOnDuckDuckGo('musixmatch.com', query);
-      if (pageUrl == null) return null;
-
-      final response = await http
-          .get(Uri.parse(pageUrl), headers: _browserHeaders)
-          .timeout(const Duration(seconds: 4));
-      if (response.statusCode != 200) return null;
-
-      final nextDataRegex = RegExp(
-        r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>',
-        dotAll: true,
-      );
-      final match = nextDataRegex.firstMatch(response.body);
-      if (match != null) {
-        final data = jsonDecode(match.group(1)!);
-        final trackInfo =
-            data['props']?['pageProps']?['data']?['trackInfo']?['data'];
-        if (trackInfo != null) {
-          final lyricsBody = trackInfo['lyrics']?['body'];
-          if (lyricsBody is String && lyricsBody.isNotEmpty) {
-            return LyricsResponse(plainLyrics: lyricsBody.trim());
-          }
-        }
-      }
-    } catch (_) {
-      LoggerHelper.write('LyricsService: Musixmatch lyrics fetch error');
-    }
-    return null;
-  }
-
-  // --- 4. AZLyrics ---
+  // --- 3. AZLyrics ---
   Future<LyricsResponse?> _fetchAZLyrics(
     String trackName,
     String artistName,
@@ -372,7 +344,7 @@ class LyricsService {
             .timeout(const Duration(seconds: 4));
       }
 
-      if (response.statusCode == 200) {
+      if (LyricsHttp.ok(response.statusCode)) {
         final html = response.body;
         final startTag =
             '<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->';
@@ -389,12 +361,13 @@ class LyricsService {
         }
       }
     } catch (_) {
+      LyricsHttp.failed();
       LoggerHelper.write('LyricsService: AZLyrics fetch error');
     }
     return null;
   }
 
-  // --- 5. LyricsMINT ---
+  // --- 4. LyricsMINT ---
   Future<LyricsResponse?> _fetchLyricsMintLyrics(
     String trackName,
     String artistName,
@@ -407,7 +380,7 @@ class LyricsService {
       final response = await http
           .get(Uri.parse(pageUrl), headers: _browserHeaders)
           .timeout(const Duration(seconds: 4));
-      if (response.statusCode == 200) {
+      if (LyricsHttp.ok(response.statusCode)) {
         final html = response.body;
         final lyricRegex = RegExp(
           r'<div[^>]*class="[^"]*text-base[^"]*lg:text-lg[^"]*"[^>]*>(.*?)</div>',
@@ -424,12 +397,13 @@ class LyricsService {
         }
       }
     } catch (_) {
+      LyricsHttp.failed();
       LoggerHelper.write('LyricsService: LyricsMINT fetch error');
     }
     return null;
   }
 
-  // --- 6. LyricFind ---
+  // --- 5. LyricFind ---
   Future<LyricsResponse?> _fetchLyricFindLyrics(
     String trackName,
     String artistName,
@@ -442,7 +416,7 @@ class LyricsService {
       final response = await http
           .get(Uri.parse(pageUrl), headers: _browserHeaders)
           .timeout(const Duration(seconds: 4));
-      if (response.statusCode != 200) return null;
+      if (!LyricsHttp.ok(response.statusCode)) return null;
 
       final html = response.body;
 
@@ -489,6 +463,7 @@ class LyricsService {
         }
       }
     } catch (_) {
+      LyricsHttp.failed();
       LoggerHelper.write('LyricsService: LyricFind fetch error');
     }
     return null;

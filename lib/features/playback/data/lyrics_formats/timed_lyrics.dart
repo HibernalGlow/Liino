@@ -159,6 +159,53 @@ class TimedLrcWriter {
   }
 }
 
+/// `Lyrics by: X`, `作词 : X` - a short label, a colon, a name.
+final RegExp _creditLine = RegExp(r'^[^:：]{1,24}[:：]\s*\S');
+
+/// [lines] without the credits the Chinese catalogues (NetEase, KuGou,
+/// Lyricify) time as if they were sung: `Title - Artist` and
+/// `Lyrics by: ...` lines before the first lyric, and credit lines after
+/// the last one.
+List<TimedLyricLine> withoutCreditLines(
+  List<TimedLyricLine> lines, {
+  String title = '',
+}) {
+  String textOf(TimedLyricLine l) =>
+      l.isWordSynced ? l.words.map((w) => w.text).join().trim() : l.text.trim();
+  String squash(String s) => s.toLowerCase().replaceAll(
+    RegExp(r'[^\p{L}\p{M}\p{N}]', unicode: true),
+    '',
+  );
+  final titleKey = squash(title);
+  bool isCredit(TimedLyricLine l) => _creditLine.hasMatch(textOf(l));
+  bool isHeading(TimedLyricLine l) {
+    final text = textOf(l);
+    return titleKey.isNotEmpty &&
+        text.contains(' - ') &&
+        squash(text).startsWith(titleKey);
+  }
+
+  var start = 0;
+  while (start < lines.length &&
+      (isCredit(lines[start]) || isHeading(lines[start]))) {
+    start++;
+  }
+  var end = lines.length;
+  while (end > start && isCredit(lines[end - 1])) {
+    end--;
+  }
+  // All "credits": the pattern misfired on real lyrics - keep everything.
+  return start >= end ? lines : lines.sublist(start, end);
+}
+
+/// Whether [lines] can belong to a recording lasting [durationSeconds]:
+/// lyrics that keep going well past the end are another version's. Used
+/// for sources whose search doesn't give a length to compare.
+bool fitsDuration(List<TimedLyricLine> lines, int durationSeconds) =>
+    durationSeconds <= 0 ||
+    lines.isEmpty ||
+    lines.last.startMs <= (durationSeconds + 10) * 1000;
+
 /// Assigns duet sides from per-line singer ids: the first distinct solo
 /// singer sings on the main side, the next one on the opposite side,
 /// alternating for any further singers. Group/ensemble lines stay on the

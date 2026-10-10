@@ -2563,13 +2563,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'If your music lives in a folder with a different name, or on an SD card, add it directly.';
 
   @override
-  String get indexingYourLibrary => 'INDEXING YOUR LIBRARY...';
-
-  @override
-  String get indexingYourLibraryDesc =>
-      'Filling in titles, artwork and lyrics for your songs.';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'STEP $step: $title';
   }
@@ -2895,11 +2888,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'No word-synced lyrics found for this song';
 
   @override
+  String get lyricsNotSynced => 'Not synced';
+
+  @override
+  String get findSyncedLyrics => 'Find synced lyrics';
+
+  @override
+  String get searchingSyncedLyrics => 'Searching for synced lyrics…';
+
+  @override
+  String get syncedLyricsLoaded => 'Synced lyrics loaded';
+
+  @override
+  String get noSyncedLyricsFound => 'No synced lyrics found for this song';
+
+  @override
+  String get tipFindSyncedDesc =>
+      'When lyrics have no timing, look for a version that follows the song.';
+
+  @override
   String get lyricsTiming => 'Lyrics timing';
 
   @override
   String get lyricsTimingDesc =>
-      'Positive shows lyrics earlier, negative later. If lyrics run ahead of the song (common with Bluetooth), lower it.';
+      'Positive shows lyrics earlier, negative later. If lyrics run ahead of the song (common with Bluetooth), lower it. Saved for this song only.';
 
   @override
   String get lyricsTimingEarlier => 'Earlier';
@@ -3141,4 +3153,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => 'Exit full screen';
+
+  @override
+  String get importM3uPlaylist => 'Import Playlist (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      'Creates a playlist from an .m3u or .m3u8 file, matching its tracks to the songs in your library.';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return 'Imported \"$name\": $found of $total songs found';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return 'Imported $playlists playlists: $found of $total songs found';
+  }
+
+  @override
+  String get m3uImportNoSongs =>
+      'None of the songs in this playlist were found in your library.';
+
+  @override
+  String get m3uImportFailed =>
+      'Failed to import playlist: The file could not be read or is not an M3U playlist.';
+
+  @override
+  String get mostFullyPlayed => 'Most Fully Played';
+
+  @override
+  String get lyricsServices => 'Lyrics services';
+
+  @override
+  String get lyricsServicesDesc =>
+      'Drag to set the order lyrics are looked up in. Services you switch off are skipped.';
+
+  @override
+  String get creditWordSyncedDesc => 'Word-synced lyrics';
+
+  @override
+  String get creditMorpheDesc =>
+      'Reference for the NetEase, KuGou, Musixmatch and Lyricify lookups · GPL-3.0';
 }

@@ -170,9 +170,11 @@ cd universal
 Online lyrics come from these services and projects. Lyrics belong to their artists and rights holders and are fetched for personal display only.
 * **[lrc.red](https://lrc.red)**: word-synced lyrics (the default provider)
 * **[LyricsPlus](https://github.com/ibratabian17/lyricsplus)**: word-synced lyrics. It's an open-source server by ibratabian17 (Apache-2.0), hosted by binimum.
+* **[AMLL](https://amll.dev)**, **[NetEase](https://music.163.com)**, **[KuGou](https://www.kugou.com)**, **[Musixmatch](https://www.musixmatch.com)** and **[Lyricify](https://lyricify.app)**: word-synced lyrics, asked after the two above. You can reorder the services or switch any of them off in Settings.
 * **[LRCLIB](https://lrclib.net)**: line-synced lyrics from a free, open database
 * **[MusicBrainz](https://musicbrainz.org)**: finds each song's ISRC so lrc.red can match it (open music database, CC0 data)
 * **[am-lyrics](https://github.com/binimum/am-lyrics)** by binimum (MPL-2.0): inspired Looper's word-synced lyrics support. No code was copied; Looper's Dart implementation was written from the lyrics formats.
+* **[Morphe Patches](https://github.com/MorpheApp/morphe-patches)** (GPL-3.0): reference for the NetEase, KuGou, Musixmatch and Lyricify lookups and their lyrics formats.
 
 ---
 

@@ -1042,8 +1042,6 @@
   "qualityAudio": "Audio",
   "addCustomFolder": "Add a Custom Folder",
   "addCustomFolderDesc": "If your music lives in a folder with a different name, or on an SD card, add it directly.",
-  "indexingYourLibrary": "INDEXING YOUR LIBRARY...",
-  "indexingYourLibraryDesc": "Filling in titles, artwork and lyrics for your songs.",
   "welcomeStep": "STEP {step}: {title}",
   "@welcomeStep": {
     "placeholders": {
@@ -1205,8 +1203,14 @@
   "searchingWordSyncedLyrics": "Searching lrc.red and LyricsPlus…",
   "wordSyncedLyricsLoaded": "Word-synced lyrics loaded",
   "noWordSyncedLyricsFound": "No word-synced lyrics found for this song",
+  "lyricsNotSynced": "Not synced",
+  "findSyncedLyrics": "Find synced lyrics",
+  "searchingSyncedLyrics": "Searching for synced lyrics…",
+  "syncedLyricsLoaded": "Synced lyrics loaded",
+  "noSyncedLyricsFound": "No synced lyrics found for this song",
+  "tipFindSyncedDesc": "When lyrics have no timing, look for a version that follows the song.",
   "lyricsTiming": "Lyrics timing",
-  "lyricsTimingDesc": "Positive shows lyrics earlier, negative later. If lyrics run ahead of the song (common with Bluetooth), lower it.",
+  "lyricsTimingDesc": "Positive shows lyrics earlier, negative later. If lyrics run ahead of the song (common with Bluetooth), lower it. Saved for this song only.",
   "lyricsTimingEarlier": "Earlier",
   "lyricsTimingLater": "Later",
   "lyricsTimingReset": "Reset",
@@ -1317,5 +1321,42 @@
   "lyricsSizeLarger": "Larger lyrics",
   "lyricsOptions": "Lyrics options",
   "lyricsFullscreen": "Full screen lyrics",
-  "lyricsExitFullscreen": "Exit full screen"
+  "lyricsExitFullscreen": "Exit full screen",
+  "importM3uPlaylist": "Import Playlist (M3U)",
+  "importM3uPlaylistDesc": "Creates a playlist from an .m3u or .m3u8 file, matching its tracks to the songs in your library.",
+  "m3uImportedSummary": "Imported \"{name}\": {found} of {total} songs found",
+  "@m3uImportedSummary": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "m3uImportedMany": "Imported {playlists} playlists: {found} of {total} songs found",
+  "@m3uImportedMany": {
+    "placeholders": {
+      "playlists": {
+        "type": "int"
+      },
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "m3uImportNoSongs": "None of the songs in this playlist were found in your library.",
+  "m3uImportFailed": "Failed to import playlist: The file could not be read or is not an M3U playlist.",
+  "mostFullyPlayed": "Most Fully Played",
+  "lyricsServices": "Lyrics services",
+  "lyricsServicesDesc": "Drag to set the order lyrics are looked up in. Services you switch off are skipped.",
+  "creditWordSyncedDesc": "Word-synced lyrics",
+  "creditMorpheDesc": "Reference for the NetEase, KuGou, Musixmatch and Lyricify lookups · GPL-3.0"
 }

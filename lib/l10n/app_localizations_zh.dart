@@ -2440,12 +2440,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addCustomFolderDesc => '如果你的音乐位于其他名称的文件夹或 SD 卡中，请直接添加。';
 
   @override
-  String get indexingYourLibrary => '正在索引你的媒体库...';
-
-  @override
-  String get indexingYourLibraryDesc => '正在为你的歌曲补全标题、封面和歌词。';
-
-  @override
   String welcomeStep(String step, String title) {
     return '第 $step 步：$title';
   }
@@ -2751,10 +2745,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noWordSyncedLyricsFound => '未找到这首歌的逐词同步歌词';
 
   @override
+  String get lyricsNotSynced => '未同步';
+
+  @override
+  String get findSyncedLyrics => '查找同步歌词';
+
+  @override
+  String get searchingSyncedLyrics => '正在查找同步歌词…';
+
+  @override
+  String get syncedLyricsLoaded => '已加载同步歌词';
+
+  @override
+  String get noSyncedLyricsFound => '未找到这首歌的同步歌词';
+
+  @override
+  String get tipFindSyncedDesc => '歌词没有时间轴时，查找能跟随歌曲的版本。';
+
+  @override
   String get lyricsTiming => '歌词时间';
 
   @override
-  String get lyricsTimingDesc => '正值让歌词提前显示，负值让歌词延后。如果歌词比歌曲快（使用蓝牙时常见），请调低数值。';
+  String get lyricsTimingDesc =>
+      '正值让歌词提前显示，负值让歌词延后。如果歌词比歌曲快（使用蓝牙时常见），请调低数值。仅为这首歌保存。';
 
   @override
   String get lyricsTimingEarlier => '提前';
@@ -2983,4 +2996,43 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => '退出全屏';
+
+  @override
+  String get importM3uPlaylist => '导入播放列表 (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      '从 .m3u 或 .m3u8 文件创建播放列表，并将其中的曲目与您音乐库中的歌曲匹配。';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '已导入“$name”：共 $total 首，找到 $found 首';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return '已导入 $playlists 个播放列表：共 $total 首，找到 $found 首';
+  }
+
+  @override
+  String get m3uImportNoSongs => '音乐库中未找到此播放列表中的任何歌曲。';
+
+  @override
+  String get m3uImportFailed => '导入播放列表失败：无法读取文件，或该文件不是 M3U 播放列表。';
+
+  @override
+  String get mostFullyPlayed => '完整播放最多';
+
+  @override
+  String get lyricsServices => '歌词服务';
+
+  @override
+  String get lyricsServicesDesc => '拖动以设置查找歌词的顺序。已关闭的服务会被跳过。';
+
+  @override
+  String get creditWordSyncedDesc => '逐字同步歌词';
+
+  @override
+  String get creditMorpheDesc =>
+      'NetEase、KuGou、Musixmatch 和 Lyricify 查询的参考实现 · GPL-3.0';
 }

@@ -60,7 +60,10 @@ class Equalizer extends _$Equalizer {
   void onSongChanged(Song? song) {
     _flushPendingSaveSync();
     final settings = ref.read(settingsProvider);
-    final isGlobal = settings.equalizerGlobalMode;
+    // A song with its own profile always plays with it, in either mode.
+    final hasOwnProfile =
+        song != null && song.hasCustomEqualizer && song.equalizerGains != null;
+    final isGlobal = settings.equalizerGlobalMode && !hasOwnProfile;
 
     if (isGlobal) {
       state = state.copyWith(
@@ -95,6 +98,12 @@ class Equalizer extends _$Equalizer {
       _pendingSaveSong = song;
     }
   }
+
+  /// Whether edits go to the global profile: global mode, unless the current
+  /// song is playing with its own profile (then they stay with the song).
+  bool get _editsGlobal =>
+      ref.read(settingsProvider).equalizerGlobalMode &&
+      !state.currentSongHasCustom;
 
   List<double> _getDefaultGains() {
     final list = List<double>.filled(48, 0.0);
@@ -141,10 +150,7 @@ class Equalizer extends _$Equalizer {
     Map<int, double> bandValues, {
     bool applyInstant = false,
   }) async {
-    final newSongGains = List<double>.from(state.currentSongGains);
-
-    final settings = ref.read(settingsProvider);
-    final isGlobal = settings.equalizerGlobalMode;
+    final isGlobal = _editsGlobal;
 
     final newGains = List<double>.from(state.currentSongGains);
     bandValues.forEach((bandIndex, val) {
@@ -349,8 +355,7 @@ class Equalizer extends _$Equalizer {
 
     applyShelving(newSongGains);
 
-    final settings = ref.read(settingsProvider);
-    final isGlobal = settings.equalizerGlobalMode;
+    final isGlobal = _editsGlobal;
 
     if (isGlobal) {
       final newGlobalGains = List<double>.from(newSongGains);
@@ -391,8 +396,7 @@ class Equalizer extends _$Equalizer {
   }) async {
     final double clampedGain = clampEqGain(bandIndex, gain);
 
-    final settings = ref.read(settingsProvider);
-    final isGlobal = settings.equalizerGlobalMode;
+    final isGlobal = _editsGlobal;
 
     // Update active gains in memory immediately
     final newGains = List<double>.from(state.currentSongGains);
@@ -531,8 +535,13 @@ class Equalizer extends _$Equalizer {
       });
     }
 
+    // Without its own profile the song is back on the global one in global
+    // mode, flat in song-specific mode.
+    final settings = ref.read(settingsProvider);
     state = state.copyWith(
-      currentSongGains: _getDefaultGains(),
+      currentSongGains: settings.equalizerGlobalMode
+          ? _ensureLength(settings.globalEqualizerGains, 48)
+          : _getDefaultGains(),
       currentSongHasCustom: false,
     );
 

@@ -2605,13 +2605,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Если ваша музыка лежит в папке с другим названием или на SD-карте, добавьте её напрямую.';
 
   @override
-  String get indexingYourLibrary => 'ИНДЕКСАЦИЯ БИБЛИОТЕКИ...';
-
-  @override
-  String get indexingYourLibraryDesc =>
-      'Заполняем названия, обложки и тексты ваших песен.';
-
-  @override
   String welcomeStep(String step, String title) {
     return 'ШАГ $step: $title';
   }
@@ -2946,11 +2939,30 @@ class AppLocalizationsRu extends AppLocalizations {
       'Текст с синхронизацией по словам для этой песни не найден';
 
   @override
+  String get lyricsNotSynced => 'Без синхронизации';
+
+  @override
+  String get findSyncedLyrics => 'Найти синхронный текст';
+
+  @override
+  String get searchingSyncedLyrics => 'Поиск синхронного текста…';
+
+  @override
+  String get syncedLyricsLoaded => 'Синхронный текст загружен';
+
+  @override
+  String get noSyncedLyricsFound => 'Синхронный текст для этой песни не найден';
+
+  @override
+  String get tipFindSyncedDesc =>
+      'Если у текста нет таймингов, ищет версию, которая идёт за песней.';
+
+  @override
   String get lyricsTiming => 'Тайминг текста';
 
   @override
   String get lyricsTimingDesc =>
-      'Положительное значение показывает текст раньше, отрицательное — позже. Если текст опережает песню (часто при Bluetooth), уменьшите значение.';
+      'Положительное значение показывает текст раньше, отрицательное — позже. Если текст опережает песню (часто при Bluetooth), уменьшите значение. Сохраняется только для этой песни.';
 
   @override
   String get lyricsTimingEarlier => 'Раньше';
@@ -3196,4 +3208,46 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => 'Выйти из полноэкранного режима';
+
+  @override
+  String get importM3uPlaylist => 'Импорт плейлиста (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      'Создаёт плейлист из файла .m3u или .m3u8, сопоставляя его треки с песнями в вашей библиотеке.';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '«$name» импортирован: найдено $found из $total песен';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return 'Импортировано плейлистов: $playlists; найдено $found из $total песен';
+  }
+
+  @override
+  String get m3uImportNoSongs =>
+      'Ни одна песня из этого плейлиста не найдена в вашей библиотеке.';
+
+  @override
+  String get m3uImportFailed =>
+      'Не удалось импортировать плейлист: файл не читается или не является плейлистом M3U.';
+
+  @override
+  String get mostFullyPlayed => 'Чаще всего дослушанные';
+
+  @override
+  String get lyricsServices => 'Сервисы текстов';
+
+  @override
+  String get lyricsServicesDesc =>
+      'Перетащите, чтобы задать порядок поиска текстов. Отключённые сервисы пропускаются.';
+
+  @override
+  String get creditWordSyncedDesc => 'Тексты с синхронизацией по словам';
+
+  @override
+  String get creditMorpheDesc =>
+      'Образец для запросов к NetEase, KuGou, Musixmatch и Lyricify · GPL-3.0';
 }

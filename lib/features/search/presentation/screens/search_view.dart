@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,6 +22,7 @@ part 'search_view.g.dart';
 part '../widgets/song_result_card.dart';
 part '../widgets/artist_result_card.dart';
 part '../widgets/album_result_card.dart';
+part '../widgets/collection_result_chip.dart';
 
 @Riverpod(keepAlive: true)
 class SearchQuery extends _$SearchQuery {
@@ -76,12 +78,23 @@ class SearchResults {
   final List<Song> songs;
   final List<Album> albums;
   final List<Artist> artists;
+  final List<Playlist> playlists;
+  final List<String> genres;
 
   SearchResults({
     required this.songs,
     required this.albums,
     required this.artists,
+    this.playlists = const [],
+    this.genres = const [],
   });
+
+  bool get isEmpty =>
+      songs.isEmpty &&
+      albums.isEmpty &&
+      artists.isEmpty &&
+      playlists.isEmpty &&
+      genres.isEmpty;
 }
 
 /// Ranks how well [song] matches [lowerQuery] (already lower-cased) for
@@ -135,6 +148,23 @@ Stream<SearchResults> searchResults(Ref ref) {
             .filter()
             .nameContains(query, caseSensitive: false)
             .findAll();
+        final playlists = await DbService.isar.playlists
+            .filter()
+            .nameContains(query, caseSensitive: false)
+            .sortByName()
+            .findAll();
+        // Genres have no table of their own; they are whatever distinct
+        // values the songs carry.
+        final genres =
+            (await DbService.isar.songs
+                    .filter()
+                    .genreContains(query, caseSensitive: false)
+                    .distinctByGenre(caseSensitive: false)
+                    .genreProperty()
+                    .findAll())
+                .whereType<String>()
+                .toList()
+              ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
         // Sort songs: top match songs name > lyrics match > others
         final lowerQuery = query.toLowerCase();
@@ -155,6 +185,8 @@ Stream<SearchResults> searchResults(Ref ref) {
           songs: sortedSongs,
           albums: albums,
           artists: artists,
+          playlists: playlists,
+          genres: genres,
         );
       });
 }
@@ -250,9 +282,7 @@ class SearchView extends ConsumerWidget {
     BuildContext context,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    if (results.songs.isEmpty &&
-        results.albums.isEmpty &&
-        results.artists.isEmpty) {
+    if (results.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -268,12 +298,15 @@ class SearchView extends ConsumerWidget {
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            child: _buildTopResult(results, ref, context),
-          ),
-        ),
+        if (results.songs.isNotEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              child: _buildTopResult(results, ref, context),
+            ),
+          )
+        else
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
         if (results.artists.isNotEmpty)
           SliverToBoxAdapter(
             child: Column(
@@ -331,6 +364,26 @@ class SearchView extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        if (results.playlists.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _ChipResultSection(
+              title: l10n.playlists,
+              children: [
+                for (final playlist in results.playlists)
+                  _PlaylistResultChip(playlist: playlist),
+              ],
+            ),
+          ),
+        if (results.genres.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _ChipResultSection(
+              title: l10n.genres,
+              children: [
+                for (final genre in results.genres)
+                  _GenreResultChip(genre: genre),
               ],
             ),
           ),

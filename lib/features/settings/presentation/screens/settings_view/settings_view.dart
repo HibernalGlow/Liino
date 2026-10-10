@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:looper_player/core/utils/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:looper_player/core/services/update/apk_installer.dart';
@@ -25,6 +26,7 @@ import '../../widgets/tiles/playback_settings_tiles.dart';
 import '../../widgets/tiles/audio_playback_settings_tiles.dart';
 import '../../widgets/tiles/library_settings_tiles.dart';
 import '../../widgets/tiles/about_settings_tiles.dart';
+import '../../widgets/lyrics_services_sheet.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
 export '../settings_category_screen.dart';
 

@@ -3,12 +3,20 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:metadata_god/metadata_god.dart';
 
+import 'lyrics_formats/id3_sylt_reader.dart';
+
 class MetadataService {
   static const MethodChannel _broadcastChannel = MethodChannel(
     'com.looper.player/broadcast',
   );
 
   static Future<String?> getEmbeddedLyrics(String path) async {
+    // Synced lyrics (ID3 SYLT) first: the tag readers below only return the
+    // unsynced USLT copy stored next to them.
+    if (path.toLowerCase().endsWith('.mp3')) {
+      final synced = await Id3SyltReader.readFile(path);
+      if (synced != null && synced.isNotEmpty) return synced;
+    }
     if (Platform.isAndroid) {
       return await _getLyricsAndroid(path);
     }

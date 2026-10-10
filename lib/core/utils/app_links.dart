@@ -49,20 +49,27 @@ class AppLinks {
   static const String azlyricsWeb = 'https://www.azlyrics.com';
   static const String lyricsmintWeb = 'https://www.lyricsmint.com';
   static const String lyricfindWeb = 'https://www.lyricfind.com';
+  static const String amllWeb = 'https://amll.dev';
+  static const String neteaseWeb = 'https://music.163.com';
+  static const String kugouWeb = 'https://www.kugou.com';
+  static const String lyricifyWeb = 'https://lyricify.app';
+
+  // Lyrics API endpoints (the ones above are the sites credited in About).
+  static const String amllApiBase = 'https://api.amll.dev/v1/lyrics';
+  static const String neteaseApiBase = 'https://music.163.com/api';
+  static const String kugouSongSearchUrl =
+      'https://mobiles.kugou.com/api/v3/search/song';
+  static const String kugouLyricsBase = 'https://lyrics.kugou.com';
+  static const String musixmatchApiBase = 'https://apic.musixmatch.com/ws/1.1';
+  static const String lyricifyApiUrl =
+      'https://api.lyricify.app/lyrics/get/mobile/new';
+  static const String creditsFmResolveUrl =
+      'https://api.credits.fm/v1/resolve/track';
 
   // Credits: projects our word-synced lyrics build on (see About).
   static const String lyricsPlusSource =
       'https://github.com/ibratabian17/lyricsplus';
   static const String amLyricsSource = 'https://github.com/binimum/am-lyrics';
-
-  static const Map<String, String> lyricsProviderUrls = {
-    'lrc.red': lrcRedWeb,
-    'LyricsPlus': lyricsPlusWeb,
-    'LRCLIB': lrclibWeb,
-    'Genius': geniusWeb,
-    'Musixmatch': musixmatchWeb,
-    'AZLyrics': azlyricsWeb,
-    'LyricsMINT': lyricsmintWeb,
-    'LyricFind': lyricfindWeb,
-  };
+  static const String morphePatchesSource =
+      'https://github.com/MorpheApp/morphe-patches';
 }

@@ -32,6 +32,7 @@ class MainActivity : FlutterActivity() {
     private val AUDIO_FOCUS_CHANNEL = "com.looper.player/audio_focus"
     private val AUDIO_INFO_CHANNEL = "com.looper.player/audio_info"
     private val SYSTEM_UI_CHANNEL = "com.looper.player/system_ui"
+    private val HAPTICS_CHANNEL = "com.looper.player/haptics"
     private val SAF_PICK_FOLDER_REQUEST_CODE = 9273
     private val MEDIA_WRITE_REQUEST_CODE = 9274
     private val MEDIA_BATCH_DELETE_REQUEST_CODE = 9275
@@ -439,6 +440,20 @@ class MainActivity : FlutterActivity() {
                 navBarHidden = call.argument<Boolean>("hidden") ?: false
                 applyNavigationBarVisibility()
                 result.success(null)
+            } else {
+                result.notImplemented()
+            }
+        }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, HAPTICS_CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "play") {
+                try {
+                    val pulses = call.argument<List<List<Int>>>("pulses") ?: emptyList()
+                    TouchHaptics.play(applicationContext, window?.decorView, pulses)
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("HAPTICS_ERROR", e.message, null)
+                }
             } else {
                 result.notImplemented()
             }

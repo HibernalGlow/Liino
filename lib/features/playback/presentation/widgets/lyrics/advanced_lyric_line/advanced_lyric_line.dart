@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:looper_player/core/utils/motion.dart';
 import 'package:looper_player/core/theme/app_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/core/utils/artwork_colors.dart';
@@ -61,9 +62,23 @@ class AdvancedLyricLine extends ConsumerWidget {
   final LyricLine line;
   final LyricsSyncMode mode;
   final bool isActive;
-  final int relativeIndex;
   final VoidCallback onTap;
   final double fontScale;
+
+  /// How many lines away from the current one this line is. Lines dim
+  /// step by step with it, so the lyrics fade into the dark above and
+  /// below the line being sung.
+  final int distance;
+
+  /// What an inactive line's text opacity is [distance] lines from the
+  /// current one: the old uniform 0.35 next to it, down to a floor that
+  /// still reads.
+  static double inactiveOpacity(int distance) =>
+      (0.35 - (distance - 1).clamp(0, 5) * 0.05).clamp(0.12, 0.35);
+
+  /// False for lyrics without timestamps: every line reads as plain text,
+  /// none of them current, sung or tappable to seek.
+  final bool synced;
 
   /// Whether this line is part of the current share-card selection, and
   /// whether a selection is in progress at all (used to dim non-selected
@@ -77,12 +92,13 @@ class AdvancedLyricLine extends ConsumerWidget {
     required this.line,
     required this.mode,
     required this.isActive,
-    required this.relativeIndex,
     required this.onTap,
     required this.onLongPress,
     this.isSelected = false,
     this.selectionActive = false,
     this.fontScale = 1.0,
+    this.synced = true,
+    this.distance = 1,
   });
 
   /// Word/char styles only apply to lines with real word timing; anything
@@ -111,12 +127,9 @@ class AdvancedLyricLine extends ConsumerWidget {
         ? ref.watch(playbackProvider.select((s) => s.isPlaying))
         : false;
 
-    final isPast = isActive
+    final isPast = isActive || !synced
         ? false
         : (ref.read(playbackProvider).position > line.endTime);
-
-    // Calculate absolute distance for opacity and duration
-    final absIndex = relativeIndex.abs();
 
     // Calculate dynamic opacity based on distance from active line for a smoother transition
     double lineOpacity = 1.0;
@@ -126,9 +139,10 @@ class AdvancedLyricLine extends ConsumerWidget {
     } else if (selectionActive) {
       lineOpacity =
           0.18; // dim everything else while the user is picking lines to share
+    } else if (!synced) {
+      lineOpacity = 0.8; // text to read: no current line to stand out from
     } else if (!isActive) {
-      lineOpacity =
-          0.35; // ponytail: make inactive lyrics lines all have uniform opacity
+      lineOpacity = inactiveOpacity(distance);
     }
 
     final settings = ref.watch(settingsProvider);
@@ -174,15 +188,7 @@ class AdvancedLyricLine extends ConsumerWidget {
       color: isActive
           ? activeColor
           : Colors.white.withValues(alpha: lineOpacity),
-      shadows: isActive && useDynamicColor
-          ? [
-              Shadow(
-                color: activeColor.withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ]
-          : null,
+      shadows: isActive && useDynamicColor ? [_glow(activeColor, 1)] : null,
     );
 
     // Unified animation duration and easeInOutCubic curve for a buttery-smooth transition
@@ -204,53 +210,52 @@ class AdvancedLyricLine extends ConsumerWidget {
       isPlaying,
     );
 
-    // Optimization: If the line is far from the active line (distance > 1),
-    // skip expensive animation/mouse widgets and render a static layout.
-    // This reduces widget tree depth by 75% and resolves slow frames.
-    if (absIndex > 2) {
-      return GestureDetector(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Padding(
-          padding: EdgeInsets.only(top: 8 * fontScale, bottom: 8 * fontScale),
-          child: _selectionHighlight(
-            child: DefaultTextStyle(
-              style: baseStyle,
-              textAlign: textAlign,
-              softWrap: true,
-              child: childWidget,
-            ),
-          ),
-        ),
-      );
-    }
-
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: synced ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(
         onTap: onTap,
         onLongPress: onLongPress,
-        child: AnimatedPadding(
-          duration: animDuration,
-          curve: curve,
-          padding: EdgeInsets.only(
-            top: (isActive ? 12 : 8) * fontScale,
-            bottom: (isActive ? 16 : 8) * fontScale,
-          ),
+        // The same height whether active or not: the list's follow motion
+        // measures where a line rests, so a line must not resize under it.
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 8 * fontScale),
           child: _selectionHighlight(
             child: AnimatedDefaultTextStyle(
               duration: animDuration,
               curve: curve,
-              style: baseStyle,
+              // The glow is faded below, not here: a text style animating
+              // to "no shadow" only shrinks the shadow's blur and keeps
+              // its colour, so a line that stopped being current held a
+              // sharp accent copy of itself behind the fading text - and
+              // dropped it in one frame when the animation ended.
+              style: baseStyle.copyWith(shadows: const []),
               softWrap: true,
               textAlign: textAlign,
-              child: childWidget,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(end: isActive && useDynamicColor ? 1.0 : 0.0),
+                duration: animDuration,
+                curve: curve,
+                child: childWidget,
+                builder: (context, glow, child) => glow <= 0
+                    ? child!
+                    : DefaultTextStyle.merge(
+                        style: TextStyle(shadows: [_glow(activeColor, glow)]),
+                        child: child!,
+                      ),
+              ),
             ),
           ),
         ),
       ),
     );
   }
+
+  /// The soft glow under a colored active line, at [strength] 0..1.
+  static Shadow _glow(Color color, double strength) => Shadow(
+    color: color.withValues(alpha: 0.3 * strength),
+    blurRadius: 20,
+    offset: const Offset(0, 4),
+  );
 
   /// Wraps [child] in a tinted, rounded background when this line is part
   /// of the active share-card selection.
@@ -385,12 +390,13 @@ class AdvancedLyricLine extends ConsumerWidget {
               style: baseStyle,
             ),
           )
+        // No style of its own: it wears the animated one above, so the
+        // line eases into its active colour and glow the way it eases out.
         : Text(
             displayText,
             textAlign: textAlign,
             softWrap: true,
             overflow: TextOverflow.visible,
-            style: baseStyle,
           );
   }
 

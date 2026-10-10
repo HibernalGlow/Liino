@@ -45,6 +45,7 @@ class _GestureArtworkWithFeedbackState
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   late AnimationController _snapController;
+  Animation<double>? _snapAnimation;
   bool _isNext = true;
   double _dragOffset = 0.0;
   bool _skipSlideTransition = false;
@@ -75,6 +76,26 @@ class _GestureArtworkWithFeedbackState
       vsync: this,
       duration: const Duration(milliseconds: 320),
     );
+    _snapController.addListener(() {
+      final animation = _snapAnimation;
+      if (animation == null) return;
+      setState(() {
+        _dragOffset = animation.value;
+      });
+    });
+  }
+
+  /// Slides the artwork from where the finger left it to [end]: back to rest
+  /// (0), or off to the side when the swipe skips. One plain ease-out for
+  /// both, so letting go never overshoots or bounces.
+  TickerFuture _slideTo(double end) {
+    _snapAnimation = _snapController.drive(
+      Tween<double>(
+        begin: _dragOffset,
+        end: end,
+      ).chain(CurveTween(curve: Curves.easeOutCubic)),
+    );
+    return _snapController.forward(from: 0.0);
   }
 
   @override
@@ -325,39 +346,14 @@ class _GestureArtworkWithFeedbackState
                 details.primaryVelocity! < -300)) {
           // Swipe Left -> Skip Next
           if (nextSong == null) {
-            final start = _dragOffset;
-            final animation = Tween<double>(begin: start, end: 0.0).animate(
-              CurvedAnimation(
-                parent: _snapController,
-                curve: Curves.elasticOut,
-              ),
-            );
-            animation.addListener(() {
-              setState(() {
-                _dragOffset = animation.value;
-              });
-            });
-            _snapController.forward(from: 0.0);
+            _slideTo(0.0);
           } else {
             setState(() {
               _isNext = true;
               _isSwipeTriggered = true;
             });
             AppHaptics.medium();
-            final start = _dragOffset;
-            final end = -slideExtent;
-            final animation = Tween<double>(begin: start, end: end).animate(
-              CurvedAnimation(
-                parent: _snapController,
-                curve: Curves.easeOutCubic,
-              ),
-            );
-            animation.addListener(() {
-              setState(() {
-                _dragOffset = animation.value;
-              });
-            });
-            _snapController.forward(from: 0.0).then((_) {
+            _slideTo(-slideExtent).then((_) {
               ref.read(playbackProvider.notifier).skipNext();
             });
           }
@@ -366,54 +362,20 @@ class _GestureArtworkWithFeedbackState
                 details.primaryVelocity! > 300)) {
           // Swipe Right -> Skip Previous
           if (prevSong == null) {
-            final start = _dragOffset;
-            final animation = Tween<double>(begin: start, end: 0.0).animate(
-              CurvedAnimation(
-                parent: _snapController,
-                curve: Curves.elasticOut,
-              ),
-            );
-            animation.addListener(() {
-              setState(() {
-                _dragOffset = animation.value;
-              });
-            });
-            _snapController.forward(from: 0.0);
+            _slideTo(0.0);
           } else {
             setState(() {
               _isNext = false;
               _isSwipeTriggered = true;
             });
             AppHaptics.medium();
-            final start = _dragOffset;
-            final end = slideExtent;
-            final animation = Tween<double>(begin: start, end: end).animate(
-              CurvedAnimation(
-                parent: _snapController,
-                curve: Curves.easeOutCubic,
-              ),
-            );
-            animation.addListener(() {
-              setState(() {
-                _dragOffset = animation.value;
-              });
-            });
-            _snapController.forward(from: 0.0).then((_) {
+            _slideTo(slideExtent).then((_) {
               ref.read(playbackProvider.notifier).skipPrevious(force: true);
             });
           }
         } else {
           // Snap Back
-          final start = _dragOffset;
-          final animation = Tween<double>(begin: start, end: 0.0).animate(
-            CurvedAnimation(parent: _snapController, curve: Curves.elasticOut),
-          );
-          animation.addListener(() {
-            setState(() {
-              _dragOffset = animation.value;
-            });
-          });
-          _snapController.forward(from: 0.0);
+          _slideTo(0.0);
         }
       },
       // Hidden while the Fluid Player's morphing art stands in for it. Only

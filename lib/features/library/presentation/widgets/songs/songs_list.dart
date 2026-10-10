@@ -1,5 +1,7 @@
 import 'package:looper_player/core/theme/app_fonts.dart';
+
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:looper_player/features/settings/presentation/providers/settings_notifier.dart';
@@ -19,11 +21,18 @@ import 'package:looper_player/ui/android/widgets/premium_section.dart';
 import 'package:looper_player/features/playlists/data/services/playlist_service.dart';
 import 'package:looper_player/features/playlists/presentation/screens/playlist_view.dart'
     show playlistProvider;
+import 'package:looper_player/features/library/domain/song_full_plays.dart';
+import 'package:looper_player/ui/widgets/common/fast_scroller.dart';
+
 import 'song_tile.dart';
+
 import 'package:looper_player/core/utils/ui_utils.dart';
+
 import 'song_columns.dart';
+
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+
 export 'song_tile.dart';
 part 'sort_bottom_sheet.dart';
 
@@ -57,6 +66,18 @@ class SongsList extends ConsumerStatefulWidget {
 // playlist) instead of leaking a stale selection into the next screen.
 class _SongsListState extends ConsumerState<SongsList> {
   final Set<String> _selectedPaths = {};
+
+  // The fast scroller needs the list's controller; lists embedded without
+  // one get their own.
+  ScrollController? _ownController;
+  ScrollController get _scrollController =>
+      widget.controller ?? (_ownController ??= ScrollController());
+
+  @override
+  void dispose() {
+    _ownController?.dispose();
+    super.dispose();
+  }
 
   bool get _isSelecting => _selectedPaths.isNotEmpty;
 
@@ -272,8 +293,52 @@ class _SongsListState extends ConsumerState<SongsList> {
   /// The list every platform had before two-column mode; moved here
   /// unchanged so the desktop path can choose between it and the grid.
   Widget _buildSingleColumnList(AppLocalizations l10n) {
+    if (!UiUtils.isDesktop) {
+      // Touch screens have no scrollbar to grab, so a long list gets a
+      // draggable thumb; desktop keeps its own scrollbar.
+      return FastScroller(
+        controller: _scrollController,
+        itemCount: widget.songs.length,
+        labelBuilder: _scrollLabelBuilder(),
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 180),
+        child: _buildSingleColumnListView(l10n, _scrollController),
+      );
+    }
+    return _buildSingleColumnListView(l10n, widget.controller);
+  }
+
+  /// The fast scroller's bubble text for a row - only where the order makes
+  /// one meaningful: the library's own list, sorted by a name, year or play
+  /// count.
+  String? Function(int index)? _scrollLabelBuilder() {
+    final library = ref.read(libraryProvider);
+    if (!identical(widget.songs, library.songs)) return null;
+    final songs = widget.songs;
+    String? at(int i, String? Function(Song s) label) =>
+        i < songs.length ? label(songs[i]) : null;
+    return switch (library.sortStrategy) {
+      SongSortStrategy.title => (i) => at(i, (s) => fastScrollLetter(s.title)),
+      SongSortStrategy.artist => (i) => at(
+        i,
+        (s) => fastScrollLetter(s.artist),
+      ),
+      SongSortStrategy.album => (i) => at(i, (s) => fastScrollLetter(s.album)),
+      SongSortStrategy.year => (i) => at(i, (s) => s.year?.toString() ?? '#'),
+      SongSortStrategy.playCount => (i) => at(i, (s) => '${s.playCount}'),
+      SongSortStrategy.fullPlays => (i) => at(
+        i,
+        (s) => songFullPlays(s).toStringAsFixed(1),
+      ),
+      _ => null,
+    };
+  }
+
+  Widget _buildSingleColumnListView(
+    AppLocalizations l10n,
+    ScrollController? controller,
+  ) {
     return ListView.builder(
-      controller: widget.controller,
+      controller: controller,
       shrinkWrap: false,
       physics:
           widget.physics ??

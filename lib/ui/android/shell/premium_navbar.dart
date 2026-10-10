@@ -97,7 +97,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    AppHaptics.light();
+                    AppHaptics.tick();
                     onTap(0);
                   },
                   borderRadius: const BorderRadius.only(
@@ -134,7 +134,7 @@ class PremiumNavbar extends ConsumerWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            AppHaptics.light();
+                            AppHaptics.tick();
                             onTap(1);
                           },
                           child: Container(
@@ -148,7 +148,7 @@ class PremiumNavbar extends ConsumerWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            AppHaptics.light();
+                            AppHaptics.tick();
                             onTap(2);
                           },
                           child: Container(
@@ -172,7 +172,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    AppHaptics.light();
+                    AppHaptics.tick();
                     onTap(0);
                   },
                   borderRadius: const BorderRadius.only(
@@ -196,7 +196,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    AppHaptics.light();
+                    AppHaptics.tick();
                     onTap(1);
                   },
                   borderRadius: BorderRadius.circular(12),
@@ -215,7 +215,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    AppHaptics.light();
+                    AppHaptics.tick();
                     onTap(2);
                   },
                   borderRadius: const BorderRadius.only(
@@ -251,7 +251,7 @@ class PremiumNavbar extends ConsumerWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            AppHaptics.light();
+                            AppHaptics.tick();
                             onTap(0);
                           },
                           child: Container(
@@ -265,7 +265,7 @@ class PremiumNavbar extends ConsumerWidget {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            AppHaptics.light();
+                            AppHaptics.tick();
                             onTap(1);
                           },
                           child: Container(
@@ -292,7 +292,7 @@ class PremiumNavbar extends ConsumerWidget {
                   useBlur: useBlur,
                   keepSurfaceOnDisableBlur: true,
                   onTap: () {
-                    AppHaptics.light();
+                    AppHaptics.tick();
                     onTap(2);
                   },
                   borderRadius: const BorderRadius.only(

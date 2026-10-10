@@ -1,27 +1,23 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:haptic_feedback/haptic_feedback.dart';
-import 'package:vibration/vibration.dart';
 
 /// The single entry point for every haptic in the app.
 ///
 /// Widgets call a named event (`AppHaptics.light()`, `AppHaptics.success()`,
 /// ...) instead of Flutter's [HapticFeedback], so one switch in settings
-/// silences everything and each event plays the richest pattern the device
-/// can do:
+/// silences everything and every event's strength is tuned in one place.
 ///
-/// 1. `haptic_feedback` patterns (Android primitives on API 30+, amplitude
-///    waveforms on API 26+, a plain buzz before that), tagged as touch
-///    feedback so Android 13+ still honours the system "touch haptics" off
-///    switch.
-/// 2. `vibration` for the few custom multi-pulse patterns the plugin above
-///    doesn't have, and only when the motor has amplitude control. Without it
-///    those events fall back to the closest built-in pattern.
-/// 3. Flutter's [HapticFeedback] where neither plugin works (desktop).
+/// On Android each event is a short list of [_Pulse]s handed to the app's own
+/// native player (TouchHaptics.kt), because the haptic plugins hard-code
+/// pulse strengths that feel too heavy for taps that repeat all the time. It
+/// plays them as scaled primitives where the motor has them, as an amplitude
+/// waveform otherwise, and as one system tick on motors with no strength
+/// control - always tagged as touch feedback, so the system "touch feedback"
+/// switch and intensity still apply.
 ///
-/// Capabilities are probed once, lazily; every call is fire-and-forget and
-/// never throws.
+/// Everywhere else (desktop) the event falls back to Flutter's
+/// [HapticFeedback]. Every call is fire-and-forget and never throws.
 class AppHaptics {
   AppHaptics._();
 
@@ -30,95 +26,78 @@ class AppHaptics {
   /// the settings notifier writes it whenever settings load or change.
   static bool enabled = true;
 
-  static final bool _mobile = Platform.isAndroid || Platform.isIOS;
-  static Future<_Caps>? _caps;
+  static const _channel = MethodChannel('com.looper.player/haptics');
 
-  static Future<_Caps> _probe() async {
-    if (!_mobile) return const _Caps(patterns: false, amplitude: false);
-    bool patterns = false;
-    bool amplitude = false;
-    try {
-      patterns = await Haptics.canVibrate();
-    } catch (_) {}
-    try {
-      amplitude =
-          await Vibration.hasVibrator() &&
-          await Vibration.hasAmplitudeControl();
-    } catch (_) {}
-    return _Caps(patterns: patterns, amplitude: amplitude);
-  }
-
-  /// Warms the capability probe so the first tap isn't delayed by it.
-  static void init() => _caps ??= _probe();
+  /// Nothing to warm up any more; kept so startup code needs no change.
+  static void init() {}
 
   /// Small, frequent touches: list taps, chips, menu items.
-  static void light() => _play(HapticsType.light, HapticFeedback.lightImpact);
+  static void light() =>
+      _play(const [_Pulse.tick(30, ms: 10, amplitude: 50)], _lightImpact);
 
-  /// Confirming a choice: toggles, primary buttons, sheet actions.
+  /// The faintest touch, for taps that repeat constantly (navigation bar
+  /// tabs, fast-scroll letters).
+  static void tick() =>
+      _play(const [_Pulse.tick(20, ms: 8, amplitude: 35)], _selectionClick);
+
+  /// Confirming a choice: toggles, primary buttons, sheet actions. Also the
+  /// strongest single pulse the app plays - there is deliberately no heavy
+  /// event, weighty actions (resets, destructive confirmations) use this too.
   static void medium() =>
-      _play(HapticsType.medium, HapticFeedback.mediumImpact);
-
-  /// Weighty, rare actions: resets, destructive confirmations.
-  static void heavy() => _play(HapticsType.heavy, HapticFeedback.heavyImpact);
+      _play(const [_Pulse.click(35, ms: 12, amplitude: 85)], _mediumImpact);
 
   /// A value stepping while dragging: sliders, pickers, segmented rows.
   static void selection() =>
-      _play(HapticsType.selection, HapticFeedback.selectionClick);
+      _play(const [_Pulse.tick(25, ms: 8, amplitude: 40)], _selectionClick);
 
   /// A crisp click when something locks into place (a slider snapping to
   /// zero or a detent).
-  static void snap() => _play(HapticsType.rigid, HapticFeedback.mediumImpact);
+  static void snap() =>
+      _play(const [_Pulse.click(45, ms: 10, amplitude: 105)], _mediumImpact);
 
-  /// A gentle bump for soft UI (reveals, drag handles).
-  static void soft() => _play(HapticsType.soft, HapticFeedback.lightImpact);
+  /// A gentle bump for soft UI (reveals, drag handles): one round, low tap.
+  static void soft() =>
+      _play(const [_Pulse.low(45, ms: 18, amplitude: 40)], _lightImpact);
 
-  /// A task finished well: saved, imported, restored.
-  static void success() =>
-      _play(HapticsType.success, HapticFeedback.mediumImpact);
+  /// A task finished well: saved, imported, restored. A soft tap that lands
+  /// on a firmer one, so it reads as "done".
+  static void success() => _play(const [
+    _Pulse.low(40, ms: 16, amplitude: 45),
+    _Pulse.click(50, ms: 12, amplitude: 105, gap: 65),
+  ], _mediumImpact);
 
-  /// Something needs attention but nothing failed.
-  static void warning() =>
-      _play(HapticsType.warning, HapticFeedback.mediumImpact);
+  /// Something needs attention but nothing failed. Two even, unhurried taps -
+  /// a nudge with no resolution, unlike [success].
+  static void warning() => _play(const [
+    _Pulse.click(40, ms: 12, amplitude: 90),
+    _Pulse.click(40, ms: 12, amplitude: 90, gap: 120),
+  ], _mediumImpact);
 
-  /// Something failed.
-  static void error() => _play(HapticsType.error, HapticFeedback.heavyImpact);
+  /// Something failed. A quick double knock that drops into a dull tap, so
+  /// it feels like bouncing off rather than landing.
+  static void error() => _play(const [
+    _Pulse.click(45, ms: 10, amplitude: 100),
+    _Pulse.click(45, ms: 10, amplitude: 100, gap: 40),
+    _Pulse.low(55, ms: 22, amplitude: 55, gap: 70),
+  ], _mediumImpact);
 
-  /// Liking a song: a quick "lub-dub" double beat.
-  static void heartbeat() => _custom(
-    pattern: const [0, 22, 70, 36],
-    intensities: const [0, 150, 0, 255],
-    fallback: HapticsType.success,
-    desktop: HapticFeedback.mediumImpact,
-  );
+  /// Liking a song: a "lub-dub" heartbeat, a round beat then a sharper one.
+  static void heartbeat() => _play(const [
+    _Pulse.low(50, ms: 20, amplitude: 55),
+    _Pulse.click(55, ms: 14, amplitude: 115, gap: 85),
+  ], _mediumImpact);
 
-  static void _play(HapticsType type, Future<void> Function() desktop) {
+  static Future<void> _lightImpact() => HapticFeedback.lightImpact();
+  static Future<void> _mediumImpact() => HapticFeedback.mediumImpact();
+  static Future<void> _selectionClick() => HapticFeedback.selectionClick();
+
+  static void _play(List<_Pulse> pulses, Future<void> Function() desktop) {
     if (!enabled) return;
     _run(() async {
-      final caps = await (_caps ??= _probe());
-      if (caps.patterns) {
-        await Haptics.vibrate(type, usage: HapticsUsage.touch);
-      } else {
-        await desktop();
-      }
-    });
-  }
-
-  static void _custom({
-    required List<int> pattern,
-    required List<int> intensities,
-    required HapticsType fallback,
-    required Future<void> Function() desktop,
-  }) {
-    if (!enabled) return;
-    _run(() async {
-      final caps = await (_caps ??= _probe());
-      if (caps.amplitude) {
-        await Vibration.vibrate(pattern: pattern, intensities: intensities);
-      } else if (caps.patterns) {
-        await Haptics.vibrate(fallback, usage: HapticsUsage.touch);
-      } else {
-        await desktop();
-      }
+      if (!Platform.isAndroid) return desktop();
+      await _channel.invokeMethod<void>('play', {
+        'pulses': [for (final p in pulses) p.encode()],
+      });
     });
   }
 
@@ -127,9 +106,35 @@ class AppHaptics {
   }
 }
 
-class _Caps {
-  const _Caps({required this.patterns, required this.amplitude});
+/// One pulse of an event. [scale] (percent of the motor's tuned primitive) is
+/// what plays on motors with primitives; [ms] at [amplitude] (1-255) is the
+/// equivalent for motors with only amplitude control. [gap] is the pause in
+/// milliseconds before the pulse.
+class _Pulse {
+  const _Pulse.tick(this.scale, {required this.ms, required this.amplitude})
+    : primitive = 0,
+      gap = 0;
 
-  final bool patterns;
-  final bool amplitude;
+  /// A rounder, lower-pitched tap; a plain tick on motors without it.
+  const _Pulse.low(
+    this.scale, {
+    required this.ms,
+    required this.amplitude,
+    this.gap = 0,
+  }) : primitive = 2;
+
+  const _Pulse.click(
+    this.scale, {
+    required this.ms,
+    required this.amplitude,
+    this.gap = 0,
+  }) : primitive = 1;
+
+  final int primitive;
+  final int scale;
+  final int ms;
+  final int amplitude;
+  final int gap;
+
+  List<int> encode() => [gap, ms, amplitude, primitive, scale];
 }

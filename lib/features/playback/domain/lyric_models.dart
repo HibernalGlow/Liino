@@ -187,6 +187,11 @@ class LrcParser {
   /// not-yet-active first line.
   static const Duration _introGap = Duration(seconds: 5);
 
+  /// Whether [lrc] has line timestamps at all. Lyrics without them (plain
+  /// text, common in embedded tags) can't follow the song: [parse] returns
+  /// their lines with no times, to be shown as text to read.
+  static bool isTimed(String lrc) => _lineTag.hasMatch(lrc);
+
   /// [shift] moves every timestamp later (negative: earlier) - the user's
   /// lyrics offset setting, on top of any `[offset:]` tag in the file.
   static List<LyricLine> parse(
@@ -277,7 +282,9 @@ class LrcParser {
     }
 
     if (rawLines.isEmpty) {
-      // FALLBACK FOR PLAIN TEXT LYRICS (no timestamps)
+      // PLAIN TEXT LYRICS (no timestamps): the lines, with no times - see
+      // [isTimed]. Spreading them evenly over the song looked synced and
+      // never was.
       // Filter out metadata tags like [ti:xx], [ar:xx], etc.
       final List<String> plainLines = [];
       final metaRegExp = RegExp(r'^\[[a-zA-Z]+:.*\]$');
@@ -293,25 +300,14 @@ class LrcParser {
         plainLines.add(trimmed);
       }
 
-      if (plainLines.isNotEmpty) {
-        final List<LyricLine> result = [];
-        final count = plainLines.length;
-        final totalMs = totalDuration.inMilliseconds > 0
-            ? totalDuration.inMilliseconds
-            : 180000; // fallback to 3 mins
-        final interval = totalMs ~/ count;
-        for (var i = 0; i < count; i++) {
-          result.add(
-            LyricLine(
-              startTime: Duration(milliseconds: interval * i),
-              endTime: Duration(milliseconds: interval * (i + 1)),
-              text: plainLines[i],
-            ),
-          );
-        }
-        return result;
-      }
-      return [];
+      return [
+        for (final text in plainLines)
+          LyricLine(
+            startTime: Duration.zero,
+            endTime: Duration.zero,
+            text: text,
+          ),
+      ];
     }
 
     // Sort by start time just in case (stable, so lines sharing a timestamp

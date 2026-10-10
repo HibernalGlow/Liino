@@ -73,6 +73,7 @@ class LrcRedClient {
     }
 
     // lrc.red's own match, per artist credit.
+    var searchDown = !_searchUp;
     if (_searchUp) {
       try {
         for (final name in artists.take(2)) {
@@ -87,18 +88,18 @@ class LrcRedClient {
           if (lrc != null) return lrc;
         }
       } catch (e) {
+        searchDown = true;
         _searchDownUntil = DateTime.now().add(_searchBackoff);
         LoggerHelper.write('LrcRedClient: match.json unavailable ($e)');
       }
     }
 
-    final viaMusicBrainz = await fromIsrcs(
-      await MusicBrainzIsrc.find(
-        title: cleanTitle,
-        artists: artists,
-        durationSeconds: durationSeconds,
-      ),
+    final isrcs = await MusicBrainzIsrc.find(
+      title: cleanTitle,
+      artists: artists,
+      durationSeconds: durationSeconds,
     );
+    final viaMusicBrainz = await fromIsrcs(isrcs);
     if (viaMusicBrainz != null) return viaMusicBrainz;
 
     if (_searchUp) {
@@ -106,14 +107,19 @@ class LrcRedClient {
         final hits = await _query('/search.json', {
           'q': '${artists.length > 1 ? artists[1] : artist} $cleanTitle',
         });
-        return await fromIsrcs(
+        final lrc = await fromIsrcs(
           _rankHits(_byArtist(hits, artists), durationSeconds),
         );
+        if (lrc != null) return lrc;
       } catch (e) {
+        searchDown = true;
         _searchDownUntil = DateTime.now().add(_searchBackoff);
         LoggerHelper.write('LrcRedClient: search.json unavailable ($e)');
       }
     }
+    // With lrc.red's search down, only MusicBrainz's ISRCs were tried:
+    // when it knew none either, the song was never really looked up.
+    if (searchDown && isrcs.isEmpty) LyricsHttp.failed();
     return null;
   }
 
@@ -171,7 +177,7 @@ class LrcRedClient {
     final response = await http
         .get(uri, headers: LyricsHttp.headers)
         .timeout(LyricsHttp.timeout);
-    if (response.statusCode != 200) return const [];
+    if (!LyricsHttp.ok(response.statusCode)) return const [];
     final body = jsonDecode(utf8.decode(response.bodyBytes));
     final hits = body is Map ? body['hits'] : null;
     return hits is List ? hits.whereType<Map>().toList() : const [];
@@ -184,7 +190,7 @@ class LrcRedClient {
     final response = await http
         .get(uri, headers: LyricsHttp.headers)
         .timeout(_ttmlTimeout);
-    if (response.statusCode != 200) return null;
+    if (!LyricsHttp.ok(response.statusCode)) return null;
     final lines = TtmlLyricsParser.parse(utf8.decode(response.bodyBytes));
     if (lines == null) return null;
     return TimedLrcWriter.write(lines);

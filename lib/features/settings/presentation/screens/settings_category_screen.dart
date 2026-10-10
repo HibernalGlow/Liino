@@ -221,6 +221,8 @@ class SettingsCategoryScreen extends ConsumerWidget {
         const Divider(height: 1, indent: 72, color: Colors.white10),
         const ImportBackupTile(),
         const Divider(height: 1, indent: 72, color: Colors.white10),
+        const ImportM3uPlaylistTile(),
+        const Divider(height: 1, indent: 72, color: Colors.white10),
         const ExportLogsTile(),
         const Divider(height: 1, indent: 72, color: Colors.white10),
         const ClearLogsTile(),

@@ -15,6 +15,7 @@ import 'package:looper_player/core/theme/app_assets.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
 import 'package:looper_player/core/services/update/apk_update_notifier.dart';
 import 'package:looper_player/ui/widgets/sheets/apk_update_sheet.dart';
+import 'package:looper_player/features/settings/presentation/widgets/lyrics_services_sheet.dart';
 
 class LooperVersionTile extends ConsumerWidget {
   const LooperVersionTile({super.key});
@@ -49,6 +50,7 @@ class LooperVersionTile extends ConsumerWidget {
   }
 }
 
+/// Opens the lyrics services sheet (order + on/off per service).
 class LyricsProviderTile extends ConsumerWidget {
   const LyricsProviderTile({super.key});
 
@@ -57,52 +59,30 @@ class LyricsProviderTile extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    final availableProviders = [
-      'lrc.red',
-      'LyricsPlus',
-      'LRCLIB',
-      'Genius',
-      'Musixmatch',
-      'AZLyrics',
-      'LyricsMINT',
-      'LyricFind',
-    ];
-
-    final providerUrls = AppLinks.lyricsProviderUrls;
-
-    final currentProvider = settings.lyricsProvider;
-
     return ListTile(
       leading: const Icon(LucideIcons.music, color: Colors.white70),
       title: Text(
-        l10n.lyricsProvider,
+        l10n.lyricsServices,
         style: AppFonts.jostStyle(
           color: Colors.white,
           fontWeight: FontWeight.w500,
         ),
       ),
       subtitle: Text(
-        providerUrls[currentProvider] ?? 'lrc.red',
+        lyricsServiceChain(settings),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
         style: AppFonts.jostStyle(color: Colors.white54, fontSize: 12),
       ),
-      trailing: DropdownButton<String>(
-        value: availableProviders.contains(currentProvider)
-            ? currentProvider
-            : 'lrc.red',
-        dropdownColor: const Color(0xFF1A1A1A),
-        underline: const SizedBox(),
-        items: availableProviders.map((prov) {
-          return DropdownMenuItem<String>(
-            value: prov,
-            child: Text(prov, style: AppFonts.jostStyle(color: Colors.white)),
-          );
-        }).toList(),
-        onChanged: (value) {
-          if (value != null) {
-            ref.read(settingsProvider.notifier).updateLyricsProvider(value);
-          }
-        },
+      trailing: Icon(
+        LucideIcons.chevronRight,
+        color: Colors.white.withValues(alpha: 0.4),
+        size: 18,
       ),
+      onTap: () {
+        AppHaptics.light();
+        showLyricsServicesSheet(context);
+      },
     );
   }
 }
@@ -499,6 +479,14 @@ List<LyricsCredit> lyricsCredits(AppLocalizations l10n) => [
     description: l10n.creditLyricsPlusDesc,
     url: AppLinks.lyricsPlusSource,
   ),
+  for (final (name, url) in const [
+    ('AMLL', AppLinks.amllWeb),
+    ('NetEase', AppLinks.neteaseWeb),
+    ('KuGou', AppLinks.kugouWeb),
+    ('Musixmatch', AppLinks.musixmatchWeb),
+    ('Lyricify', AppLinks.lyricifyWeb),
+  ])
+    (name: name, description: l10n.creditWordSyncedDesc, url: url),
   (name: 'LRCLIB', description: l10n.creditLrclibDesc, url: AppLinks.lrclibWeb),
   (
     name: 'MusicBrainz',
@@ -509,6 +497,11 @@ List<LyricsCredit> lyricsCredits(AppLocalizations l10n) => [
     name: 'am-lyrics',
     description: l10n.creditAmLyricsDesc,
     url: AppLinks.amLyricsSource,
+  ),
+  (
+    name: 'Morphe Patches',
+    description: l10n.creditMorpheDesc,
+    url: AppLinks.morphePatchesSource,
   ),
 ];
 

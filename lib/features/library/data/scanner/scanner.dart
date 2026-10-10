@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+
 import '../../../../core/services/storage/db_service.dart';
+
 import 'package:isar_community/isar.dart';
+
 import '../../../playback/data/lyrics_fetcher.dart';
 import '../../../playback/data/metadata_service.dart';
 import '../services/artwork_downloader_service.dart';
@@ -111,13 +115,15 @@ class LibraryScanner {
 
     // 1. Direct Background Isolate Directory Traversal for full disk coverage
     if (Directory(path).existsSync()) {
-      final List<String> filePaths =
-          await compute(_isolatedDirectoryTraversal, {
-            'rootPath': path,
-            'extensions': supportedExtensions,
-            'minSizeBytes': minSizeBytes,
-            'includeSystemAndMessagingAudio': includeSystemAndMessagingAudio,
-          });
+      final List<String> filePaths = await compute(
+        _isolatedDirectoryTraversal,
+        {
+          'rootPath': path,
+          'extensions': supportedExtensions,
+          'minSizeBytes': minSizeBytes,
+          'includeSystemAndMessagingAudio': includeSystemAndMessagingAudio,
+        },
+      );
       discoveredPaths.addAll(filePaths);
     }
 
@@ -384,6 +390,7 @@ class LibraryScanner {
         song.isFavorite = existingDbSong.isFavorite;
         song.hasCustomEqualizer = existingDbSong.hasCustomEqualizer;
         song.equalizerGains = existingDbSong.equalizerGains;
+        song.lyricsOffsetMs = existingDbSong.lyricsOffsetMs;
         // A re-read that finds no genre (tag read timed out, MediaStore
         // hasn't indexed it) shouldn't wipe one already known - e.g. the
         // quick insert's MediaStore genre, or a user edit.
@@ -701,9 +708,8 @@ class LibraryScanner {
     try {
       Metadata? metadata;
       try {
-        metadata = await MetadataGod.readMetadata(
-          file: file.path,
-        ).timeout(tagTimeout);
+        metadata = await MetadataGod.readMetadata(file: file.path)
+            .timeout(tagTimeout);
       } on TimeoutException {
         transient = true;
       } catch (_) {}

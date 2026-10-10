@@ -1609,6 +1609,18 @@ class Playback extends _$Playback {
     }
   }
 
+  void updateSongLyricsOffset(int songId, int? offsetMs) {
+    final idx = _playlist.indexWhere((s) => s.id == songId);
+    if (idx != -1) {
+      _playlist[idx].lyricsOffsetMs = offsetMs;
+    }
+
+    final song = state.currentSong;
+    if (song != null && song.id == songId) {
+      song.lyricsOffsetMs = offsetMs;
+    }
+  }
+
   void clearAllSongsEqualizer() {
     for (int i = 0; i < _playlist.length; i++) {
       _playlist[i].hasCustomEqualizer = false;
@@ -1893,7 +1905,7 @@ class Playback extends _$Playback {
       final lyricsState = ref.read(lyricsProvider);
       final currentPosition = state.position;
       String currentLine = "";
-      if (lyricsState.rawLrc != null) {
+      if (lyricsState.rawLrc != null && lyricsState.isSynced) {
         final activeLineIndex = _activeLyricLineIndex(
           lyricsState.parsedLines,
           currentPosition,
@@ -2162,7 +2174,7 @@ class Playback extends _$Playback {
       final currentPosition = state.position;
       String currentLine = "";
       String nextLine = "";
-      if (lyricsState.rawLrc != null) {
+      if (lyricsState.rawLrc != null && lyricsState.isSynced) {
         final activeLineIndex = _activeLyricLineIndex(
           lyricsState.parsedLines,
           currentPosition,

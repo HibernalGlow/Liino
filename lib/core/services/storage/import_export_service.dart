@@ -13,6 +13,8 @@ import 'package:looper_player/features/library/presentation/providers/library/li
 import 'package:looper_player/features/playback/presentation/providers/equalizer/equalizer_notifier.dart';
 import 'package:looper_player/core/utils/l10n.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:looper_player/core/services/haptics/haptic_snack_bar.dart';
+import 'package:looper_player/features/playlists/data/m3u_parser.dart';
 
 class ImportExportService {
   // Bumped from 1 -> 2 to add play stats, custom EQ presets and excluded
@@ -125,8 +127,8 @@ class ImportExportService {
         e,
         stack,
       );
-      AppHaptics.error();
-      messenger.showSnackBar(
+      messenger.showHapticSnackBar(
+        AppHaptics.error,
         SnackBar(
           content: Text(currentL10n().backupExportFailed),
           backgroundColor: Colors.red.shade800,
@@ -179,9 +181,8 @@ class ImportExportService {
       ref
           .read(libraryProvider.notifier)
           .scanSavedFolders(showVisualIndicator: false);
-
-      AppHaptics.success();
-      messenger.showSnackBar(
+      messenger.showHapticSnackBar(
+        AppHaptics.success,
         SnackBar(
           content: Text(
             currentL10n().backupImportedSummary(
@@ -200,10 +201,132 @@ class ImportExportService {
         e,
         stack,
       );
-      AppHaptics.error();
-      messenger.showSnackBar(
+      messenger.showHapticSnackBar(
+        AppHaptics.error,
         SnackBar(
           content: Text(currentL10n().backupImportFailed),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  /// Settings > Backups & Logs > Import Playlist (M3U): each picked
+  /// `.m3u` / `.m3u8` file becomes a new playlist named after the file
+  /// ("Road trip (2)" when that name is taken), holding the tracks that
+  /// are in the library, in the file's order.
+  static Future<void> importM3uPlaylists(BuildContext context) async {
+    LoggerHelper.write('ImportExportService: Starting M3U playlist import...');
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      // FileType.any, not a custom extension filter: Android has no MIME
+      // type for .m3u8 on every version, which makes the filter throw.
+      final picked = await FilePicker.pickFiles();
+      final files = picked.where((f) {
+        final name = f.name.toLowerCase();
+        return f.path != null &&
+            (name.endsWith('.m3u') || name.endsWith('.m3u8'));
+      }).toList();
+
+      if (picked.isEmpty) {
+        LoggerHelper.write('ImportExportService: M3U import cancelled.');
+        return;
+      }
+      if (files.isEmpty) throw 'No .m3u / .m3u8 file selected';
+
+      final songs = await DbService.isar.songs.where().findAll();
+      final matcher = M3uSongMatcher(songs);
+      final taken = (await DbService.isar.playlists.where().findAll())
+          .map((p) => p.name)
+          .toSet();
+
+      final toPut = <Playlist>[];
+      int found = 0;
+      int total = 0;
+      for (final m3u in files) {
+        final file = File(m3u.path!);
+        final bytes = await file.readAsBytes();
+        // Older playlists are often Latin-1 rather than UTF-8.
+        String content;
+        try {
+          content = utf8.decode(bytes);
+        } on FormatException {
+          content = latin1.decode(bytes);
+        }
+
+        final entries = M3uParser.parse(content);
+        final paths = <String>[];
+        for (final entry in entries) {
+          final song = matcher.match(entry, playlistDir: file.parent.path);
+          if (song != null && !paths.contains(song.path)) paths.add(song.path);
+        }
+        total += entries.length;
+        found += paths.length;
+        LoggerHelper.write(
+          'ImportExportService: ${m3u.name}: matched ${paths.length} of '
+          '${entries.length} entries.',
+        );
+        if (paths.isEmpty) continue;
+
+        final dot = m3u.name.lastIndexOf('.');
+        final baseName = m3u.name.substring(0, dot).trim();
+        final name = uniquePlaylistName(
+          baseName.isEmpty ? m3u.name : baseName,
+          taken,
+        );
+        taken.add(name);
+        final now = DateTime.now();
+        toPut.add(
+          Playlist()
+            ..name = name
+            ..songPaths = paths
+            ..dateCreated = now
+            ..dateModified = now,
+        );
+      }
+
+      if (toPut.isEmpty) {
+        messenger.showHapticSnackBar(
+          AppHaptics.error,
+          SnackBar(
+            content: Text(currentL10n().m3uImportNoSongs),
+            backgroundColor: Colors.red.shade800,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      await DbService.isar.writeTxn(
+        () => DbService.isar.playlists.putAll(toPut),
+      );
+      messenger.showHapticSnackBar(
+        AppHaptics.success,
+        SnackBar(
+          content: Text(
+            toPut.length == 1
+                ? currentL10n().m3uImportedSummary(
+                    toPut.first.name,
+                    found,
+                    total,
+                  )
+                : currentL10n().m3uImportedMany(toPut.length, found, total),
+          ),
+          backgroundColor: Colors.green.shade800,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e, stack) {
+      LoggerHelper.write(
+        'ImportExportService: Failed to import M3U playlist',
+        e,
+        stack,
+      );
+      messenger.showHapticSnackBar(
+        AppHaptics.error,
+        SnackBar(
+          content: Text(currentL10n().m3uImportFailed),
           backgroundColor: Colors.red.shade800,
           behavior: SnackBarBehavior.floating,
         ),

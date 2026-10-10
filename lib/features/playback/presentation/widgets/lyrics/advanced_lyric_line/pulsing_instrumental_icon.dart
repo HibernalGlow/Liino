@@ -32,13 +32,14 @@ class _PulsingInstrumentalIconState
   @override
   void initState() {
     super.initState();
-    if (ref.read(playbackProvider).isPlaying) {
+    if (ref.read(playbackProvider).isPlaying && !Motion.reduced) {
       _controller.repeat(reverse: true);
     }
   }
 
   void _syncWithPlayback(bool playing) {
     if (playing) {
+      if (Motion.reduced) return;
       if (!_controller.isAnimating) _controller.repeat(reverse: true);
     } else {
       // Settle back down instead of freezing mid-glow.

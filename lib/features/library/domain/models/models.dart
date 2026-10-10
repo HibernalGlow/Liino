@@ -47,6 +47,11 @@ class Song {
   bool hasCustomEqualizer = false;
   List<double>? equalizerGains;
 
+  /// This song's own lyrics timing offset in milliseconds (positive =
+  /// earlier), set in the lyrics menu. Null = the app default,
+  /// [AppSettings.defaultLyricsOffsetMs].
+  int? lyricsOffsetMs;
+
   /// True for a row the scanner inserted quickly (path + whatever MediaStore
   /// had) without yet running the slow part - tag parsing, embedded art,
   /// lyrics. Lets a song appear in the list immediately on first scan while
@@ -311,8 +316,18 @@ class AppSettings {
   int audioCacheSecs = 120;
   int audioBackCacheSizeMB = 100;
   bool exclusiveHardwareMode = false;
+  /// Legacy: the single provider picked before [lyricsProviderOrder]
+  /// existed. It heads the order until the user arranges the list.
   String lyricsProvider = 'lrc.red';
   bool autoLyricsFallback = true;
+
+  /// The lyrics services (LyricsProviderInfo ids) in the order lookups ask
+  /// them. Empty = the default order; services added in a later version
+  /// slot in at their default position.
+  List<String> lyricsProviderOrder = [];
+
+  /// Services the user switched off - skipped by automatic lookups.
+  List<String> lyricsProvidersOff = [];
 
   /// One-time move of installs still on the old LRCLIB default to lrc.red
   /// (word-synced lyrics). Set once so a later deliberate LRCLIB pick sticks.
@@ -324,10 +339,18 @@ class AppSettings {
   /// approximate it otherwise.
   String lyricsSyncStyle = 'char';
 
-  /// Shows lyrics earlier (positive) or later (negative), in ms. Negative
-  /// helps when audio reaches the ears late, e.g. over Bluetooth.
-  int lyricsOffsetMs = defaultLyricsOffsetMs;
+  /// The lyrics timing offset every song starts with, in ms (positive =
+  /// earlier). A song the user re-times keeps its own value in
+  /// [Song.lyricsOffsetMs].
   static const int defaultLyricsOffsetMs = 200;
+
+  /// Legacy: the old user-adjustable offset for all songs. Only read by the
+  /// [lyricsOffsetPerSongMigrated] migration.
+  int lyricsOffsetMs = defaultLyricsOffsetMs;
+
+  /// [Song.lyricsOffsetMs] used to be added on top of [lyricsOffsetMs]; set
+  /// once stored song offsets have been turned into the song's full offset.
+  bool lyricsOffsetPerSongMigrated = false;
 
   /// [lyricsOffsetMs] used to mean positive = later; set once stored values
   /// have been flipped to the positive = earlier meaning.

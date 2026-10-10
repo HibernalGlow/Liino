@@ -93,6 +93,7 @@ class MusicBrainzIsrc {
       }
       return found.toList();
     } catch (e) {
+      LyricsHttp.failed();
       LoggerHelper.write('MusicBrainzIsrc: lookup failed ($e)');
       return const [];
     }
@@ -104,7 +105,9 @@ class MusicBrainzIsrc {
     _queue = _queue.then((_) async {
       try {
         final response = await request();
-        result.complete(response.statusCode == 200 ? response.body : null);
+        result.complete(
+          LyricsHttp.ok(response.statusCode) ? response.body : null,
+        );
       } catch (e) {
         result.completeError(e);
       }

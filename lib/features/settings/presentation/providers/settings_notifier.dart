@@ -115,6 +115,27 @@ class Settings extends _$Settings {
         settings.lyricsOffsetEarlierMigrated = true;
         needsSave = true;
       }
+      if (!settings.lyricsOffsetPerSongMigrated) {
+        // A song's offset used to be added on top of the offset for all
+        // songs; it is now the song's whole offset. Keep what each re-timed
+        // song sounded like.
+        final int base = settings.lyricsOffsetMs;
+        await DbService.isar.writeTxn(() async {
+          final retimed = await DbService.isar.songs
+              .filter()
+              .lyricsOffsetMsIsNotNull()
+              .findAll();
+          for (final song in retimed) {
+            song.lyricsOffsetMs = (base + song.lyricsOffsetMs!).clamp(
+              -5000,
+              5000,
+            );
+          }
+          await DbService.isar.songs.putAll(retimed);
+        });
+        settings.lyricsOffsetPerSongMigrated = true;
+        needsSave = true;
+      }
       if (!settings.stackSansDefaultMigrated) {
         final font = settings.customFontFamily;
         if (font.isEmpty || font == 'Space Grotesk') {
@@ -376,10 +397,13 @@ class Settings extends _$Settings {
       ..exclusiveHardwareMode = s.exclusiveHardwareMode
       ..lyricsProvider = s.lyricsProvider
       ..autoLyricsFallback = s.autoLyricsFallback
+      ..lyricsProviderOrder = List<String>.from(s.lyricsProviderOrder)
+      ..lyricsProvidersOff = List<String>.from(s.lyricsProvidersOff)
       ..lyricsProviderWordSyncMigrated = s.lyricsProviderWordSyncMigrated
       ..lyricsSyncStyle = s.lyricsSyncStyle
       ..lyricsOffsetMs = s.lyricsOffsetMs
       ..lyricsOffsetEarlierMigrated = s.lyricsOffsetEarlierMigrated
+      ..lyricsOffsetPerSongMigrated = s.lyricsOffsetPerSongMigrated
       ..stackSansDefaultMigrated = s.stackSansDefaultMigrated
       ..equalizerGlobalMode = s.equalizerGlobalMode
       ..firstTimeEqualizer = s.firstTimeEqualizer
@@ -406,17 +430,23 @@ class Settings extends _$Settings {
   Future<void> updateIncludeSystemAndMessagingAudio(bool value) =>
       _update((s) => s..includeSystemAndMessagingAudio = value);
 
-  Future<void> updateLyricsProvider(String value) =>
-      _update((s) => s..lyricsProvider = value);
+  Future<void> updateLyricsProviderOrder(List<String> order) =>
+      _update((s) => s..lyricsProviderOrder = List<String>.from(order));
+
+  /// Switches a lyrics service on or off for automatic lookups.
+  Future<void> setLyricsProviderEnabled(String id, bool enabled) => _update(
+    (s) => s
+      ..lyricsProvidersOff = [
+        ...s.lyricsProvidersOff.where((p) => p != id),
+        if (!enabled) id,
+      ],
+  );
 
   Future<void> updateAutoLyricsFallback(bool value) =>
       _update((s) => s..autoLyricsFallback = value);
 
   Future<void> updateLyricsSyncStyle(String value) =>
       _update((s) => s..lyricsSyncStyle = value);
-
-  Future<void> updateLyricsOffsetMs(int value) =>
-      _update((s) => s..lyricsOffsetMs = value.clamp(-5000, 5000));
 
   Future<void> updateBlurredArtworkForLyrics(bool value) =>
       _update((s) => s..blurredArtworkForLyrics = value);

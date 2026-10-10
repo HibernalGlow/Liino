@@ -1,9 +1,11 @@
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:looper_player/core/utils/logger_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:looper_player/features/library/data/scanner/scanner.dart';
+import 'package:looper_player/features/library/domain/song_full_plays.dart';
 import 'package:looper_player/core/services/storage/db_service.dart';
 import 'package:looper_player/features/library/data/services/artist_image_service.dart';
 import 'package:isar_community/isar.dart';
@@ -13,6 +15,7 @@ import 'package:looper_player/core/services/storage/local_json_store.dart';
 import 'package:looper_player/core/services/storage/storage_access.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'dart:async';
 
 part 'library_notifier.g.dart';
@@ -138,12 +141,9 @@ class Library extends _$Library {
 
   Future<void> prefetchLibraryLyrics() async {
     final songs = await DbService.isar.songs.where().findAll();
-    // Also retries songs previously cached as "not found": LyricsFetcher
-    // itself skips the slow/rate-limited online re-check for those (see its
-    // cachedAsNotFound handling) but still re-tries the fast, local,
-    // no-network embedded-metadata/sidecar-file checks - worth doing here
-    // too, since e.g. Android's embedded-lyrics reader didn't exist when
-    // some libraries were first scanned.
+    // Songs saved as "not found" are included: LyricsFetcher reads their
+    // own files again, and only asks the services that never answered for
+    // them (switched on or added since) - the rest reply from the cache.
     final songsToFetch = songs
         .where(
           (s) =>
@@ -913,6 +913,9 @@ class Library extends _$Library {
         return isAsc
             ? DbService.isar.songs.where().sortByLastPlayed()
             : DbService.isar.songs.where().sortByLastPlayedDesc();
+      case SongSortStrategy.fullPlays:
+        // A computed value Isar can't sort by; _watchSongs orders the result.
+        return DbService.isar.songs.where().sortByPlayCountDesc();
       case SongSortStrategy.dateAdded:
       default:
         return isAsc
@@ -925,6 +928,14 @@ class Library extends _$Library {
     _songsSubscription?.cancel();
     _songsSubscription = _buildSongsQuery().watch(fireImmediately: true).listen(
       (songs) {
+        if (state.sortStrategy == SongSortStrategy.fullPlays) {
+          songs = List<Song>.of(songs)
+            ..sort(
+              state.isAscending
+                  ? (a, b) => compareByFullPlays(b, a)
+                  : compareByFullPlays,
+            );
+        }
         state = state.copyWith(songs: songs, isInitialized: true);
       },
     );

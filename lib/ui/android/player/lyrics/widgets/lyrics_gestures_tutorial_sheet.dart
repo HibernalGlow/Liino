@@ -59,6 +59,11 @@ List<_GestureTip> _lyricsMenuTips(BuildContext context) {
       description: l10n.tipFindWordSyncDesc,
     ),
     _GestureTip(
+      icon: LucideIcons.searchCheck,
+      title: l10n.findSyncedLyrics,
+      description: l10n.tipFindSyncedDesc,
+    ),
+    _GestureTip(
       icon: LucideIcons.highlighter,
       title: l10n.lyricsHighlightStyle,
       description: l10n.tipHighlightStyleDesc,

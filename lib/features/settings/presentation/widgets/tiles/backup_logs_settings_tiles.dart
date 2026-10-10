@@ -53,6 +53,29 @@ class ImportBackupTile extends ConsumerWidget {
   }
 }
 
+class ImportM3uPlaylistTile extends ConsumerWidget {
+  const ImportM3uPlaylistTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    return ListTile(
+      leading: const Icon(LucideIcons.listMusic, color: Colors.white70),
+      title: Text(l10n.importM3uPlaylist, style: _tileTitleStyle()),
+      subtitle: Text(l10n.importM3uPlaylistDesc, style: _tileSubtitleStyle()),
+      trailing: const Icon(
+        LucideIcons.chevronRight,
+        color: Colors.white30,
+        size: 18,
+      ),
+      onTap: () {
+        AppHaptics.light();
+        ImportExportService.importM3uPlaylists(context);
+      },
+    );
+  }
+}
+
 class ExportLogsTile extends ConsumerWidget {
   const ExportLogsTile({super.key});
 

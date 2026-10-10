@@ -18,7 +18,8 @@ class _PulsingHeartState extends State<_PulsingHeart>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
+    );
+    if (!Motion.reduced) _controller.repeat(reverse: true);
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.15,

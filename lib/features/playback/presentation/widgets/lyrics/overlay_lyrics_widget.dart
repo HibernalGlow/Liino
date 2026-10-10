@@ -21,9 +21,12 @@ class _OverlayLyricsWidgetState extends ConsumerState<OverlayLyricsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Only rebuild when the parsed lines change
+    // Only rebuild when the parsed lines change. Lyrics without
+    // timestamps have no current line to show.
     final lines = ref.watch(
-      lyricsProvider.select((state) => state.parsedLines),
+      lyricsProvider.select(
+        (state) => state.isSynced ? state.parsedLines : const [],
+      ),
     );
 
     return GestureDetector(

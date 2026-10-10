@@ -2473,12 +2473,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get addCustomFolderDesc => '음악이 다른 이름의 폴더나 SD 카드에 있다면 직접 추가하세요.';
 
   @override
-  String get indexingYourLibrary => '라이브러리 색인 중...';
-
-  @override
-  String get indexingYourLibraryDesc => '노래의 제목, 아트워크, 가사를 채우고 있습니다.';
-
-  @override
   String welcomeStep(String step, String title) {
     return '$step단계: $title';
   }
@@ -2786,11 +2780,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noWordSyncedLyricsFound => '이 곡의 단어 동기화 가사를 찾지 못했습니다';
 
   @override
+  String get lyricsNotSynced => '동기화 안 됨';
+
+  @override
+  String get findSyncedLyrics => '동기화된 가사 찾기';
+
+  @override
+  String get searchingSyncedLyrics => '동기화된 가사를 찾는 중…';
+
+  @override
+  String get syncedLyricsLoaded => '동기화된 가사를 불러왔습니다';
+
+  @override
+  String get noSyncedLyricsFound => '이 노래의 동기화된 가사를 찾을 수 없습니다';
+
+  @override
+  String get tipFindSyncedDesc => '가사에 타이밍이 없으면 노래를 따라가는 버전을 찾습니다.';
+
+  @override
   String get lyricsTiming => '가사 타이밍';
 
   @override
   String get lyricsTimingDesc =>
-      '양수는 가사를 더 일찍, 음수는 더 늦게 표시합니다. 가사가 노래보다 앞서면(블루투스에서 흔함) 값을 낮추세요.';
+      '양수는 가사를 더 일찍, 음수는 더 늦게 표시합니다. 가사가 노래보다 앞서면(블루투스에서 흔함) 값을 낮추세요. 이 곡에만 저장됩니다.';
 
   @override
   String get lyricsTimingEarlier => '더 빠르게';
@@ -3022,4 +3034,44 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get lyricsExitFullscreen => '전체 화면 종료';
+
+  @override
+  String get importM3uPlaylist => '재생목록 가져오기 (M3U)';
+
+  @override
+  String get importM3uPlaylistDesc =>
+      '.m3u 또는 .m3u8 파일로 재생목록을 만들고 트랙을 라이브러리의 곡과 맞춥니다.';
+
+  @override
+  String m3uImportedSummary(String name, int found, int total) {
+    return '\"$name\" 가져옴: $total곡 중 $found곡 찾음';
+  }
+
+  @override
+  String m3uImportedMany(int playlists, int found, int total) {
+    return '재생목록 $playlists개 가져옴: $total곡 중 $found곡 찾음';
+  }
+
+  @override
+  String get m3uImportNoSongs => '이 재생목록의 곡을 라이브러리에서 찾지 못했습니다.';
+
+  @override
+  String get m3uImportFailed =>
+      '재생목록을 가져오지 못했습니다: 파일을 읽을 수 없거나 M3U 재생목록이 아닙니다.';
+
+  @override
+  String get mostFullyPlayed => '끝까지 가장 많이 들은 곡';
+
+  @override
+  String get lyricsServices => '가사 서비스';
+
+  @override
+  String get lyricsServicesDesc => '드래그하여 가사를 찾는 순서를 정하세요. 끈 서비스는 건너뜁니다.';
+
+  @override
+  String get creditWordSyncedDesc => '단어 단위로 동기화된 가사';
+
+  @override
+  String get creditMorpheDesc =>
+      'NetEase, KuGou, Musixmatch, Lyricify 조회의 참고 자료 · GPL-3.0';
 }
