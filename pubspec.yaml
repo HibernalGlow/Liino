@@ -48,6 +48,11 @@ dependencies:
   url_launcher: ^6.3.2
   path_provider: ^2.1.6
   path: ^1.9.1
+  # Annotations only (@visibleForTesting). Declared explicitly because the
+  # platform path/tag helpers are deliberately engine-free, so they can be
+  # unit-tested without a Flutter test host - importing flutter/foundation
+  # for the annotation alone would drag dart:ui back in.
+  meta: ^1.18.0
   permission_handler: ^11.3.1
   file_picker: ^12.3.0
   http: ^1.6.0
