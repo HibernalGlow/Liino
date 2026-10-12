@@ -1,5 +1,22 @@
 name: Secure Build, Signing, and Unified CI Release Pipeline
 
+# What runs when
+# --------------
+# pull_request            -> test only. A 30-second gate on analyze, formatting
+#                            and the regression suite; the platform builds are
+#                            not worth the runner minutes on every PR.
+# push tag v*             -> test, build-macos, build-windows, publish-release.
+#                            macOS and Windows are the desktop targets this
+#                            repository ships.
+# workflow_dispatch       -> the same desktop builds, for a dry run.
+#
+# Android and Linux packaging stay defined but are OFF by default: the Android
+# job needs a signing keystore and a Play-flavor secret this fork does not
+# carry, and Linux packaging needs flutter_distributor plus an apt toolchain.
+# A tag push must not fail because of either. Set the repository variables
+# RELEASE_ANDROID / RELEASE_LINUX to "true" in Settings -> Secrets and
+# variables -> Actions -> Variables to bring them back for a release.
+
 on:
   push:
     tags:
@@ -12,9 +29,8 @@ permissions:
 
 jobs:
   # Static analysis and the pure-Dart regression suite. Cheap, runs first, and
-  # is the only job a pull request needs - the platform builds below are
-  # tag-only in practice but a broken analyze/test fails here instead of
-  # somewhere deep inside a packaging step.
+  # is the only job a pull request needs - a broken analyze/test fails here
+  # instead of somewhere deep inside a packaging step.
   test:
     runs-on: ubuntu-latest
     steps:
@@ -40,6 +56,7 @@ jobs:
         run: flutter test
 
   build-android:
+    if: ${{ vars.RELEASE_ANDROID == 'true' && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') }}
     needs: [test]
     runs-on: ubuntu-latest
     steps:
@@ -106,6 +123,7 @@ jobs:
           path: build/release-assets/*.apk
 
   build-linux:
+    if: ${{ vars.RELEASE_LINUX == 'true' && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') }}
     needs: [test]
     runs-on: ubuntu-latest
     env:
@@ -174,6 +192,7 @@ jobs:
   # the network entitlements, so the "works in dev, no lyrics in the shipped
   # app" failure is the expected one to guard against.
   build-macos:
+    if: ${{ startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' }}
     needs: [test]
     runs-on: macos-latest
     steps:
@@ -249,6 +268,7 @@ jobs:
   # actually ships - a missing DLL is the classic "starts on the build machine
   # only" failure, hence the explicit check.
   build-windows:
+    if: ${{ startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' }}
     needs: [test]
     runs-on: windows-latest
     steps:
@@ -299,7 +319,10 @@ jobs:
           path: build/windows-release-assets/*
 
   publish-release:
-    needs: [build-android, build-linux, build-macos, build-windows]
+    # Only the two desktop targets gate the release. Android and Linux are
+    # downloaded when they exist, but a release that ships macOS and Windows
+    # should not be held back by a job that was skipped.
+    needs: [build-macos, build-windows]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
@@ -307,12 +330,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Android Artifacts
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: android-apks
           path: release-binaries
 
       - name: Download Linux Artifacts
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: linux-packages
@@ -345,15 +370,17 @@ jobs:
             --title "Looper Player $TAG_NAME" \
             --notes "### 🚀 Welcome to Looper Player $TAG_NAME!
             
-            We are excited to present **Looper Player $TAG_NAME**—the ultimate offline-first, high-fidelity local music player for Android, Linux, macOS and Windows!
-            
-            This release features secure, cryptographically signed production builds for Android and complete Linux packages (Debian, RedHat, AppImage, and portable Archive formats) built directly through our automated CI/CD pipelines, alongside native macOS and Windows desktop builds.
+            This release is the first with native **macOS** and **Windows** desktop support, built through the automated CI/CD pipelines.
             
             #### 📱 Platforms Supported
-            - **Android**: Signed production APKs supporting modern \`arm64-v8a\`, \`armeabi-v7a\`, and \`x86_64\` architectures.
-            - **Linux**: High-compatibility Native packages for Debian/Ubuntu (\`.deb\`), RedHat/Fedora (\`.rpm\`), platform-agnostic standalone (\`.AppImage\`), and portable (\`.tar.gz\`) archives.
-            - **macOS**: Native \`.app\` bundle, archived with \`ditto\` so the embedded libmpv framework survives the round trip.
+            - **macOS**: Native \`.app\` bundle, archived with \`ditto\` so the embedded libmpv framework survives the round trip. Sandboxed with the network, user-selected-folder and Music-library entitlements the player needs.
             - **Windows**: 64-bit desktop archive containing the executable and its bundled \`libmpv\` runtime.
+            
+            #### 🆕 Desktop changes in this release
+            - Each desktop now resolves its own music folder: \`~/Music\` on macOS (unwrapping the App Sandbox container), the profile library plus a redirected OneDrive one on Windows, \`xdg-user-dir\` on Linux. No desktop falls back to an Android storage path any more.
+            - Embedded lyrics work out of the box on Windows and macOS: the ID3v2 SYLT and USLT frames are decoded in pure Dart, so no ffprobe and no native reader are required. ffprobe is still used as a fallback when it is installed.
+            - Directory containment checks use the platform's own separator, so a backslash-separated Windows path finally matches its own children.
+            - Desktop layout, full-screen lyrics and the Fluid Player switch are keyed off \"is this a desktop\" rather than \"is this Linux\".
             
             ---
             *Looper Player is 100% offline-first, private, and telemetry-free. Enjoy your local high-fidelity audio with beautifully synchronized interactive lyrics.*"
