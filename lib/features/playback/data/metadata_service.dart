@@ -3,7 +3,10 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:metadata_god/metadata_god.dart';
 
+import 'package:looper_player/core/utils/ui_utils.dart';
+
 import 'lyrics_formats/id3_sylt_reader.dart';
+import 'lyrics_formats/id3_uslt_reader.dart';
 
 class MetadataService {
   static const MethodChannel _broadcastChannel = MethodChannel(
@@ -17,12 +20,28 @@ class MetadataService {
       final synced = await Id3SyltReader.readFile(path);
       if (synced != null && synced.isNotEmpty) return synced;
     }
+
     if (Platform.isAndroid) {
-      return await _getLyricsAndroid(path);
+      final native = await _getLyricsAndroid(path);
+      if (native != null && native.isNotEmpty) return native;
+    } else if (UiUtils.isDesktop) {
+      // Linux has always read USLT through ffprobe; the same works on
+      // Windows and macOS whenever ffmpeg is installed, so the desktop
+      // branch is shared and the probe is simply absent-safe (a missing
+      // executable throws ProcessException, which reads as "no lyrics").
+      final probed = await _getLyricsViaFfprobe(path);
+      if (probed != null && probed.isNotEmpty) return probed;
     }
-    if (Platform.isLinux) {
-      return await _getLyricsLinux(path);
+
+    // Last resort, and the reason Windows/macOS are no longer lyrics-less
+    // out of the box: the USLT frame is decoded straight from the tag
+    // bytes, with no native reader and no external binary involved. This
+    // also covers a Linux install without ffmpeg.
+    if (path.toLowerCase().endsWith('.mp3')) {
+      final unsynced = await Id3UsltReader.readFile(path);
+      if (unsynced != null && unsynced.isNotEmpty) return unsynced;
     }
+
     return null;
   }
 
@@ -41,7 +60,9 @@ class MetadataService {
     }
   }
 
-  static Future<String?> _getLyricsLinux(String path) async {
+  /// The `USLT`/`lyrics` tag of [path] via ffprobe, on any desktop that has
+  /// ffmpeg available. Null when ffprobe is missing or found nothing.
+  static Future<String?> _getLyricsViaFfprobe(String path) async {
     try {
       final result = await Process.run('ffprobe', [
         '-v',
