@@ -20,7 +20,9 @@ build/
 one-player.spec/
 .local/
 dist/
-test/
+# test/ deliberately NOT ignored. It used to be, which meant `flutter test`
+# had nothing to run on a fresh checkout and the CI job that gates every
+# platform build was green for the wrong reason.
 
 # IntelliJ related
 *.iml
@@ -80,5 +82,6 @@ graphify-out/
 # Internal agent config/notes - not for the public repo.
 .agents/
 AGENTS.md
+.workbuddy/
 docs/ADS_ANALYTICS_SETUP.md
 
