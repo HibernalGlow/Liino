@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:looper_player/core/utils/ui_utils.dart';
 
 import 'package:window_manager/window_manager.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -243,7 +244,9 @@ class LyricsFullscreen extends _$LyricsFullscreen {
   void set(bool value) {
     if (state == value) return;
     state = value;
-    if (Platform.isLinux) windowManager.setFullScreen(value);
+    // The lyrics page takes the whole window on every desktop, not just
+    // Linux - the layout it belongs to (see HomeScreen) is shared.
+    if (UiUtils.isDesktop) windowManager.setFullScreen(value);
   }
 }
 

@@ -137,9 +137,15 @@ void main(List<String> args) async {
     } catch (e, s) {
       LoggerHelper.write('Failed to initialize MpvAudioKit', e, s);
     }
-    try {
-      await FlutterDisplayMode.setHighRefreshRate();
-    } catch (_) {}
+    // flutter_displaymode is an Android plugin, so asking for a high refresh
+    // rate on Linux, Windows or macOS only ever produced a
+    // MissingPluginException. Guarded by platform instead of by catch: a
+    // desktop build shouldn't control its behaviour through a thrown error.
+    if (Platform.isAndroid) {
+      try {
+        await FlutterDisplayMode.setHighRefreshRate();
+      } catch (_) {}
+    }
   }();
 
   // Check permissions in parallel (status check only - no automatic permission prompt dialogs on startup)

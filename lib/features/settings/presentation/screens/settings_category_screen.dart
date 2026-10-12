@@ -22,6 +22,7 @@ import '../widgets/tiles/about_settings_tiles.dart';
 import '../widgets/tiles/backup_logs_settings_tiles.dart';
 import 'package:looper_player/core/theme/app_assets.dart';
 import 'package:looper_player/core/services/haptics/app_haptics.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
 
 class SettingsCategoryScreen extends ConsumerWidget {
   final String categoryId;
@@ -149,7 +150,9 @@ class SettingsCategoryScreen extends ConsumerWidget {
     } else if (categoryId == 'playback') {
       children = [
         const LanguageTile(),
-        if (!Platform.isLinux) ...[
+        // The Fluid Player is a swipe gesture on the player bar, and a
+        // mouse can't make one - hidden on every desktop, not just Linux.
+        if (!UiUtils.isDesktop) ...[
           const Divider(height: 1, indent: 72, color: Colors.white10),
           const FluidPlayerTile(),
         ],

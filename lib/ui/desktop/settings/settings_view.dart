@@ -334,7 +334,9 @@ class SettingsView extends ConsumerWidget {
                       },
                       isLast: false,
                     ),
-                    if (!Platform.isLinux)
+                    // Desktop has no Fluid Player: the setting is a swipe
+                    // gesture, so it is hidden on all three, not just Linux.
+                    if (!UiUtils.isDesktop)
                       _PremiumSwitchRow(
                         icon: LucideIcons.move,
                         title: l10n.fluidPlayer,

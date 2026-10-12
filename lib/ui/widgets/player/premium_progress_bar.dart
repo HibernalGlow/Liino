@@ -35,10 +35,12 @@ class ExpressiveSlider extends ConsumerStatefulWidget {
     this.style,
   });
 
-  /// Whether this is the desktop (Linux) bar with its own fixed look.
+  /// Whether this is a desktop (Linux, Windows or macOS) bar with its own
+  /// fixed look. Was Linux-only, which left the Windows and macOS builds
+  /// rendering the phone bar in a resized window.
   /// Overridable so tests (which run on Linux) can reach the Android bar.
   @visibleForTesting
-  static bool useDesktopLayout = Platform.isLinux;
+  static bool useDesktopLayout = UiUtils.isDesktop;
 
   @override
   ConsumerState<ExpressiveSlider> createState() => _ExpressiveSliderState();
@@ -61,7 +63,7 @@ class _ExpressiveSliderState extends ConsumerState<ExpressiveSlider> {
         durationStr,
         style: AppFonts.jostStyle(
           color: Colors.white,
-          fontWeight: Platform.isLinux ? FontWeight.w300 : FontWeight.w600,
+          fontWeight: UiUtils.isDesktop ? FontWeight.w300 : FontWeight.w600,
           fontSize: 14,
           fontFeatures: const [FontFeature.tabularFigures()],
         ),
@@ -95,7 +97,7 @@ class _ExpressiveSliderState extends ConsumerState<ExpressiveSlider> {
               key: ValueKey(char),
               style: AppFonts.jostStyle(
                 color: Colors.white,
-                fontWeight: Platform.isLinux
+                fontWeight: UiUtils.isDesktop
                     ? FontWeight.w300
                     : FontWeight.w600,
                 fontSize: 12,
