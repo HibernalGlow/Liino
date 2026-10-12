@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:looper_player/core/utils/desktop_paths.dart';
 import 'package:looper_player/core/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -250,16 +251,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
     // Broad/coarse roots (e.g. the whole storage root) that must NOT be
     // recorded as-is in libraryFolders - see recordFolder below.
     final Set<String> coarseRoots = {};
-    if (Platform.isLinux) {
-      String defaultPath = '${Platform.environment['HOME']}/Music';
-      try {
-        final result = await Process.run('xdg-user-dir', ['MUSIC']);
-        if (result.exitCode == 0 &&
-            result.stdout.toString().trim().isNotEmpty) {
-          defaultPath = result.stdout.toString().trim();
-        }
-      } catch (_) {}
-      scanRoots.add(defaultPath);
+    if (UiUtils.isDesktop) {
+      // Windows and macOS used to fall straight past this whole chain - the
+      // only branches were Linux and Android - which left the first scan
+      // with no roots at all, and the library-notifier fallback that then
+      // kicked in pointed at an Android storage path. DesktopPaths resolves
+      // the platform's real music folder for all three desktops.
+      scanRoots.addAll(await DesktopPaths.defaultMusicDirectories());
     } else if (Platform.isAndroid && await StorageAccess.hasAllFilesAccess()) {
       // github flavor with All Files Access: walk the whole internal storage
       // root and every SD card. These are coarse roots - the real per-song

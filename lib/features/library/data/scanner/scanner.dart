@@ -16,9 +16,11 @@ import '../../../playback/data/metadata_service.dart';
 import '../services/artwork_downloader_service.dart';
 import '../services/saf_folder_service.dart';
 import '../../../../core/services/storage/local_json_store.dart';
+import '../../../../core/utils/desktop_paths.dart';
+import '../../../../core/utils/ui_utils.dart';
 import 'scan_result.dart';
 import 'artist_parser.dart';
-import 'linux_tag_reader.dart';
+import 'desktop_tag_reader.dart';
 export 'artist_parser.dart';
 part 'scan_paths.dart';
 part 'media_sources.dart';
@@ -115,15 +117,13 @@ class LibraryScanner {
 
     // 1. Direct Background Isolate Directory Traversal for full disk coverage
     if (Directory(path).existsSync()) {
-      final List<String> filePaths = await compute(
-        _isolatedDirectoryTraversal,
-        {
-          'rootPath': path,
-          'extensions': supportedExtensions,
-          'minSizeBytes': minSizeBytes,
-          'includeSystemAndMessagingAudio': includeSystemAndMessagingAudio,
-        },
-      );
+      final List<String> filePaths =
+          await compute(_isolatedDirectoryTraversal, {
+            'rootPath': path,
+            'extensions': supportedExtensions,
+            'minSizeBytes': minSizeBytes,
+            'includeSystemAndMessagingAudio': includeSystemAndMessagingAudio,
+          });
       discoveredPaths.addAll(filePaths);
     }
 
@@ -183,7 +183,7 @@ class LibraryScanner {
 
     if (filesToProcess.isEmpty) {
       await DbService.isar.writeTxn(() async {
-        final prefix = path.endsWith('/') ? path : '$path/';
+        final prefix = directoryPrefix(path);
         final toDelete = await DbService.isar.songs
             .filter()
             .pathStartsWith(prefix)
@@ -200,7 +200,7 @@ class LibraryScanner {
 
     // Existing songs scoped to this folder - used below to know what may
     // need deleting (files under `path` that disappeared).
-    final prefix = path.endsWith('/') ? path : '$path/';
+    final prefix = directoryPrefix(path);
     final songsInPathDb = await DbService.isar.songs
         .filter()
         .pathStartsWith(prefix)
@@ -708,30 +708,42 @@ class LibraryScanner {
     try {
       Metadata? metadata;
       try {
-        metadata = await MetadataGod.readMetadata(file: file.path)
-            .timeout(tagTimeout);
+        metadata = await MetadataGod.readMetadata(
+          file: file.path,
+        ).timeout(tagTimeout);
       } on TimeoutException {
         transient = true;
       } catch (_) {}
 
-      // Linux has no native tag fallback, so when metadata_god couldn't
-      // read the file (or failed to initialise at all) ask ffprobe.
-      LinuxTags? linuxTags;
-      if (Platform.isLinux && metadata == null) {
-        try {
-          linuxTags = await LinuxTagReader.read(file.path, timeout: tagTimeout);
-        } on TimeoutException {
-          transient = true;
+      // No native tag fallback of its own on any desktop, so when
+      // metadata_god couldn't read the file (or failed to initialise at all)
+      // ask ffprobe - if the machine has one. Linux needed this first; the
+      // same probe now covers macOS and Windows rather than leaving those
+      // two with no fallback at all.
+      DesktopTags? desktopTags;
+      if (UiUtils.isDesktop && metadata == null) {
+        final ffprobe = await DesktopTagReader.ffprobe();
+        if (ffprobe != null) {
+          try {
+            desktopTags = await DesktopTagReader.read(
+              file.path,
+              timeout: tagTimeout,
+              executable: ffprobe,
+            );
+          } on TimeoutException {
+            transient = true;
+          }
         }
       }
 
-      String? title = metadata?.title ?? linuxTags?.title;
-      String? artist = metadata?.artist ?? linuxTags?.artist;
-      String? album = metadata?.album ?? linuxTags?.album;
-      String? genre = _cleanGenre(metadata?.genre ?? linuxTags?.genre);
-      int? durationMs = metadata?.durationMs?.toInt() ?? linuxTags?.durationMs;
-      int? trackNumber = metadata?.trackNumber ?? linuxTags?.trackNumber;
-      int? year = metadata?.year ?? linuxTags?.year;
+      String? title = metadata?.title ?? desktopTags?.title;
+      String? artist = metadata?.artist ?? desktopTags?.artist;
+      String? album = metadata?.album ?? desktopTags?.album;
+      String? genre = _cleanGenre(metadata?.genre ?? desktopTags?.genre);
+      int? durationMs =
+          metadata?.durationMs?.toInt() ?? desktopTags?.durationMs;
+      int? trackNumber = metadata?.trackNumber ?? desktopTags?.trackNumber;
+      int? year = metadata?.year ?? desktopTags?.year;
       List<int>? pictureData = metadata?.picture?.data;
 
       // Use native MediaStore fallbacks if MetadataGod fields are null or empty
@@ -779,14 +791,18 @@ class LibraryScanner {
         }
       }
 
-      if (pictureData == null && Platform.isLinux) {
-        try {
-          pictureData = await LinuxTagReader.readCover(
-            file.path,
-            timeout: pictureTimeout,
-          );
-        } on TimeoutException {
-          transient = true;
+      if (pictureData == null && UiUtils.isDesktop) {
+        final ffmpeg = await DesktopTagReader.ffmpeg();
+        if (ffmpeg != null) {
+          try {
+            pictureData = await DesktopTagReader.readCover(
+              file.path,
+              timeout: pictureTimeout,
+              executable: ffmpeg,
+            );
+          } on TimeoutException {
+            transient = true;
+          }
         }
       }
 

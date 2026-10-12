@@ -13,6 +13,8 @@ import 'package:looper_player/features/settings/presentation/providers/settings_
 import 'package:looper_player/features/playback/data/lyrics_fetcher.dart';
 import 'package:looper_player/core/services/storage/local_json_store.dart';
 import 'package:looper_player/core/services/storage/storage_access.dart';
+import 'package:looper_player/core/utils/desktop_paths.dart';
+import 'package:looper_player/core/utils/ui_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -479,7 +481,7 @@ class Library extends _$Library {
       // not under-matching, but still wrong).
       final songsToDelete = allSongs.where((song) {
         return !activeFolders.any((folder) {
-          final prefix = folder.endsWith('/') ? folder : '$folder/';
+          final prefix = directoryPrefix(folder);
           return song.path == folder || song.path.startsWith(prefix);
         });
       }).toList();
@@ -723,16 +725,16 @@ class Library extends _$Library {
               }
             }
           }
-        } else if (Platform.isLinux) {
-          String defaultPath = '${Platform.environment['HOME']}/Music';
-          try {
-            final result = await Process.run('xdg-user-dir', ['MUSIC']);
-            if (result.exitCode == 0 &&
-                result.stdout.toString().trim().isNotEmpty) {
-              defaultPath = result.stdout.toString().trim();
-            }
-          } catch (_) {}
-          scanRoots.add(defaultPath);
+        } else if (UiUtils.isDesktop) {
+          // Every desktop resolves its own music folder here: Linux through
+          // xdg-user-dir, macOS through the real (sandbox-unwrapped) ~/Music,
+          // Windows through the profile's Music plus a redirected OneDrive
+          // one. Leaving this Linux-only meant a Windows or macOS install
+          // with no saved folders had nothing to scan and fell through to
+          // the Android storage root below.
+          for (final dir in await DesktopPaths.defaultMusicDirectories()) {
+            if (!scanRoots.contains(dir)) scanRoots.add(dir);
+          }
         }
 
         for (final f in savedFolders) {
@@ -761,13 +763,20 @@ class Library extends _$Library {
                 scanRoots.add(cp);
               }
             }
-          } else if (Platform.isLinux) {
-            scanRoots.add('${Platform.environment['HOME']}/Music');
+          } else if (UiUtils.isDesktop) {
+            for (final dir in await DesktopPaths.defaultMusicDirectories()) {
+              if (!scanRoots.contains(dir)) scanRoots.add(dir);
+            }
           }
         }
       }
 
-      if (scanRoots.isEmpty) {
+      // Android-only safety net: an unindexed device still has everything
+      // under the internal storage root, and MediaStore fills in whatever
+      // the walk misses. On a desktop an empty root list genuinely means
+      // "no music folders found", and scanning "/" would be both wrong and
+      // unboundedly slow - so the fallback stays scoped to Android.
+      if (scanRoots.isEmpty && Platform.isAndroid) {
         scanRoots.add('/storage/emulated/0');
       }
 
@@ -809,7 +818,7 @@ class Library extends _$Library {
         if (candidateFolders.isNotEmpty) {
           final List<String> validFolders = [];
           for (final folder in candidateFolders) {
-            final prefix = folder.endsWith('/') ? folder : '$folder/';
+            final prefix = directoryPrefix(folder);
             final hasSongs =
                 await DbService.isar.songs
                     .filter()
@@ -1125,7 +1134,7 @@ class ExcludedFolders extends _$ExcludedFolders {
   }
 
   Future<void> _deleteSongsUnderFolder(String folder) async {
-    final prefix = folder.endsWith('/') ? folder : '$folder/';
+    final prefix = directoryPrefix(folder);
     await DbService.isar.writeTxn(() async {
       final toDelete = await DbService.isar.songs
           .filter()

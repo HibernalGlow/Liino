@@ -7,7 +7,7 @@ part of 'scanner.dart';
 bool isUnderExcludedFolder(String filePath, List<String> excludedFolders) {
   for (final folder in excludedFolders) {
     if (folder.isEmpty) continue;
-    final normalized = folder.endsWith('/') ? folder : '$folder/';
+    final normalized = directoryPrefix(folder);
     if (filePath == folder || filePath.startsWith(normalized)) return true;
   }
   return false;

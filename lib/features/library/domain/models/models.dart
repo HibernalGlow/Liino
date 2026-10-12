@@ -316,6 +316,7 @@ class AppSettings {
   int audioCacheSecs = 120;
   int audioBackCacheSizeMB = 100;
   bool exclusiveHardwareMode = false;
+
   /// Legacy: the single provider picked before [lyricsProviderOrder]
   /// existed. It heads the order until the user arranges the list.
   String lyricsProvider = 'lrc.red';

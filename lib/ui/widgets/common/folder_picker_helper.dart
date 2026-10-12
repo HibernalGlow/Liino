@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:looper_player/core/utils/desktop_paths.dart';
 import 'package:looper_player/features/library/data/services/saf_folder_service.dart';
 import 'package:looper_player/features/library/presentation/providers/library/library_notifier.dart';
 import 'package:looper_player/l10n/app_localizations.dart';
@@ -67,7 +68,7 @@ class FolderPickerHelper {
                 controller: controller,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: '/home/username/Music',
+                  hintText: DesktopPaths.manualPathHint(),
                   hintStyle: const TextStyle(color: Colors.white30),
                   filled: true,
                   fillColor: Colors.white.withValues(alpha: 0.05),
