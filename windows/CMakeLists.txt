@@ -32,6 +32,16 @@ set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 # Use Unicode for all projects.
 add_definitions(-DUNICODE -D_UNICODE)
 
+# permission_handler_windows (11.4.0, the version permission_handler 11.x
+# resolves to) still includes <experimental/coroutine>, which Microsoft has
+# removed from recent MSVC: the header now hard-errors with C2338 and names
+# this exact define as the supported way to keep building. It is a directory
+# property, so it reaches every plugin added below - which is the only place
+# it can go, since the plugin's own CMakeLists is not ours to edit. Drop it
+# once permission_handler resolves to a Windows implementation that has moved
+# to the C++20 <coroutine> header.
+add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # Compilation settings that should be applied to most targets.
 #
 # Be cautious about adding new options here, as plugins use this function by
