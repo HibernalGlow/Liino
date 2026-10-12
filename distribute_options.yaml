@@ -1,5 +1,16 @@
 output: dist/
 
+# Linux-only on purpose. macOS and Windows are packaged by the build-macos and
+# build-windows jobs in .github/workflows/release.yml instead of by a
+# flutter_distributor maker here, because every maker for those two platforms
+# needs extra tooling the Linux jobs don't (create-dmg, Inno Setup, ...) and
+# each one has to run on its own OS. Those jobs do the two things a plain
+# `flutter build` gets wrong on desktop:
+#
+#   macOS  - archive with `ditto`, since the embedded libmpv.framework is a
+#            symlink farm that a normal zip corrupts
+#   Windows - assert libmpv.dll landed next to the executable, which is the
+#            download-and-bundle step in mpv_audio_kit's CMakeLists
 releases:
   - name: dev
     display_name: Looper Player

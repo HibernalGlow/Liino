@@ -2,7 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Kept on deliberately: Looper ships outside the Mac App Store, but the
+	     sandbox is what makes "the Debug build works, the Release build
+	     can't reach the network or the music folder" a real failure mode.
+	     Every entitlement below is the reason it doesn't happen here. -->
 	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- Lyrics providers, artwork downloads and update checks. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<!-- Folders the user adds through the open panel. -->
+	<key>com.apple.security.files.user-selected.read-only</key>
+	<true/>
+	<!-- The default library scan reads ~/Music. -->
+	<key>com.apple.security.assets.music.read-only</key>
 	<true/>
 </dict>
 </plist>

@@ -6,7 +6,23 @@
 	<true/>
 	<key>com.apple.security.cs.allow-jit</key>
 	<true/>
+	<!-- Dart VM service / hot reload, debug builds only. -->
 	<key>com.apple.security.network.server</key>
+	<true/>
+	<!-- Lyrics providers, artwork downloads and update checks are all
+	     HTTPS, so the client half of the network entitlement is what a
+	     sandboxed build actually needs. Without it every request fails
+	     silently while the rest of the app looks healthy. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<!-- "Add folder": file_picker hands back a folder the user picked in the
+	     open panel, which the sandbox only grants with this entitlement. -->
+	<key>com.apple.security.files.user-selected.read-only</key>
+	<true/>
+	<!-- The default library scan reads ~/Music. The App Sandbox otherwise
+	     rewrites HOME into the container, leaving the real music folder
+	     both unreadable and invisible. -->
+	<key>com.apple.security.assets.music.read-only</key>
 	<true/>
 </dict>
 </plist>
