@@ -97,6 +97,14 @@ containment prefix as `'$folder/'`, which never matches on Windows where
 `/storage/...`; that is correct, since it exists to reject Android storage
 roots and simply never matches on a desktop.
 
+## CI blockers found while wiring the desktop builds
+
+| Blocker | Detail | Handling |
+| --- | --- | --- |
+| `appambit_sdk_flutter` 1.2.0 plugin declaration | The package declares `pluginClass: AppAmbitSdkFlutterPlugin` (matching the class inside the file) but names the file `AppambitSdkFlutterPlugin.kt`. `flutter_tools`' Android plugin validation looks for a file named after `pluginClass`, case-sensitively, and aborts `pub get`. It therefore fails on **every case-sensitive filesystem** - including Linux CI - and passes on macOS and Windows only because APFS and NTFS are case-insensitive, which is why it never reproduced locally. The validation runs regardless of which platforms are enabled, so turning Android off does not avoid it. No fixed release on pub.dev as of 1.2.0. | The Linux CI jobs rename the file in the pub cache before the second `pub get`. Renaming is safe: Kotlin does not require file and class names to match, and the generated Android registrant then names a class that actually exists. |
+| Fork workflow triggers | The first tag push on the fork produced no run at all, even though GitHub recorded the push and the workflow was registered. | `gh workflow run release.yml --ref <tag> -R <owner>/<repo>` dispatches on the tag ref, so `github.ref` is still the tag and the publish step runs. Note that with both an `origin` and an `upstream` remote, plain `gh` commands resolve against upstream - always pass `-R`. |
+| macOS Release signature | A local `flutter build macos --release` is ad-hoc signed and carries `com.apple.security.get-task-allow`, which is a debugging grant. Fine for local runs, not for distribution. | A real distribution needs a Developer ID certificate and notarisation; the CI job does not have one. |
+
 ## Known gaps after this pass
 
 | Gap | Detail |

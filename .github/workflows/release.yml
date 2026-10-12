@@ -49,7 +49,27 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          # appambit_sdk_flutter 1.2.0 declares
+          # `pluginClass: AppAmbitSdkFlutterPlugin` - which does match the class
+          # inside the file - but names the file AppambitSdkFlutterPlugin.kt.
+          # flutter_tools' Android plugin validation looks for a file named
+          # after pluginClass, case-sensitively, and aborts `pub get` when it is
+          # absent. So this only fails on a case-sensitive filesystem, which is
+          # why it never reproduced on the macOS or Windows runners (APFS and
+          # NTFS are not case-sensitive) and why it is fixed here and not there.
+          #
+          # Renaming the file is the whole fix: Kotlin does not require the two
+          # to match, and the generated Android registrant then names a class
+          # that really exists. The first run is what downloads the package, so
+          # it is expected to fail; the second resolves everything. Drop both
+          # once the package is fixed upstream.
+          flutter pub get || true
+          plugin_dir="$HOME/.pub-cache/hosted/pub.dev/appambit_sdk_flutter-1.2.0/android/src/main/kotlin/com/appambit/appambit_sdk_flutter"
+          if [ -f "$plugin_dir/AppambitSdkFlutterPlugin.kt" ] && [ ! -e "$plugin_dir/AppAmbitSdkFlutterPlugin.kt" ]; then
+            mv "$plugin_dir/AppambitSdkFlutterPlugin.kt" "$plugin_dir/AppAmbitSdkFlutterPlugin.kt"
+          fi
+          flutter pub get
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib test
@@ -97,7 +117,27 @@ jobs:
           echo "storeFile=app/upload-keystore.jks" >> android/key.properties
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          # appambit_sdk_flutter 1.2.0 declares
+          # `pluginClass: AppAmbitSdkFlutterPlugin` - which does match the class
+          # inside the file - but names the file AppambitSdkFlutterPlugin.kt.
+          # flutter_tools' Android plugin validation looks for a file named
+          # after pluginClass, case-sensitively, and aborts `pub get` when it is
+          # absent. So this only fails on a case-sensitive filesystem, which is
+          # why it never reproduced on the macOS or Windows runners (APFS and
+          # NTFS are not case-sensitive) and why it is fixed here and not there.
+          #
+          # Renaming the file is the whole fix: Kotlin does not require the two
+          # to match, and the generated Android registrant then names a class
+          # that really exists. The first run is what downloads the package, so
+          # it is expected to fail; the second resolves everything. Drop both
+          # once the package is fixed upstream.
+          flutter pub get || true
+          plugin_dir="$HOME/.pub-cache/hosted/pub.dev/appambit_sdk_flutter-1.2.0/android/src/main/kotlin/com/appambit/appambit_sdk_flutter"
+          if [ -f "$plugin_dir/AppambitSdkFlutterPlugin.kt" ] && [ ! -e "$plugin_dir/AppAmbitSdkFlutterPlugin.kt" ]; then
+            mv "$plugin_dir/AppambitSdkFlutterPlugin.kt" "$plugin_dir/AppAmbitSdkFlutterPlugin.kt"
+          fi
+          flutter pub get
 
       # The GitHub-release APKs use the `github` flavor: it checks GitHub for
       # updates and contains no Google Play code. The Play Store AAB (`play`
@@ -177,7 +217,27 @@ jobs:
         run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
       - name: Install Project Dependencies
-        run: flutter pub get
+        run: |
+          # appambit_sdk_flutter 1.2.0 declares
+          # `pluginClass: AppAmbitSdkFlutterPlugin` - which does match the class
+          # inside the file - but names the file AppambitSdkFlutterPlugin.kt.
+          # flutter_tools' Android plugin validation looks for a file named
+          # after pluginClass, case-sensitively, and aborts `pub get` when it is
+          # absent. So this only fails on a case-sensitive filesystem, which is
+          # why it never reproduced on the macOS or Windows runners (APFS and
+          # NTFS are not case-sensitive) and why it is fixed here and not there.
+          #
+          # Renaming the file is the whole fix: Kotlin does not require the two
+          # to match, and the generated Android registrant then names a class
+          # that really exists. The first run is what downloads the package, so
+          # it is expected to fail; the second resolves everything. Drop both
+          # once the package is fixed upstream.
+          flutter pub get || true
+          plugin_dir="$HOME/.pub-cache/hosted/pub.dev/appambit_sdk_flutter-1.2.0/android/src/main/kotlin/com/appambit/appambit_sdk_flutter"
+          if [ -f "$plugin_dir/AppambitSdkFlutterPlugin.kt" ] && [ ! -e "$plugin_dir/AppAmbitSdkFlutterPlugin.kt" ]; then
+            mv "$plugin_dir/AppambitSdkFlutterPlugin.kt" "$plugin_dir/AppAmbitSdkFlutterPlugin.kt"
+          fi
+          flutter pub get
 
       - name: Package Linux Distributors (DEB, RPM, AppImage, Archive)
         run: |
@@ -229,6 +289,9 @@ jobs:
         run: flutter config --enable-macos-desktop
 
       - name: Install Project Dependencies
+        # Deliberately no workaround here - see the Linux jobs' comment. This
+        # runner's filesystem is case-insensitive, so flutter_tools' plugin
+        # validation finds the file and pub get succeeds first time.
         run: flutter pub get
 
       - name: Build macOS Release
@@ -310,6 +373,9 @@ jobs:
         run: flutter config --enable-windows-desktop
 
       - name: Install Project Dependencies
+        # Deliberately no workaround here - see the Linux jobs' comment. This
+        # runner's filesystem is case-insensitive, so flutter_tools' plugin
+        # validation finds the file and pub get succeeds first time.
         run: flutter pub get
 
       - name: Build Windows Release
