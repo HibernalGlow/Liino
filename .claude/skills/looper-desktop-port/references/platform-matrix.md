@@ -105,6 +105,9 @@ roots and simply never matches on a desktop.
 | Fork workflow triggers | The first tag push on the fork produced no run at all, even though GitHub recorded the push and the workflow was registered. | `gh workflow run release.yml --ref <tag> -R <owner>/<repo>` dispatches on the tag ref, so `github.ref` is still the tag and the publish step runs. Note that with both an `origin` and an `upstream` remote, plain `gh` commands resolve against upstream - always pass `-R`. |
 | macOS Release signature | A local `flutter build macos --release` is ad-hoc signed and carries `com.apple.security.get-task-allow`, which is a debugging grant. Fine for local runs, not for distribution. | A real distribution needs a Developer ID certificate and notarisation; the CI job does not have one. |
 
+| `permission_handler_windows` 11.4.0 vs current MSVC | The plugin still includes `<experimental/coroutine>`, which Microsoft has removed: the header hard-errors with `C2338` on MSVC 14.51 (Visual Studio 18). The error text names the supported escape hatch. | `windows/CMakeLists.txt` adds `_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS` as a directory definition, so it reaches every plugin below it. This is the one Windows-specific assumption the port could not exercise locally - there is no MSVC on the development machine, so it was found by the first real Windows build. |
+| Windows `cargokit` symlink resolution | `metadata_god` builds through cargokit, whose `resolve_symlinks.ps1` prints `Get-Item : Could not find item ...\AppData` on the runner. It is a non-terminating PowerShell error and the build continues past it. | Nothing to do; noted so the next person does not chase it as the cause of a later failure. |
+
 ## Known gaps after this pass
 
 | Gap | Detail |
