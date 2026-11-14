@@ -1,3 +1,4 @@
+import 'package:liino_api/liino_api.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -14,11 +15,41 @@ class _LiinoHomePageState extends State<LiinoHomePage> {
   Set<UiRoleMode> _selectedMode = {UiRoleMode.auto};
   int _navIndex = 0;
   bool _isStreaming = false;
+  FrbDeviceCapabilities? _capabilities;
+  FrbEngineSnapshot? _snapshot;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshFromCore();
+  }
+
+  void _refreshFromCore() {
+    try {
+      final caps = detectCapabilities();
+      final snap = previewSnapshot(mode: _selectedMode.first.name);
+      setState(() {
+        _capabilities = caps;
+        _snapshot = snap;
+      });
+    } catch (_) {
+      // Fallback gracefully when native library is unavailable in test mode.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final m3e = M3ETheme.of(context);
     final scheme = m3e.colorScheme;
+    final caps = _capabilities;
+    final snap = _snapshot;
+
+    final statusSummary = snap != null
+        ? 'Platform: ${caps?.platformName ?? "unknown"} · '
+            'Resolved: ${snap.resolvedRole.toUpperCase()} · '
+            'RingBuffer: ${snap.ringBufferLen}/${snap.ringBufferCapacity}'
+        : 'Mode: ${_selectedMode.first.name.toUpperCase()} · '
+            'Transports: LAN / USB / BT';
 
     return Scaffold(
       body: LayoutBuilder(
@@ -60,18 +91,29 @@ class _LiinoHomePageState extends State<LiinoHomePage> {
                         Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: M3ESegmentedButton<UiRoleMode>(
-                            segments: const [
-                              M3ESegment(value: UiRoleMode.auto, label: 'AUTO'),
-                              M3ESegment(value: UiRoleMode.sender, label: 'SENDER'),
+                            segments: [
+                              const M3ESegment(
+                                value: UiRoleMode.auto,
+                                label: 'AUTO',
+                              ),
+                              M3ESegment(
+                                value: UiRoleMode.sender,
+                                label: 'SENDER',
+                                enabled: caps?.canCaptureAudio ?? true,
+                              ),
                               M3ESegment(
                                 value: UiRoleMode.receiver,
                                 label: 'RECEIVER',
+                                enabled:
+                                    (caps?.canPlayAudio ?? true) ||
+                                    (caps?.canVirtualMicrophone ?? true),
                               ),
                             ],
                             selected: _selectedMode,
                             onSelectionChanged: (v) {
                               if (v.isNotEmpty) {
                                 setState(() => _selectedMode = v);
+                                _refreshFromCore();
                               }
                             },
                           ),
@@ -89,9 +131,7 @@ class _LiinoHomePageState extends State<LiinoHomePage> {
                             headline: _isStreaming
                                 ? 'Audio Link Active'
                                 : 'Ready to Connect',
-                            supportingText:
-                                'Mode: ${_selectedMode.first.name.toUpperCase()} · '
-                                'RingBuffer: 16/64 · Transports: LAN / USB / BT',
+                            supportingText: statusSummary,
                             actions: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [

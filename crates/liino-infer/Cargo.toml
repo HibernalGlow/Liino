@@ -1,0 +1,8 @@
+[package]
+name = "liino-infer"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+description = "Pure-Rust inference VM for statically compiled MCYI model blobs (PureVox6 / AEC7), migrated from MicYou"
+
+[dependencies]

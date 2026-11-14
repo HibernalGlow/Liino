@@ -3,6 +3,9 @@ resolver = "3"
 members = [
     "cli",
     "crates/liino-core",
+    "crates/liino-engine",
+    "crates/liino-infer",
+    "crates/liino-protocol",
     "packages/core",
     "packages/liino_api",
     "packages/localsend_isolates/rust",

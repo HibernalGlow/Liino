@@ -1,8 +1,15 @@
+import 'package:liino_api/liino_api.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 import 'features/home/home_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await RustLib.init();
+  } catch (_) {
+    // Allow UI preview even when native dylib is not yet bundled on host.
+  }
   runApp(const LiinoApp());
 }
 

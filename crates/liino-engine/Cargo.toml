@@ -1,0 +1,14 @@
+[package]
+name = "liino-engine"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+description = "Platform-agnostic session, jitter buffer, FEC, and telemetry engine for liino (migrated from MicYou)"
+
+[dependencies]
+liino-core = { path = "../liino-core" }
+liino-protocol = { path = "../liino-protocol" }
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+prost = "0.14.3"
