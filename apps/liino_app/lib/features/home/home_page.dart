@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../design_system/tokens.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum UiRoleMode { auto, sender, receiver }
 
@@ -10,193 +10,144 @@ class LiinoHomePage extends StatefulWidget {
   State<LiinoHomePage> createState() => _LiinoHomePageState();
 }
 
-class _LiinoHomePageState extends State<LiinoHomePage>
-    with SingleTickerProviderStateMixin {
-  UiRoleMode _selectedMode = UiRoleMode.auto;
+class _LiinoHomePageState extends State<LiinoHomePage> {
+  Set<UiRoleMode> _selectedMode = {UiRoleMode.auto};
+  int _navIndex = 0;
   bool _isStreaming = false;
-  late final AnimationController _pulseController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    );
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  void _toggleStream() {
-    setState(() {
-      _isStreaming = !_isStreaming;
-      if (_isStreaming) {
-        _pulseController.repeat(reverse: true);
-      } else {
-        _pulseController.stop();
-        _pulseController.reset();
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final m3e = M3ETheme.of(context);
+    final scheme = m3e.colorScheme;
 
     return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isDesktop = constraints.maxWidth >= 780;
-            return Row(
-              children: [
-                if (isDesktop)
-                  NavigationRail(
-                    backgroundColor: scheme.surfaceContainerLowest,
-                    selectedIndex: 0,
-                    onDestinationSelected: (_) {},
-                    labelType: NavigationRailLabelType.all,
-                    destinations: const [
-                      NavigationRailDestination(
-                        icon: Icon(Icons.graphic_eq_rounded),
-                        label: Text('Audio'),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.devices_rounded),
-                        label: Text('Devices'),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.tune_rounded),
-                        label: Text('DSP'),
-                      ),
-                    ],
-                  ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isDesktop = constraints.maxWidth >= 780;
+          return Row(
+            children: [
+              if (isDesktop)
+                M3ENavigationRail(
+                  selectedIndex: _navIndex,
+                  onDestinationSelected: (i) => setState(() => _navIndex = i),
+                  sections: const [
+                    M3ENavigationRailSection(
+                      destinations: [
+                        M3ENavigationRailDestination(
+                          icon: Icon(Icons.graphic_eq_rounded),
+                          label: 'Audio',
+                        ),
+                        M3ENavigationRailDestination(
+                          icon: Icon(Icons.devices_rounded),
+                          label: 'Devices',
+                        ),
+                        M3ENavigationRailDestination(
+                          icon: Icon(Icons.tune_rounded),
+                          label: 'DSP',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    M3EAppBar.sliver(
+                      titleText: 'liino',
+                      variant: M3EAppBarVariant.mediumFlexible,
+                      pinned: true,
+                      actions: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: M3ESegmentedButton<UiRoleMode>(
+                            segments: const [
+                              M3ESegment(value: UiRoleMode.auto, label: 'AUTO'),
+                              M3ESegment(value: UiRoleMode.sender, label: 'SENDER'),
+                              M3ESegment(
+                                value: UiRoleMode.receiver,
+                                label: 'RECEIVER',
+                              ),
+                            ],
+                            selected: _selectedMode,
+                            onSelectionChanged: (v) {
+                              if (v.isNotEmpty) {
+                                setState(() => _selectedMode = v);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.all(24),
+                      sliver: SliverList.list(
+                        children: [
+                          M3ECard(
+                            variant: _isStreaming
+                                ? M3ECardVariant.filled
+                                : M3ECardVariant.outlined,
+                            headline: _isStreaming
+                                ? 'Audio Link Active'
+                                : 'Ready to Connect',
+                            supportingText:
+                                'Mode: ${_selectedMode.first.name.toUpperCase()} · '
+                                'RingBuffer: 16/64 · Transports: LAN / USB / BT',
+                            actions: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Text('liino', style: textTheme.displaySmall),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Unified Bidirectional Audio Core',
-                                  style: textTheme.bodyMedium,
+                                M3EButton(
+                                  style: _isStreaming
+                                      ? M3EButtonStyle.tonal
+                                      : M3EButtonStyle.filled,
+                                  icon: Icon(
+                                    _isStreaming
+                                        ? Icons.stop_rounded
+                                        : Icons.play_arrow_rounded,
+                                  ),
+                                  onPressed: () =>
+                                      setState(() => _isStreaming = !_isStreaming),
+                                  child: Text(
+                                    _isStreaming ? 'Stop' : 'Start Link',
+                                  ),
                                 ),
                               ],
                             ),
-                            _buildRoleSelector(scheme),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        _buildHeroStatusCard(scheme, textTheme),
-                      ],
+                          ),
+                          const SizedBox(height: 16),
+                          if (_isStreaming)
+                            const M3EProgressIndicator.linearWavy()
+                          else
+                            Divider(color: scheme.outlineVariant),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRoleSelector(ColorScheme scheme) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(LiinoDesignTokens.radiusFull),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: UiRoleMode.values.map((mode) {
-          final selected = _selectedMode == mode;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedMode = mode),
-            child: AnimatedContainer(
-              duration: LiinoDesignTokens.motionQuick,
-              curve: LiinoDesignTokens.springCurve,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: selected ? scheme.primaryContainer : Colors.transparent,
-                borderRadius: BorderRadius.circular(LiinoDesignTokens.radiusFull),
-              ),
-              child: Text(
-                mode.name.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: selected
-                      ? scheme.onPrimaryContainer
-                      : scheme.onSurfaceVariant,
+                  ],
                 ),
               ),
-            ),
+            ],
           );
-        }).toList(),
+        },
       ),
-    );
-  }
-
-  Widget _buildHeroStatusCard(ColorScheme scheme, TextTheme textTheme) {
-    return AnimatedContainer(
-      duration: LiinoDesignTokens.motionEmphasized,
-      curve: LiinoDesignTokens.springCurve,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: _isStreaming
-            ? scheme.primaryContainer
-            : scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(LiinoDesignTokens.radiusExtraLarge),
-          topRight: const Radius.circular(LiinoDesignTokens.radiusMedium),
-          bottomLeft: const Radius.circular(LiinoDesignTokens.radiusMedium),
-          bottomRight: const Radius.circular(LiinoDesignTokens.radiusExtraLarge),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _isStreaming ? 'Audio Link Active' : 'Ready to Connect',
-                  style: textTheme.headlineSmall?.copyWith(
-                    color: _isStreaming
-                        ? scheme.onPrimaryContainer
-                        : scheme.onSurface,
-                  ),
+      bottomNavigationBar: MediaQuery.sizeOf(context).width < 780
+          ? M3ENavigationBar(
+              selectedIndex: _navIndex,
+              onDestinationSelected: (i) => setState(() => _navIndex = i),
+              destinations: const [
+                M3ENavigationBarDestination(
+                  icon: Icon(Icons.graphic_eq_rounded),
+                  label: 'Audio',
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Mode: ${_selectedMode.name.toUpperCase()} · RingBuffer: 16/64 · Transports: LAN / USB / BT',
-                  style: textTheme.bodyMedium,
+                M3ENavigationBarDestination(
+                  icon: Icon(Icons.devices_rounded),
+                  label: 'Devices',
+                ),
+                M3ENavigationBarDestination(
+                  icon: Icon(Icons.tune_rounded),
+                  label: 'DSP',
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          FilledButton.icon(
-            onPressed: _toggleStream,
-            icon: Icon(_isStreaming ? Icons.stop_rounded : Icons.play_arrow_rounded),
-            label: Text(_isStreaming ? 'Stop' : 'Start Link'),
-          ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 }

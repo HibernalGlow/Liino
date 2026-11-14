@@ -14,6 +14,13 @@
   ```
 - **能力驱动而非平台硬编码**：运行时通过 `DeviceCapabilities` 检测真实系统能力（`can_capture_audio`、`can_play_audio`、`can_virtual_microphone`、`supported_transports`），`Auto` 模式下默认 Android / iOS 为 `Sender`，Windows / macOS / Linux 为 `Receiver`；手动切换仅开放当前设备真实支持的能力。
 
+### UI 组件库与布局借鉴策略（不重复造轮子）
+
+- **MD3 Expressive 组件库**：直接使用 [`material_3_expressive`](https://pub.dev/packages/material_3_expressive)（`^1.2.1`，MIT）与 [`material_ui`](https://pub.dev/packages/material_ui)（`^1.11.0`）提供的 `M3EMaterialApp`、`M3EThemeData`、`M3ENavigationRail`、`M3ENavigationBar`、`M3ESegmentedButton`、`M3EButton`、`M3ECard`、`M3EList`、`M3EProgressIndicator`（含 wavy 波形进度条）等组件，禁止手搓重复的圆角令牌或基础控件。
+- **工程布局与交互参考**：
+  - 借鉴本地 `Rossi` 项目的 `SettingPageShell`（`M3EAppBar.sliver(largeFlexible)` + `scroll_spy` 吸顶目录）与双栏设置布局。
+  - 借鉴 [FlClash](https://github.com/chen08209/FlClash) 的桌面侧栏 / 悬浮 Dock 适配与 `CoreController` 状态防抖（600ms connecting 最小展示窗口）设计。
+
 ## 2. 分层架构与通信边界
 
 ```text

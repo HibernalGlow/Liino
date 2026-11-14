@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'design_system/tokens.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 import 'features/home/home_page.dart';
 
 void main() {
@@ -9,14 +9,17 @@ void main() {
 class LiinoApp extends StatelessWidget {
   const LiinoApp({super.key});
 
+  static const Color _seedColor = Color(0xFF006A6A);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return M3EMaterialApp(
       title: 'liino',
       debugShowCheckedModeBanner: false,
-      theme: LiinoDesignTokens.buildTheme(Brightness.light),
-      darkTheme: LiinoDesignTokens.buildTheme(Brightness.dark),
-      themeMode: ThemeMode.system,
+      data: M3EThemeData.light(seedColor: _seedColor),
+      autoTheming: true,
+      dynamicColoring: true,
+      drawUnderSystemBars: true,
       home: const LiinoHomePage(),
     );
   }
