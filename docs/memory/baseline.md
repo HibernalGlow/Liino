@@ -17,8 +17,8 @@
 | :--- | :--- | :--- |
 | Rust 核心单元测试 | `cargo test -p liino-{protocol,audio-core,engine,platform,daemon,infer,core}` | **116 passed, 0 failed**（engine 78 / audio-core 33 / core 2 / daemon 2 / platform 1） |
 | Clippy（`--all-targets`） | `cargo clippy ... --all-targets` | 无 `error`；仍有 `liino-infer` 数值代码的循环索引 / 精度类 warning 待清理 |
-| FRB Release 动态库 | `cargo build --release -p liino_api` | `target/release/libliino_api.dylib` = **852 KB** |
-| Flutter GUI Release | `flutter build macos --release` | `liino_app.app` = **23.0 MB**，内含 `Contents/Frameworks/libliino_api.dylib`（852 KB）与 `Contents/Resources/liino-daemon`（1.1 MB） |
+| FRB Release 动态库 | `cargo build --release -p liino_api` | `target/release/libliino_api.dylib` = **1.6 MB**（已链入 vendored `micyou-core`） |
+| Flutter GUI Release | `flutter build macos --release` | `liino_app.app` = **23.9 MB**，内含 `Contents/Frameworks/libliino_api.dylib`（1.6 MB）与 `Contents/Resources/liino-daemon`（1.1 MB） |
 | `liino-daemon` Release | `cargo build --release -p liino-daemon` | 二进制可启动，IPC socket 建在 `$XDG_RUNTIME_DIR` 或 `/tmp` |
 
 ## 3. Release 进程内存基线（2026-11-14 实测）
@@ -52,15 +52,27 @@
 3. **`liino-infer` 的 clippy deny 错误**：`fast_exp` 中 `LOG2E` 字面量触发 `clippy::approx_constant`，导致 `cargo clippy --all-targets` 直接失败；已改用 `std::f32::consts::LOG2_E`。
 4. **daemon 未使用导入**：`use std::sync::Arc` 已移除。
 
+## 4. Android arm64 基线（2026-11-14 真机实测）
+
+- **构建**：`apps/liino_app/tool/build_android_rust.sh` 交叉编译 `liino_api`（`aarch64-linux-android`，API 26），产物复制到 `android/app/src/main/jniLibs/arm64-v8a/`；随后 `flutter build apk --release --target-platform android-arm64`。
+- **产物**：`app-release.apk` = **18.2 MB**；包内 `lib/arm64-v8a/libliino_api.so` = **1.15 MB**（Gradle strip 后，未压缩 2.2 MB）。`minSdk=26`，因为 vendored `micyou-audio` 的 cpal 后端链接 `libaaudio`。
+- **安装**：本机 `adb install` 被系统限制拒绝（`INSTALL_FAILED_USER_RESTRICTED`），改用 `adb push` 到 `/data/local/tmp` 后 `adb shell pm install -r -d` 成功。属设备侧“USB 安装”限制，不是 APK 问题。
+- **运行验证**（真机 Android 17 / API 37，arm64）：
+  - App 正常启动并渲染仪表盘，`logcat` 输出 `[liino] Rust core loaded`，确认 FRB 成功加载 `lib/arm64-v8a/libliino_api.so`。
+  - 角色默认解析为 `SENDER`，与 `DeviceCapabilities::detect_current()` 的 Android 分支一致。
+  - 点击开始后 `AudioForegroundService` 进入前台：`isForeground=true`、`types=0x00000080`（microphone）、通知渠道 `liino_audio` 正常创建；按 Home 后进程与服务继续存活。
+- **内存（空闲）**：`dumpsys meminfo` TOTAL PSS **124,139 KB（约 121 MB）**，TOTAL RSS **256,316 KB**；其中 Graphics 46.7 MB、Native Heap 17.9 MB、Java Heap 3.9 MB。
+
 ## 5. 未能在本环境验证的平台与原因
 
-1. **Android Release (`.apk` / `.aab`)**：本机未配置 Android SDK / NDK，未执行真机编译与 `adb shell dumpsys meminfo` 采集；`AndroidAudioBridge`（MethodChannel 桩）尚未配套 Kotlin `ForegroundService` / `AudioRecord` 实现。
+1. **Android 音频链路**：APK 已编译、安装并验证 FRB 加载与前台服务生命周期；但 `AudioRecord` 采集、Opus 传输与长时运行尚未接入 Rust，因此“传输中”和数小时级内存曲线仍缺失。
 2. **Windows / Linux Release**：需在对应目标系统或 CI Runner 上执行编译与 Private Working Set / RSS 采集；Windows Named Pipe 路径仅通过 `cfg` 代码审查，未实机运行。
 
 ## 6. 下一步基线补全清单
 
 - [x] 安装完整 Xcode 后运行 `flutter build macos --release`，记录 GUI 启动、空闲、关闭销毁后的内存与 daemon 独立进程 RSS。
 - [x] 验证关闭桌面窗口后 Flutter 进程完全退出、daemon 继续运行（Phase 4 关键行为）。
-- [ ] 配置 Android SDK/NDK 后运行 `flutter build apk --release`，在真机上通过 `adb shell dumpsys meminfo` 记录启动、连接建立、音频传输与长时运行内存。
+- [x] 构建并安装 Android arm64 APK，记录启动与空闲 PSS，验证 FRB 加载与 `AudioForegroundService`。
+- [ ] 接入 Android `AudioRecord` → Rust 采集/编码/传输后，补测连接建立、音频传输与长时运行内存。
 - [ ] 在 Windows 11 环境运行 `flutter build windows --release`，记录 Private Working Set 与 Named Pipe IPC 内存开销。
 - [ ] 音频链路真正跑通后，补测“传输中”与“数小时级长时运行”的 RSS 增长曲线（Phase 6）。

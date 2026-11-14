@@ -4,10 +4,12 @@
 
 ## 当前状态（2026-11-14）
 
+- **实施细节以 ADR 为准**：`docs/architecture/adr/` 记录已定决策，未拍板项与推荐默认值见 `docs/architecture/grilling.md`。
+- **上游复用原则**：除了 **蓝牙** 和 **Flutter UI**，其余能力一律交给 MicYou。源码以 submodule 放在 `vendor/micyou` / `vendor/micyou-ios`，**直接 path 依赖，不复制**；机制与映射见 `upstream-reuse.md`。
 - Phase 1 已完成 macOS arm64 验证：Release `.app` 可编译运行，GUI 空闲 RSS 约 90–125 MB，关闭窗口后 GUI 进程退出、`liino-daemon` 存活。数据见 `docs/memory/baseline.md`。
-- Phase 2 的 Crate 迁移与单元测试已落地（116 个测试通过），但 Android / Windows / Linux 的目标平台编译尚未实机验证。
+- Phase 2 正在从“复制迁移”切换为“直接依赖”：`packages/liino_api` 已依赖 `micyou-core` 并通过 Android arm64 链接验证；早期复制件待逐步删除。
 - Phase 3 / Phase 4 只有骨架：Android 平台桥是 MethodChannel 桩，daemon 尚无托盘、登录自启与真实音频链路。
-- 下一优先事项：接入原生托盘与登录自启，并补齐 Android 前台服务与 AudioRecord。
+- 下一优先事项：把 daemon/移动端会话切到 `micyou-core` 的 discovery + transport，再接托盘、Android AudioRecord 与蓝牙。
 
 ## Phase 0：技术调研与基座克隆（已完成）
 - 对比 LocalSend、RustDesk 与官方 FRB v2 模板，确定 **LocalSend** 为基座。
@@ -20,16 +22,18 @@
 - 验证当前可用目标平台的 **Release 编译**（macOS arm64 已通过；Windows / Android 在对应环境补测）。
 - 测量并记录真实 Release 进程内存基线（启动、空闲、关闭窗口、daemon 常驻），写入 `docs/memory/baseline.md`。
 
-## Phase 2：Rust Core 整理与解耦（代码迁移完成，跨平台待验证）
-- 已迁移并重构 `liino-protocol`、`liino-audio-core`、`liino-engine`、`liino-platform`，并额外落地 `liino-infer` 与 `liino-daemon`。
-- 已剥离桌面 UI 假设：核心 Crate 不依赖 `arboard`、`open`、`notify-rust`、`global-hotkey` 或 Tauri。
-- 已为有界缓冲区（Jitter Buffer、RingBuffer）、Opus 解码与传输校验建立单元测试；`session.rs` 覆盖会话绑定与包校验状态机。
-- 待办：Windows / Linux / Android 目标平台 `cargo check` 与实机编译；清理 `liino-infer` 的 clippy warning。
+## Phase 2：Rust Core 整理与解耦（策略调整为直接依赖 vendor）
+- **不再复制 MicYou 代码**：`exclude = ["vendor"]` + path 依赖，直接使用 `micyou-core` / `micyou-protocol` / `micyou-audio` / `micyou-infer`。
+- 已用 `crates/arboard-shim`（`[patch.crates-io]`）解决 `arboard` 无 Android 后端的问题；Android `minSdk` 因 AAudio 提到 26。
+- `packages/liino_api` 已直接依赖 `micyou-core`，host 与 `aarch64-linux-android` 均通过编译/链接。
+- 早期复制件 `crates/liino-{protocol,infer,audio-core,engine}` 保留单元测试作为回归资产，待 daemon / FRB 全部切到 vendor 后删除。
+- 待办：把 daemon 与移动端的 discovery、TCP/UDP 会话、audio pipeline 切到 `micyou-core`；补 Windows / Linux 目标平台编译验证。
 
 ## Phase 3：Android 端迁移（进行中）
 - 使用 Flutter UI 替换 MicYou 原 `composeApp`（当前 `apps/liino_app` 已具备仪表盘 / 设备 / DSP 三页雏形）。
-- `AndroidAudioBridge` 已定义 MethodChannel 协议（权限、前台服务启停），尚缺 Kotlin 侧 `ForegroundService` 与 `AudioRecord` 实现。
-- 保留稳定的 Android `ForegroundService` 与原生麦克风权限/AudioRecord 适配，逐步将传输、Opus 与 DSP 切换至 `liino-engine`。
+- 已生成 `android/` 平台工程并打通构建链路：`tool/build_android_rust.sh` 交叉编译 `libliino_api.so` 到 `jniLibs/arm64-v8a`，`flutter build apk --release --target-platform android-arm64` 产出 17.7 MB APK。
+- `MainActivity` 已实现 `dev.liino.app/android_audio` MethodChannel（权限、前台服务启停），`AudioForegroundService` 以 `microphone` 类型常驻；真机验证 FRB 加载与前台服务生命周期通过。
+- 仍缺：`AudioRecord` 采集 → Rust 编码/传输的真实音频链路，以及设备发现与会话建立（当前两端 UI 无法互相发现）。
 - 对比旧版 Android APK 进行延迟、功耗与长时运行内存回归测试。
 
 ## Phase 4：Windows / macOS 桌面端迁移与 Daemon 落地（进行中）

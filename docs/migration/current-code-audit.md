@@ -1,5 +1,7 @@
 # MicYou 现有代码审计与迁移清单（Current Code Audit）
 
+> 更新（2026-11-14）：MicYou 已升级到 **v2.2.0**，Rust 工作区从仓库根 `crates/` 移到 `tauri-app/crates/`；蓝牙仍未实现。源码现以 submodule 固定在 `vendor/micyou`，复用与同步流程见 `upstream-reuse.md`。下文表格保留 v2.1.1 的审计结论，路径以 `upstream-reuse.md` 为准。
+
 审计目标仓库：[MicYou-Dev/MicYou](https://github.com/MicYou-Dev/MicYou)（版本 v2.1.1，许可证 GPL-3.0-or-later with MicYou Plugin Exception）。
 
 ## 1. 现有 Rust Workspace 资产评估
