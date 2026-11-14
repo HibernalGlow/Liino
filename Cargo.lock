@@ -2149,6 +2149,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "liino-core"
+version = "0.1.0"
+
+[[package]]
+name = "liino_api"
+version = "0.1.0"
+dependencies = [
+ "flutter_rust_bridge",
+ "liino-core",
+]
+
+[[package]]
 name = "line-clipping"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"

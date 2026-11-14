@@ -1,0 +1,22 @@
+name: liino_app
+description: liino unified cross-platform audio communication client (Phase 1 verification)
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  flutter: ^3.47.0
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  liino_api:
+    path: ../../packages/liino_api
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

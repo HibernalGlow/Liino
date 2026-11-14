@@ -2,7 +2,9 @@
 resolver = "3"
 members = [
     "cli",
+    "crates/liino-core",
     "packages/core",
+    "packages/liino_api",
     "packages/localsend_isolates/rust",
     "server",
 ]
