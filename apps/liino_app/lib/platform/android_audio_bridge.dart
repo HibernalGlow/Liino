@@ -9,7 +9,9 @@ import 'package:flutter/services.dart';
 /// permission checks, and AudioRecord / RFCOMM lifecycle isolated from
 /// shared Rust core logic.
 class AndroidAudioBridge {
-  static const MethodChannel _channel = MethodChannel('dev.liino.app/android_audio');
+  static const MethodChannel _channel = MethodChannel(
+    'dev.liino.app/android_audio',
+  );
 
   static bool get isSupported => !kIsWeb && Platform.isAndroid;
 
@@ -29,5 +31,17 @@ class AndroidAudioBridge {
   Future<void> stopForegroundAudioService() async {
     if (!isSupported) return;
     await _channel.invokeMethod<void>('stopForegroundAudioService');
+  }
+
+  /// Starts the RFCOMM server the desktop connects to (see ADR-0005).
+  Future<bool> startBluetoothServer() async {
+    if (!isSupported) return false;
+    final started = await _channel.invokeMethod<bool>('startBluetoothServer');
+    return started ?? false;
+  }
+
+  Future<void> stopBluetoothServer() async {
+    if (!isSupported) return;
+    await _channel.invokeMethod<void>('stopBluetoothServer');
   }
 }

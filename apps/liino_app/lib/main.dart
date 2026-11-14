@@ -5,12 +5,13 @@ import 'package:liino_api/liino_api.dart';
 import 'package:liino_app/l10n/app_localizations.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'features/home/home_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await RustLib.init(externalLibrary: ExternalLibrary.open(_nativeLibPath()));
+    await RustLib.init(externalLibrary: _externalLibrary());
     debugPrint('[liino] Rust core loaded');
   } catch (e) {
     debugPrint('[liino] Rust core unavailable: $e');
@@ -18,14 +19,31 @@ Future<void> main() async {
   runApp(const LiinoApp());
 }
 
-String _nativeLibPath() {
+/// Resolves the FRB dylib per platform. Android packages it in `jniLibs`, so
+/// the bare soname is enough for the dynamic linker to find it.
+ExternalLibrary _externalLibrary() {
   final override = Platform.environment['LIINO_NATIVE_LIB'];
   if (override != null && override.isNotEmpty) {
-    return override;
+    return ExternalLibrary.open(override);
   }
-  // macOS: <App>.app/Contents/MacOS/<executable> -> Contents/Frameworks/
-  final contents = File(Platform.resolvedExecutable).parent.parent;
-  return '${contents.path}/Frameworks/libliino_api.dylib';
+  if (Platform.isAndroid) {
+    return ExternalLibrary.open('libliino_api.so');
+  }
+  if (Platform.isIOS) {
+    return ExternalLibrary.open('libliino_api.framework/libliino_api');
+  }
+  final executable = File(Platform.resolvedExecutable);
+  if (Platform.isMacOS) {
+    // <App>.app/Contents/MacOS/<executable> -> Contents/Frameworks/
+    final contents = executable.parent.parent;
+    return ExternalLibrary.open(
+      '${contents.path}/Frameworks/libliino_api.dylib',
+    );
+  }
+  if (Platform.isWindows) {
+    return ExternalLibrary.open('${executable.parent.path}/libliino_api.dll');
+  }
+  return ExternalLibrary.open('${executable.parent.path}/libliino_api.so');
 }
 
 class LiinoApp extends StatelessWidget {

@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:liino_api/liino_api.dart';
 
+import 'android_audio_bridge.dart';
+
 /// Unified gateway between Flutter UI and Rust core:
 /// - Mobile (Android/iOS): calls Rust core in-process via FRB.
 /// - Desktop (macOS/Windows/Linux): prefers IPC to `liino-daemon` so the
@@ -107,11 +109,32 @@ class MobileFrbCoreGateway implements CoreGateway {
 
   @override
   Future<void> startLink() async {
+    if (AndroidAudioBridge.isSupported) {
+      final bridge = AndroidAudioBridge();
+      try {
+        if (await bridge.ensureAudioPermissions()) {
+          await bridge.startForegroundAudioService(roleMode: _mode);
+          if (_transport == 'bluetooth_rfcomm') {
+            await bridge.startBluetoothServer();
+          }
+        }
+      } catch (_) {
+        // The foreground host is best-effort; the link itself stays usable.
+      }
+    }
     _running = true;
   }
 
   @override
   Future<void> stopLink() async {
+    if (AndroidAudioBridge.isSupported) {
+      try {
+        await AndroidAudioBridge().stopBluetoothServer();
+        await AndroidAudioBridge().stopForegroundAudioService();
+      } catch (_) {
+        // Service may already be gone.
+      }
+    }
     _running = false;
   }
 }

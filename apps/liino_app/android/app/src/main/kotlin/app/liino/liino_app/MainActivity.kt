@@ -14,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel
  */
 class MainActivity : FlutterActivity() {
     private var pendingPermissionResult: MethodChannel.Result? = null
+    private val bluetoothServer by lazy { BluetoothRfcommServer(this) }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -29,6 +30,28 @@ class MainActivity : FlutterActivity() {
                         stopService(Intent(this, AudioForegroundService::class.java))
                         result.success(null)
                     }
+                    "startBluetoothServer" -> {
+                        val started = bluetoothServer.start()
+                        if (started) {
+                            result.success(true)
+                        } else {
+                            result.error(
+                                "bluetooth_server_failed",
+                                bluetoothServer.lastError ?: "Unknown Bluetooth error",
+                                null,
+                            )
+                        }
+                    }
+                    "stopBluetoothServer" -> {
+                        bluetoothServer.stop()
+                        result.success(null)
+                    }
+                    "bluetoothServerStatus" -> result.success(
+                        mapOf(
+                            "running" to bluetoothServer.isRunning,
+                            "error" to bluetoothServer.lastError,
+                        ),
+                    )
                     else -> result.notImplemented()
                 }
             }
@@ -75,6 +98,11 @@ class MainActivity : FlutterActivity() {
             grantResults[it] != PackageManager.PERMISSION_GRANTED
         }
         result.success(!denied)
+    }
+
+    override fun onDestroy() {
+        if (isFinishing) bluetoothServer.stop()
+        super.onDestroy()
     }
 
     private fun startAudioService(roleMode: String) {
