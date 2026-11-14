@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  App Sandbox is intentionally disabled: the desktop build must reach the
+	  liino-daemon Unix socket and CoreAudio/BlackHole devices, neither of which
+	  is available to a sandboxed app without per-path exceptions.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+</dict>
+</plist>
