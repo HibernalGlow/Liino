@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="audio_service_channel">Audio link</string>
+    <string name="audio_service_channel_description">Keeps the audio link alive while the app is in the background.</string>
+    <string name="audio_service_title">liino is active</string>
+    <string name="audio_service_text">Role: %1$s</string>
+</resources>

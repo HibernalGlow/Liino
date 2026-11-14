@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="audio_service_channel">音频链路</string>
+    <string name="audio_service_channel_description">应用进入后台后保持音频链路运行。</string>
+    <string name="audio_service_title">liino 正在运行</string>
+    <string name="audio_service_text">角色：%1$s</string>
+</resources>
