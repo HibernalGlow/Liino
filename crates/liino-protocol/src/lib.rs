@@ -29,3 +29,9 @@ pub const MDNS_SERVICE_TYPE: &str = "_micyou._tcp.local.";
 pub const MDNS_WEB_SERVICE_TYPE: &str = "_micyou-web._tcp.local.";
 pub const HANDSHAKE_CLIENT_STR: &[u8] = b"MicYouCheck1";
 pub const HANDSHAKE_SERVER_STR: &[u8] = b"MicYouCheck2";
+
+// liino LAN presence (not part of the MicYou wire protocol).
+/// UDP port used for periodic presence broadcasts and peer discovery.
+pub const DISCOVERY_PORT: u16 = 9126;
+/// Presence/control protocol version carried in announcements and handshakes.
+pub const PRESENCE_VERSION: u32 = 1;

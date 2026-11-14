@@ -4,7 +4,8 @@ use ipc::{
     default_ipc_endpoint, parse_ipc_line, IpcRequest, IpcResponse, MAX_IPC_FRAME_BYTES,
     MAX_IPC_QUEUE_DEPTH,
 };
-use liino_core::{ResolvedRole, RoleMode};
+use liino_core::{ResolvedRole, RoleMode, TransportType};
+use liino_engine::presence::{Presence, PresenceConfig};
 use liino_engine::stats::NetworkStats;
 use liino_platform::{enriched_capabilities, probe_current_platform, VirtualMicStatus};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
@@ -15,19 +16,52 @@ struct DaemonState {
     active_transport: String,
     is_running: bool,
     stats: NetworkStats,
+    presence: Option<Presence>,
 }
 
 impl Default for DaemonState {
     fn default() -> Self {
         let stats = NetworkStats::default();
         stats.set_audio_info(48_000, 1);
+        let caps = enriched_capabilities();
+        let role = caps
+            .resolve_role(RoleMode::Auto)
+            .unwrap_or_else(|_| caps.default_role());
+        let presence = Presence::start(PresenceConfig {
+            name: host_name(),
+            platform: caps.platform_name.clone(),
+            role: resolved_role_str(role).to_string(),
+            transports: caps
+                .supported_transports
+                .iter()
+                .map(|transport| transport_str(*transport))
+                .collect(),
+        })
+        .map_err(|error| eprintln!("[liino-daemon] presence disabled: {error}"))
+        .ok();
         Self {
             role_mode: RoleMode::Auto,
             active_transport: "lan_wifi".to_string(),
             is_running: false,
             stats,
+            presence,
         }
     }
+}
+
+fn host_name() -> String {
+    std::env::var("HOSTNAME")
+        .or_else(|_| std::env::var("COMPUTERNAME"))
+        .unwrap_or_else(|_| "liino desktop".to_string())
+}
+
+fn transport_str(transport: TransportType) -> String {
+    match transport {
+        TransportType::LanWifi => "lan_wifi",
+        TransportType::Usb => "usb",
+        TransportType::BluetoothRfcomm => "bluetooth_rfcomm",
+    }
+    .to_string()
 }
 
 struct QueuedCommand {
@@ -83,6 +117,36 @@ fn handle_request(
                 buffer_duration_ms: metrics.buffer_duration_ms,
             }
         }
+        IpcRequest::GetPeers => {
+            let (peers, connected, connecting) = match &state.presence {
+                Some(presence) => (
+                    presence.peers(),
+                    presence.connected(),
+                    presence.connecting(),
+                ),
+                None => (Vec::new(), None, None),
+            };
+            IpcResponse::Peers {
+                peers,
+                connected,
+                connecting,
+            }
+        }
+        IpcRequest::ConnectPeer { id } => match &state.presence {
+            Some(presence) => match presence.request_connect(&id) {
+                Ok(()) => IpcResponse::Ok,
+                Err(message) => IpcResponse::Error { message },
+            },
+            None => IpcResponse::Error {
+                message: "Presence is not running".to_string(),
+            },
+        },
+        IpcRequest::DisconnectPeer => {
+            if let Some(presence) = &state.presence {
+                presence.disconnect();
+            }
+            IpcResponse::Ok
+        }
         IpcRequest::SetRoleMode { mode } => {
             let parsed = match mode.as_str() {
                 "auto" => RoleMode::Auto,
@@ -95,10 +159,14 @@ fn handle_request(
                 }
             };
             let caps = enriched_capabilities();
-            if let Err(err) = caps.resolve_role(parsed) {
-                return IpcResponse::Error { message: err };
-            }
+            let resolved = match caps.resolve_role(parsed) {
+                Ok(resolved) => resolved,
+                Err(err) => return IpcResponse::Error { message: err },
+            };
             state.role_mode = parsed;
+            if let Some(presence) = &state.presence {
+                presence.set_role(resolved_role_str(resolved));
+            }
             IpcResponse::Ok
         }
         IpcRequest::SetTransport { transport } => {

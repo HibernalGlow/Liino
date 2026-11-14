@@ -1,3 +1,4 @@
+use liino_engine::presence::PeerInfo;
 use serde::{Deserialize, Serialize};
 
 /// Hard ceiling on a single IPC JSON line to prevent unbounded heap allocation.
@@ -10,6 +11,9 @@ pub const MAX_IPC_QUEUE_DEPTH: usize = 128;
 pub enum IpcRequest {
     Ping,
     GetStatus,
+    GetPeers,
+    ConnectPeer { id: String },
+    DisconnectPeer,
     SetRoleMode { mode: String },
     SetTransport { transport: String },
     StartLink,
@@ -38,6 +42,11 @@ pub enum IpcResponse {
         bitrate: i32,
         sample_rate: i32,
         buffer_duration_ms: i64,
+    },
+    Peers {
+        peers: Vec<PeerInfo>,
+        connected: Option<PeerInfo>,
+        connecting: Option<String>,
     },
     Ok,
     Error {
