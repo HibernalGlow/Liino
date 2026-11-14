@@ -46,7 +46,8 @@ liino 把蓝牙定为主力传输，因此这部分必须新增。可选技术�
 
 - 2026-11-14：macOS 27 上 `IOBluetoothDevice.pairedDevices()` 触发蓝牙 TCC 授权弹窗；授权后成功枚举 10 台已配对设备（含 Xiaomi 15）。
 - 2026-11-14：SDP 查询成功，可读取服务名与 RFCOMM channel ID（Xiaomi 15 的 Handsfree Gateway = 1、SMS/MMS = 26 等），证明 client 侧按 UUID 找 channel 的路径可用。
-- 待验证：Android 端 `listenUsingRfcommWithServiceRecord` 发布服务后，macOS 按 UUID 匹配并 `openRFCOMMChannelAsync` 建链。
+- 2026-11-15：端到端打通。Android `listenUsingRfcommWithServiceRecord("liino", UUID)` 发布服务；macOS SDP 查到 `liino` channel 7，`openRFCOMMChannelSync` 成功，收到 `LIINO-BT-READY`，发送 `hello` 收到 `echo:hello`。
+- 2026-11-15 实测（Xiaomi 15 ↔ macOS，RFCOMM，1 KB 回显）：RTT min 26.0 ms / p50 36.6 ms / p95 96.1 ms；吞吐约 11.1 KB/s（单向 payload，回显双向约 190 kbps）。结论：足够 Opus 64 kbps + 20 ms 帧（约 8 KB/s），但 p95 抖动偏高，必须依赖 Jitter Buffer；最终帧格式尚未接入。
 
 ## 代价
 

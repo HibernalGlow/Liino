@@ -31,3 +31,6 @@ cp -f "${SRC_DAEMON}" "${RESOURCES_DIR}/liino-daemon"
 chmod +x "${RESOURCES_DIR}/liino-daemon"
 codesign --force --sign - "${RESOURCES_DIR}/liino-daemon"
 echo "Embedded ${RESOURCES_DIR}/liino-daemon"
+
+"${SRCROOT}/bt_helper/build.sh" "${RESOURCES_DIR}"
+echo "Embedded ${RESOURCES_DIR}/liino-bt-helper"

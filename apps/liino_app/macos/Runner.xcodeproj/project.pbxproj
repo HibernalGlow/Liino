@@ -356,6 +356,7 @@
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(WRAPPER_NAME)/Contents/Frameworks/libliino_api.dylib",
 				"$(BUILT_PRODUCTS_DIR)/$(WRAPPER_NAME)/Contents/Resources/liino-daemon",
+				"$(BUILT_PRODUCTS_DIR)/$(WRAPPER_NAME)/Contents/Resources/liino-bt-helper",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

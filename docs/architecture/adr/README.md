@@ -18,6 +18,6 @@
 | [0006](0006-wire-compat.md) | 复用 MicYou 端口/mDNS/协议，保持互通 | Accepted |
 | [0007](0007-licensing.md) | 整体以 GPL-3.0-or-later 分发 | Accepted |
 | [0008](0008-security-model.md) | v1 沿用 MicYou 的安全模型（局域网不鉴权，蓝牙依赖配对） | Accepted |
-| [0009](0009-macos-bluetooth-bridge.md) | macOS 蓝牙通过 ObjC C-ABI shim 接入 daemon | Proposed |
+| [0009](0009-macos-bluetooth-bridge.md) | macOS 蓝牙通过独立 Swift helper 接入 daemon | Accepted |
 
 未决细节与需要产品确认的问题见 [`../grilling.md`](../grilling.md)。

@@ -33,7 +33,8 @@
 - 使用 Flutter UI 替换 MicYou 原 `composeApp`（当前 `apps/liino_app` 已具备仪表盘 / 设备 / DSP 三页雏形）。
 - 已生成 `android/` 平台工程并打通构建链路：`tool/build_android_rust.sh` 交叉编译 `libliino_api.so` 到 `jniLibs/arm64-v8a`，`flutter build apk --release --target-platform android-arm64` 产出 17.7 MB APK。
 - `MainActivity` 已实现 `dev.liino.app/android_audio` MethodChannel（权限、前台服务启停），`AudioForegroundService` 以 `microphone` 类型常驻；真机验证 FRB 加载与前台服务生命周期通过。
-- 仍缺：`AudioRecord` 采集 → Rust 编码/传输的真实音频链路，以及设备发现与会话建立（当前两端 UI 无法互相发现）。
+- 蓝牙（RFCCOMM）已完成端到端 spike：Android `listenUsingRfcommWithServiceRecord` 发布服务，macOS 按 SDP 查到 channel 并建链，握手/回显通过；Android 侧已接入“传输=蓝牙”时的启停，macOS 侧 helper 已打进 App bundle。
+- 仍缺：RFCOMM 上承载真实 20 ms Opus 帧、daemon 拉起/守护 helper、Android `AudioRecord` → 编码/传输的完整链路，以及设备发现与会话建立。
 - 对比旧版 Android APK 进行延迟、功耗与长时运行内存回归测试。
 
 ## Phase 4：Windows / macOS 桌面端迁移与 Daemon 落地（进行中）
