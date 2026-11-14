@@ -30,6 +30,25 @@ pub struct FrbEngineSnapshot {
     pub ring_buffer_capacity: usize,
 }
 
+#[derive(Debug, Clone)]
+pub struct FrbNetworkInterface {
+    pub interface_name: String,
+    pub ip: String,
+}
+
+/// LAN interfaces as detected by the vendored MicYou core. Used by the device
+/// page to show which address a peer can reach.
+#[frb(sync)]
+pub fn network_interfaces() -> Vec<FrbNetworkInterface> {
+    micyou_core::discovery::query_network_interfaces()
+        .into_iter()
+        .map(|iface| FrbNetworkInterface {
+            interface_name: iface.interface_name,
+            ip: iface.ip,
+        })
+        .collect()
+}
+
 #[frb(sync)]
 pub fn detect_capabilities() -> FrbDeviceCapabilities {
     let caps = DeviceCapabilities::detect_current();

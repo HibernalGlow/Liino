@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "cli",
+    "crates/arboard-shim",
     "crates/liino-audio-core",
     "crates/liino-core",
     "crates/liino-daemon",
@@ -14,6 +15,9 @@ members = [
     "packages/localsend_isolates/rust",
     "server",
 ]
+# Vendored MicYou crates belong to their own workspace and are consumed as path
+# dependencies only (see docs/migration/upstream-reuse.md).
+exclude = ["vendor"]
 
 # Profiles are only honored in the workspace root manifest.
 
@@ -28,3 +32,9 @@ opt-level = 2
 
 [profile.dev.package.num-bigint-dig]
 opt-level = 2
+
+# MicYou's core only uses arboard for its plugin clipboard API; the real crate
+# has no Android backend. liino does not expose it, so a no-op shim keeps the
+# Android build possible without patching the upstream submodule.
+[patch.crates-io]
+arboard = { path = "crates/arboard-shim" }
