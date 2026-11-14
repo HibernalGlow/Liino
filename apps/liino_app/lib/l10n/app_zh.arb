@@ -1,0 +1,63 @@
+{
+  "@@locale": "zh",
+
+  "navDashboard": "仪表盘",
+  "navDevices": "设备",
+  "navDsp": "音频处理",
+  "devicesTitle": "设备与传输",
+  "dspTitle": "音频与 DSP",
+
+  "transportLanWifi": "局域网 Wi-Fi",
+  "transportUsb": "USB 通道",
+  "transportBtRfcomm": "蓝牙 RFCOMM",
+  "segLan": "局域网",
+  "segUsb": "USB",
+  "segBt": "蓝牙",
+
+  "audioLinkActive": "音频连接已建立",
+  "readyToConnect": "准备连接",
+  "labelRole": "角色",
+  "labelTransport": "传输",
+  "labelBuffer": "缓冲",
+  "syncing": "同步中…",
+  "stopLink": "停止连接",
+  "startLink": "开始连接",
+
+  "modeAuto": "自动",
+  "modeSender": "发送端",
+  "modeReceiver": "接收端",
+
+  "metricLatencyJitter": "延迟与抖动",
+  "metricStreamBitrate": "流码率",
+  "metricLatencyStream": "延迟与流状态",
+  "wordJitter": "抖动",
+  "wordLoss": "丢包",
+
+  "virtualMicTitle": "虚拟麦克风",
+  "virtualMicDriverFallback": "系统音频",
+  "virtualMicReady": "{driver} 已安装并就绪",
+  "virtualMicMissing": "未检测到 {driver}（回退：扬声器监听）",
+
+  "daemonActive": "守护进程 IPC 已激活",
+  "frbInProcess": "FRB 进程内",
+  "hostLabel": "主机",
+  "unknown": "未知",
+  "inProcess": "进程内",
+  "ringLabel": "环形缓冲",
+  "detachGui": "分离界面",
+
+  "deviceLanTitle": "局域网 / Wi-Fi (mDNS)",
+  "deviceLanSubtitle": "TCP 9123 · UDP 9124 · IPv4/IPv6 双栈",
+  "deviceUsbTitle": "USB 通道 (ADB / usbmux)",
+  "deviceUsbSubtitle": "低抖动有线音频传输",
+  "deviceBtTitle": "蓝牙经典 (RFCOMM)",
+  "deviceBtSubtitle": "原生 RFCOMM 适配器（Android / 桌面端）",
+
+  "dspPureVox": "PureVox6 AI 降噪",
+  "dspPureVoxSub": "按需加载的纯 Rust 推理虚拟机",
+  "dspAec": "AEC7 回声消除",
+  "dspAecSub": "按需加载的声学回声消除器",
+  "dspAgc": "自动增益控制 (AGC)",
+  "dspAgcSub": "实时人声电平归一化",
+  "outputGain": "输出增益"
+}

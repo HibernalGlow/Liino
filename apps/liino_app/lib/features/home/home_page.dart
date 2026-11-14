@@ -1,8 +1,12 @@
-import 'package:liino_api/liino_api.dart';
+import 'dart:async';
+
+import 'package:liino_app/l10n/app_localizations.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
-
-enum UiRoleMode { auto, sender, receiver }
+import '../../platform/core_gateway.dart';
+import '../dashboard/dashboard_view.dart';
+import '../devices/devices_view.dart';
+import '../dsp/dsp_view.dart';
 
 class LiinoHomePage extends StatefulWidget {
   const LiinoHomePage({super.key});
@@ -12,11 +16,13 @@ class LiinoHomePage extends StatefulWidget {
 }
 
 class _LiinoHomePageState extends State<LiinoHomePage> {
-  Set<UiRoleMode> _selectedMode = {UiRoleMode.auto};
+  final CoreGateway _gateway = CoreGateway.platformDefault();
+  UiRoleMode _selectedMode = UiRoleMode.auto;
+  UiTransportMode _selectedTransport = UiTransportMode.lanWifi;
   int _navIndex = 0;
   bool _isStreaming = false;
-  FrbDeviceCapabilities? _capabilities;
-  FrbEngineSnapshot? _snapshot;
+  bool _isTransitioning = false;
+  GatewayStatus? _status;
 
   @override
   void initState() {
@@ -24,170 +30,132 @@ class _LiinoHomePageState extends State<LiinoHomePage> {
     _refreshFromCore();
   }
 
-  void _refreshFromCore() {
+  Future<void> _refreshFromCore() async {
     try {
-      final caps = detectCapabilities();
-      final snap = previewSnapshot(mode: _selectedMode.first.name);
+      final status = await _gateway.getStatus(
+        preferredMode: _selectedMode.name,
+      );
+      if (!mounted) return;
       setState(() {
-        _capabilities = caps;
-        _snapshot = snap;
+        _status = status;
+        _isStreaming = status.isRunning;
+        _selectedTransport = switch (status.activeTransport) {
+          'usb' => UiTransportMode.usb,
+          'bluetooth_rfcomm' => UiTransportMode.bluetoothRfcomm,
+          _ => UiTransportMode.lanWifi,
+        };
       });
     } catch (_) {
-      // Fallback gracefully when native library is unavailable in test mode.
+      // Fallback gracefully when native library & daemon are unavailable.
     }
+  }
+
+  /// FlClash-style 600ms display hold so fast IPC transitions do not flash.
+  Future<void> _toggleLink() async {
+    if (_isTransitioning) return;
+    final next = !_isStreaming;
+    setState(() => _isTransitioning = true);
+    final hold = Future<void>.delayed(const Duration(milliseconds: 600));
+    if (next) {
+      await _gateway.startLink();
+    } else {
+      await _gateway.stopLink();
+    }
+    await hold;
+    if (!mounted) return;
+    setState(() {
+      _isStreaming = next;
+      _isTransitioning = false;
+    });
+    await _refreshFromCore();
+  }
+
+  Future<void> _onModeChanged(UiRoleMode mode) async {
+    setState(() => _selectedMode = mode);
+    await _gateway.setRoleMode(mode.name);
+    await _refreshFromCore();
+  }
+
+  Future<void> _onTransportChanged(UiTransportMode transport) async {
+    setState(() => _selectedTransport = transport);
+    final wire = switch (transport) {
+      UiTransportMode.lanWifi => 'lan_wifi',
+      UiTransportMode.usb => 'usb',
+      UiTransportMode.bluetoothRfcomm => 'bluetooth_rfcomm',
+    };
+    await _gateway.setTransport(wire);
+    await _refreshFromCore();
   }
 
   @override
   Widget build(BuildContext context) {
-    final m3e = M3ETheme.of(context);
-    final scheme = m3e.colorScheme;
-    final caps = _capabilities;
-    final snap = _snapshot;
+    final isDesktop = MediaQuery.sizeOf(context).width >= 640;
+    final l = AppLocalizations.of(context);
 
-    final statusSummary = snap != null
-        ? 'Platform: ${caps?.platformName ?? "unknown"} · '
-            'Resolved: ${snap.resolvedRole.toUpperCase()} · '
-            'RingBuffer: ${snap.ringBufferLen}/${snap.ringBufferCapacity}'
-        : 'Mode: ${_selectedMode.first.name.toUpperCase()} · '
-            'Transports: LAN / USB / BT';
+    final body = switch (_navIndex) {
+      1 => const DevicesView(),
+      2 => const DspView(),
+      _ => DashboardView(
+          selectedMode: _selectedMode,
+          selectedTransport: _selectedTransport,
+          isStreaming: _isStreaming,
+          isTransitioning: _isTransitioning,
+          status: _status,
+          onModeChanged: _onModeChanged,
+          onTransportChanged: _onTransportChanged,
+          onToggleLink: _toggleLink,
+        ),
+    };
 
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= 780;
-          return Row(
-            children: [
-              if (isDesktop)
-                M3ENavigationRail(
-                  selectedIndex: _navIndex,
-                  onDestinationSelected: (i) => setState(() => _navIndex = i),
-                  sections: const [
-                    M3ENavigationRailSection(
-                      destinations: [
-                        M3ENavigationRailDestination(
-                          icon: Icon(Icons.graphic_eq_rounded),
-                          label: 'Audio',
-                        ),
-                        M3ENavigationRailDestination(
-                          icon: Icon(Icons.devices_rounded),
-                          label: 'Devices',
-                        ),
-                        M3ENavigationRailDestination(
-                          icon: Icon(Icons.tune_rounded),
-                          label: 'DSP',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    M3EAppBar.sliver(
-                      titleText: 'liino',
-                      variant: M3EAppBarVariant.mediumFlexible,
-                      pinned: true,
-                      actions: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: M3ESegmentedButton<UiRoleMode>(
-                            segments: [
-                              const M3ESegment(
-                                value: UiRoleMode.auto,
-                                label: 'AUTO',
-                              ),
-                              M3ESegment(
-                                value: UiRoleMode.sender,
-                                label: 'SENDER',
-                                enabled: caps?.canCaptureAudio ?? true,
-                              ),
-                              M3ESegment(
-                                value: UiRoleMode.receiver,
-                                label: 'RECEIVER',
-                                enabled:
-                                    (caps?.canPlayAudio ?? true) ||
-                                    (caps?.canVirtualMicrophone ?? true),
-                              ),
-                            ],
-                            selected: _selectedMode,
-                            onSelectionChanged: (v) {
-                              if (v.isNotEmpty) {
-                                setState(() => _selectedMode = v);
-                                _refreshFromCore();
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.all(24),
-                      sliver: SliverList.list(
-                        children: [
-                          M3ECard(
-                            variant: _isStreaming
-                                ? M3ECardVariant.filled
-                                : M3ECardVariant.outlined,
-                            headline: _isStreaming
-                                ? 'Audio Link Active'
-                                : 'Ready to Connect',
-                            supportingText: statusSummary,
-                            actions: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                M3EButton(
-                                  style: _isStreaming
-                                      ? M3EButtonStyle.tonal
-                                      : M3EButtonStyle.filled,
-                                  icon: Icon(
-                                    _isStreaming
-                                        ? Icons.stop_rounded
-                                        : Icons.play_arrow_rounded,
-                                  ),
-                                  onPressed: () =>
-                                      setState(() => _isStreaming = !_isStreaming),
-                                  child: Text(
-                                    _isStreaming ? 'Stop' : 'Start Link',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          if (_isStreaming)
-                            const M3EProgressIndicator.linearWavy()
-                          else
-                            Divider(color: scheme.outlineVariant),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      bottomNavigationBar: MediaQuery.sizeOf(context).width < 780
-          ? M3ENavigationBar(
+      body: Row(
+        children: [
+          if (isDesktop)
+            M3ENavigationRail(
               selectedIndex: _navIndex,
               onDestinationSelected: (i) => setState(() => _navIndex = i),
-              destinations: const [
-                M3ENavigationBarDestination(
-                  icon: Icon(Icons.graphic_eq_rounded),
-                  label: 'Audio',
-                ),
-                M3ENavigationBarDestination(
-                  icon: Icon(Icons.devices_rounded),
-                  label: 'Devices',
-                ),
-                M3ENavigationBarDestination(
-                  icon: Icon(Icons.tune_rounded),
-                  label: 'DSP',
+              sections: [
+                M3ENavigationRailSection(
+                  destinations: [
+                    M3ENavigationRailDestination(
+                      icon: const Icon(Icons.dashboard_rounded),
+                      label: l.navDashboard,
+                    ),
+                    M3ENavigationRailDestination(
+                      icon: const Icon(Icons.devices_rounded),
+                      label: l.navDevices,
+                    ),
+                    M3ENavigationRailDestination(
+                      icon: const Icon(Icons.tune_rounded),
+                      label: l.navDsp,
+                    ),
+                  ],
                 ),
               ],
-            )
-          : null,
+            ),
+          Expanded(child: body),
+        ],
+      ),
+      bottomNavigationBar: isDesktop
+          ? null
+          : M3ENavigationBar(
+              selectedIndex: _navIndex,
+              onDestinationSelected: (i) => setState(() => _navIndex = i),
+              destinations: [
+                M3ENavigationBarDestination(
+                  icon: const Icon(Icons.dashboard_rounded),
+                  label: l.navDashboard,
+                ),
+                M3ENavigationBarDestination(
+                  icon: const Icon(Icons.devices_rounded),
+                  label: l.navDevices,
+                ),
+                M3ENavigationBarDestination(
+                  icon: const Icon(Icons.tune_rounded),
+                  label: l.navDsp,
+                ),
+              ],
+            ),
     );
   }
 }
