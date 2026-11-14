@@ -64,24 +64,25 @@
 
 ## 3. 目标 Monorepo 工程结构
 
-在 LocalSend Workspace 基础上演进为清晰的分层结构（按真实依赖拆分 Crate，避免过度碎片化）：
+在 LocalSend Workspace 基础上演进为清晰的分层结构。**MicYou 的 Rust 核心以 git submodule 放在 `vendor/` 并直接 path 依赖，不复制到 `crates/`**；`crates/liino-*` 只保留 liino 自己维护的领域类型、daemon 与临时适配层。详见 `docs/migration/upstream-reuse.md`。
 
 ```text
 liino/
-├── app/                     # Flutter 统一客户端（MD3 Expressive UI + 平台工程）
+├── apps/liino_app/          # Flutter 统一客户端（MD3 Expressive UI + 平台工程）
 ├── packages/
-│   ├── liino_api/           # FRB 绑定包（移动端直连 Rust / 桌面端走 CoreGateway）
+│   ├── liino_api/           # FRB 绑定包（直接依赖 micyou-core）
 │   └── liino_design/        # Material 3 Expressive Design Tokens 与组件库（规划）
 ├── crates/
-│   ├── liino-protocol/      # Protobuf 消息定义与编解码
-│   ├── liino-audio-core/    # 音频缓冲、RingBuffer、Opus、DSP、PureVox/AEC7
-│   ├── liino-engine/        # 会话管理、传输抽象（LAN/USB/BT）、连接状态机
-│   ├── liino-platform/      # OS 音频设备/虚拟麦克风/蓝牙适配层
-│   ├── liino-frb/           # Flutter Rust Bridge 导出接口层
-│   └── liino-daemon/        # 桌面端独立后台宿主、IPC Server 与原生托盘
+│   ├── liino-core/          # liino 自有领域类型（RoleMode / TransportType / 能力）
+│   ├── liino-daemon/        # 桌面端独立后台宿主、IPC Server 与原生托盘
+│   ├── arboard-shim/        # 让 micyou-core 可在 Android 编译的 no-op 替身
+│   └── liino-{protocol,infer,audio-core,engine}/  # 早期复制件，切换完成后删除
+├── vendor/
+│   ├── micyou/              # MicYou 主仓库（submodule，pin v2.2.0）
+│   └── micyou-ios/          # MicYou iOS（submodule，参考）
 ├── docs/
 │   ├── architecture/        # 架构与选型文档、ADR
-│   ├── migration/           # MicYou 代码审计与分阶段迁移路线
+│   ├── migration/           # MicYou 代码审计、复用策略与分阶段迁移路线
 │   └── memory/              # 各平台 Release 内存基线与回归记录
 └── Cargo.toml / pubspec.yaml
 ```
