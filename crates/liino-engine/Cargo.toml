@@ -3,12 +3,24 @@ name = "liino-engine"
 version = "0.1.0"
 edition = "2021"
 license = "GPL-3.0-or-later"
-description = "Platform-agnostic session, jitter buffer, FEC, and telemetry engine for liino (migrated from MicYou)"
+description = "Platform-agnostic session, jitter buffer, FEC, Opus, socket binding, and telemetry engine for liino (migrated from MicYou)"
 
 [dependencies]
 liino-core = { path = "../liino-core" }
 liino-protocol = { path = "../liino-protocol" }
+local-ip-address = "0.6.13"
+log = "0.4.32"
+opus-decoder = "0.1.1"
 serde = { version = "1", features = ["derive"] }
+socket2 = "0.6.4"
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "sync", "time"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.186"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = ["winsock2"] }
 
 [dev-dependencies]
 prost = "0.14.3"
+tokio = { version = "1", features = ["full"] }

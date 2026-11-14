@@ -1,0 +1,10 @@
+[package]
+name = "liino-platform"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+description = "OS-specific audio device, virtual microphone, USB/ADB, and Bluetooth capability adapters for liino"
+
+[dependencies]
+liino-core = { path = "../liino-core" }
+serde = { version = "1", features = ["derive"] }

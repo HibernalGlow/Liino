@@ -1,0 +1,30 @@
+[package]
+name = "liino-audio-core"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+description = "Audio engine, resampling, ring buffers, and DSP/AEC pipeline for liino (migrated from MicYou)"
+
+[features]
+default = ["dsp"]
+dsp = ["dep:nnnoiseless", "dep:rustfft"]
+noise-suppression = ["dsp", "dep:liino-infer"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+log = "0.4.32"
+cpal = "0.18.2"
+rubato = "5.0.1"
+ringbuf = "0.5.2"
+
+# DSP dependencies (optional, on-demand)
+nnnoiseless = { version = "0.5.2", optional = true }
+liino-infer = { path = "../liino-infer", optional = true }
+rustfft = { version = "6.4.1", optional = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc = "0.2"
+core-foundation = "0.10"
+
+[target.'cfg(windows)'.dependencies]
+wasapi = "0.25"

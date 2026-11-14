@@ -2,9 +2,12 @@
 resolver = "3"
 members = [
     "cli",
+    "crates/liino-audio-core",
     "crates/liino-core",
+    "crates/liino-daemon",
     "crates/liino-engine",
     "crates/liino-infer",
+    "crates/liino-platform",
     "crates/liino-protocol",
     "packages/core",
     "packages/liino_api",
