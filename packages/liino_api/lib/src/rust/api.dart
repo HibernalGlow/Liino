@@ -4,71 +4,120 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import 'frb_generated.dart';
+
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`
 
-            // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `fmt`, `fmt`
+/// LAN interfaces as detected by the vendored MicYou core. Used by the device
+/// page to show which address a peer can reach.
+List<FrbNetworkInterface> networkInterfaces() => RustLib.instance.api.crateApiNetworkInterfaces();
 
+FrbDeviceCapabilities detectCapabilities() => RustLib.instance.api.crateApiDetectCapabilities();
 
-            FrbDeviceCapabilities  detectCapabilities() => RustLib.instance.api.crateApiDetectCapabilities();
+FrbEngineSnapshot previewSnapshot({required String mode}) =>
+    RustLib.instance.api.crateApiPreviewSnapshot(mode: mode);
 
-FrbEngineSnapshot  previewSnapshot({required String mode }) => RustLib.instance.api.crateApiPreviewSnapshot(mode: mode);
+class FrbDeviceCapabilities {
+  final String platformName;
+  final bool canCaptureAudio;
+  final bool canPlayAudio;
+  final bool canVirtualMicrophone;
+  final List<String> supportedTransports;
+  final String defaultRole;
 
-            class FrbDeviceCapabilities  {
-                final String platformName;
-final bool canCaptureAudio;
-final bool canPlayAudio;
-final bool canVirtualMicrophone;
-final List<String> supportedTransports;
-final String defaultRole;
+  const FrbDeviceCapabilities({
+    required this.platformName,
+    required this.canCaptureAudio,
+    required this.canPlayAudio,
+    required this.canVirtualMicrophone,
+    required this.supportedTransports,
+    required this.defaultRole,
+  });
 
-                const FrbDeviceCapabilities({required this.platformName ,required this.canCaptureAudio ,required this.canPlayAudio ,required this.canVirtualMicrophone ,required this.supportedTransports ,required this.defaultRole ,});
+  @override
+  int get hashCode =>
+      platformName.hashCode ^
+      canCaptureAudio.hashCode ^
+      canPlayAudio.hashCode ^
+      canVirtualMicrophone.hashCode ^
+      supportedTransports.hashCode ^
+      defaultRole.hashCode;
 
-                
-                
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbDeviceCapabilities &&
+          runtimeType == other.runtimeType &&
+          platformName == other.platformName &&
+          canCaptureAudio == other.canCaptureAudio &&
+          canPlayAudio == other.canPlayAudio &&
+          canVirtualMicrophone == other.canVirtualMicrophone &&
+          supportedTransports == other.supportedTransports &&
+          defaultRole == other.defaultRole;
+}
 
-                
-        @override
-        int get hashCode => platformName.hashCode^canCaptureAudio.hashCode^canPlayAudio.hashCode^canVirtualMicrophone.hashCode^supportedTransports.hashCode^defaultRole.hashCode;
-        
+class FrbEngineSnapshot {
+  final String roleMode;
+  final String resolvedRole;
+  final bool isRunning;
+  final int rttMs;
+  final double jitterMs;
+  final double packetLoss;
+  final BigInt ringBufferLen;
+  final BigInt ringBufferCapacity;
 
-                
-        @override
-        bool operator ==(Object other) =>
-            identical(this, other) ||
-            other is FrbDeviceCapabilities &&
-                runtimeType == other.runtimeType
-                && platformName == other.platformName&& canCaptureAudio == other.canCaptureAudio&& canPlayAudio == other.canPlayAudio&& canVirtualMicrophone == other.canVirtualMicrophone&& supportedTransports == other.supportedTransports&& defaultRole == other.defaultRole;
-        
-            }
+  const FrbEngineSnapshot({
+    required this.roleMode,
+    required this.resolvedRole,
+    required this.isRunning,
+    required this.rttMs,
+    required this.jitterMs,
+    required this.packetLoss,
+    required this.ringBufferLen,
+    required this.ringBufferCapacity,
+  });
 
-class FrbEngineSnapshot  {
-                final String roleMode;
-final String resolvedRole;
-final bool isRunning;
-final int rttMs;
-final double jitterMs;
-final double packetLoss;
-final BigInt ringBufferLen;
-final BigInt ringBufferCapacity;
+  @override
+  int get hashCode =>
+      roleMode.hashCode ^
+      resolvedRole.hashCode ^
+      isRunning.hashCode ^
+      rttMs.hashCode ^
+      jitterMs.hashCode ^
+      packetLoss.hashCode ^
+      ringBufferLen.hashCode ^
+      ringBufferCapacity.hashCode;
 
-                const FrbEngineSnapshot({required this.roleMode ,required this.resolvedRole ,required this.isRunning ,required this.rttMs ,required this.jitterMs ,required this.packetLoss ,required this.ringBufferLen ,required this.ringBufferCapacity ,});
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbEngineSnapshot &&
+          runtimeType == other.runtimeType &&
+          roleMode == other.roleMode &&
+          resolvedRole == other.resolvedRole &&
+          isRunning == other.isRunning &&
+          rttMs == other.rttMs &&
+          jitterMs == other.jitterMs &&
+          packetLoss == other.packetLoss &&
+          ringBufferLen == other.ringBufferLen &&
+          ringBufferCapacity == other.ringBufferCapacity;
+}
 
-                
-                
+class FrbNetworkInterface {
+  final String interfaceName;
+  final String ip;
 
-                
-        @override
-        int get hashCode => roleMode.hashCode^resolvedRole.hashCode^isRunning.hashCode^rttMs.hashCode^jitterMs.hashCode^packetLoss.hashCode^ringBufferLen.hashCode^ringBufferCapacity.hashCode;
-        
+  const FrbNetworkInterface({required this.interfaceName, required this.ip});
 
-                
-        @override
-        bool operator ==(Object other) =>
-            identical(this, other) ||
-            other is FrbEngineSnapshot &&
-                runtimeType == other.runtimeType
-                && roleMode == other.roleMode&& resolvedRole == other.resolvedRole&& isRunning == other.isRunning&& rttMs == other.rttMs&& jitterMs == other.jitterMs&& packetLoss == other.packetLoss&& ringBufferLen == other.ringBufferLen&& ringBufferCapacity == other.ringBufferCapacity;
-        
-            }
-            
+  @override
+  int get hashCode => interfaceName.hashCode ^ ip.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbNetworkInterface &&
+          runtimeType == other.runtimeType &&
+          interfaceName == other.interfaceName &&
+          ip == other.ip;
+}

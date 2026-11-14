@@ -4,333 +4,517 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
+
 import 'dart:async';
 import 'dart:convert';
+
 import 'frb_generated.dart';
 import 'frb_generated.io.dart' if (dart.library.js_interop) 'frb_generated.web.dart';
+
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
+/// Main entrypoint of the Rust API
+class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
+  @internal
+  static final instance = RustLib._();
 
-                /// Main entrypoint of the Rust API
-                class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
-                  @internal
-                  static final instance = RustLib._();
+  RustLib._();
 
-                  RustLib._();
+  /// Initialize flutter_rust_bridge
+  static Future<void> init({
+    RustLibApi? api,
+    BaseHandler? handler,
+    ExternalLibrary? externalLibrary,
+    bool forceSameCodegenVersion = true,
+  }) async {
+    await instance.initImpl(
+      api: api,
+      handler: handler,
+      externalLibrary: externalLibrary,
+      forceSameCodegenVersion: forceSameCodegenVersion,
+    );
+  }
 
-                  /// Initialize flutter_rust_bridge
-                  static Future<void> init({
-                    RustLibApi? api,
-                    BaseHandler? handler,
-                    ExternalLibrary? externalLibrary,
-                    bool forceSameCodegenVersion = true,
-                  }) async {
-                    await instance.initImpl(
-                      api: api,
-                      handler: handler,
-                      externalLibrary: externalLibrary,
-                      forceSameCodegenVersion: forceSameCodegenVersion,
-                    );
-                  }
+  /// Initialize flutter_rust_bridge in mock mode.
+  /// No libraries for FFI are loaded.
+  static void initMock({required RustLibApi api}) {
+    instance.initMockImpl(api: api);
+  }
 
-                  /// Initialize flutter_rust_bridge in mock mode.
-                  /// No libraries for FFI are loaded.
-                  static void initMock({
-                    required RustLibApi api,
-                  }) {
-                    instance.initMockImpl(
-                      api: api,
-                    );
-                  }
+  /// Dispose flutter_rust_bridge
+  ///
+  /// The call to this function is optional, since flutter_rust_bridge (and everything else)
+  /// is automatically disposed when the app stops.
+  static void dispose() => instance.disposeImpl();
 
-                  /// Dispose flutter_rust_bridge
-                  ///
-                  /// The call to this function is optional, since flutter_rust_bridge (and everything else)
-                  /// is automatically disposed when the app stops.
-                  static void dispose() => instance.disposeImpl();
+  @override
+  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor => RustLibApiImpl.new;
 
-                  @override
-                  ApiImplConstructor<RustLibApiImpl, RustLibWire> get apiImplConstructor => RustLibApiImpl.new;
+  @override
+  WireConstructor<RustLibWire> get wireConstructor => RustLibWire.fromExternalLibrary;
 
-                  @override
-                  WireConstructor<RustLibWire> get wireConstructor => RustLibWire.fromExternalLibrary;
+  @override
+  Future<void> executeRustInitializers() async {
+    await api.crateApiInitApp();
+  }
 
-                  @override
-                  Future<void> executeRustInitializers() async {
-                    await api.crateApiInitApp();
+  @override
+  ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig =>
+      kDefaultExternalLibraryLoaderConfig;
 
-                  }
+  @override
+  String get codegenVersion => '2.12.0';
 
-                  @override
-                  ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig => kDefaultExternalLibraryLoaderConfig;
+  @override
+  int get rustContentHash => -1994232905;
 
-                  @override
-                  String get codegenVersion => '2.12.0';
+  static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
+    stem: 'liino_api',
+    ioDirectory: 'target/release/',
+    webPrefix: 'pkg/',
+    wasmBindgenName: 'wasm_bindgen',
+  );
+}
 
-                  @override
-                  int get rustContentHash => 730252340;
+abstract class RustLibApi extends BaseApi {
+  FrbDeviceCapabilities crateApiDetectCapabilities();
 
-                  static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
-                    stem: 'liino_api',
-                    ioDirectory: 'target/release/',
-                    webPrefix: 'pkg/',
-                    wasmBindgenName: 'wasm_bindgen',
-                  );
-                }
-                
+  Future<void> crateApiInitApp();
 
-                abstract class RustLibApi extends BaseApi {
-                  FrbDeviceCapabilities crateApiDetectCapabilities();
+  List<FrbNetworkInterface> crateApiNetworkInterfaces();
 
-Future<void> crateApiInitApp();
+  FrbEngineSnapshot crateApiPreviewSnapshot({required String mode});
+}
 
-FrbEngineSnapshot crateApiPreviewSnapshot({required String mode });
+class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
+  RustLibApiImpl({
+    required super.handler,
+    required super.wire,
+    required super.generalizedFrbRustBinding,
+    required super.portManager,
+  });
 
-
-                }
-                
-
-                class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
-                  RustLibApiImpl({
-                    required super.handler,
-                    required super.wire,
-                    required super.generalizedFrbRustBinding,
-                    required super.portManager,
-                  });
-
-                  @override FrbDeviceCapabilities crateApiDetectCapabilities()  { return handler.executeSync(SyncTask(
-            callFfi: () {
-              
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
-            
-            },
-            codec: 
-        SseCodec(
+  @override
+  FrbDeviceCapabilities crateApiDetectCapabilities() {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
+        },
+        codec: SseCodec(
           decodeSuccessData: sse_decode_frb_device_capabilities,
           decodeErrorData: null,
-        )
-        ,
-            constMeta: kCrateApiDetectCapabilitiesConstMeta,
-            argValues: [],
-            apiImpl: this,
-        )); }
+        ),
+        constMeta: kCrateApiDetectCapabilitiesConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
 
+  TaskConstMeta get kCrateApiDetectCapabilitiesConstMeta =>
+      const TaskConstMeta(debugName: "detect_capabilities", argNames: []);
 
-        TaskConstMeta get kCrateApiDetectCapabilitiesConstMeta => const TaskConstMeta(
-            debugName: "detect_capabilities",
-            argNames: [],
-        );
-        
+  @override
+  Future<void> crateApiInitApp() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2, port: port_);
+        },
+        codec: SseCodec(decodeSuccessData: sse_decode_unit, decodeErrorData: null),
+        constMeta: kCrateApiInitAppConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
 
-@override Future<void> crateApiInitApp()  { return handler.executeNormal(NormalTask(
-            callFfi: (port_) {
-              
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2, port: port_);
-            
-            },
-            codec: 
-        SseCodec(
-          decodeSuccessData: sse_decode_unit,
+  TaskConstMeta get kCrateApiInitAppConstMeta =>
+      const TaskConstMeta(debugName: "init_app", argNames: []);
+
+  @override
+  List<FrbNetworkInterface> crateApiNetworkInterfaces() {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_frb_network_interface,
           decodeErrorData: null,
-        )
-        ,
-            constMeta: kCrateApiInitAppConstMeta,
-            argValues: [],
-            apiImpl: this,
-        )); }
+        ),
+        constMeta: kCrateApiNetworkInterfacesConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
 
+  TaskConstMeta get kCrateApiNetworkInterfacesConstMeta =>
+      const TaskConstMeta(debugName: "network_interfaces", argNames: []);
 
-        TaskConstMeta get kCrateApiInitAppConstMeta => const TaskConstMeta(
-            debugName: "init_app",
-            argNames: [],
-        );
-        
-
-@override FrbEngineSnapshot crateApiPreviewSnapshot({required String mode })  { return handler.executeSync(SyncTask(
-            callFfi: () {
-              
-            final serializer = SseSerializer(generalizedFrbRustBinding);sse_encode_String(mode, serializer);
-            return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
-            
-            },
-            codec: 
-        SseCodec(
+  @override
+  FrbEngineSnapshot crateApiPreviewSnapshot({required String mode}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(mode, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+        },
+        codec: SseCodec(
           decodeSuccessData: sse_decode_frb_engine_snapshot,
           decodeErrorData: sse_decode_String,
-        )
-        ,
-            constMeta: kCrateApiPreviewSnapshotConstMeta,
-            argValues: [mode],
-            apiImpl: this,
-        )); }
+        ),
+        constMeta: kCrateApiPreviewSnapshotConstMeta,
+        argValues: [mode],
+        apiImpl: this,
+      ),
+    );
+  }
 
+  TaskConstMeta get kCrateApiPreviewSnapshotConstMeta =>
+      const TaskConstMeta(debugName: "preview_snapshot", argNames: ["mode"]);
 
-        TaskConstMeta get kCrateApiPreviewSnapshotConstMeta => const TaskConstMeta(
-            debugName: "preview_snapshot",
-            argNames: ["mode"],
-        );
-        
+  @protected
+  String dco_decode_String(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as String;
+  }
 
+  @protected
+  bool dco_decode_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as bool;
+  }
 
+  @protected
+  double dco_decode_f_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as double;
+  }
 
-                  @protected String dco_decode_String(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return raw as String; }
+  @protected
+  FrbDeviceCapabilities dco_decode_frb_device_capabilities(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 6) throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    return FrbDeviceCapabilities(
+      platformName: dco_decode_String(arr[0]),
+      canCaptureAudio: dco_decode_bool(arr[1]),
+      canPlayAudio: dco_decode_bool(arr[2]),
+      canVirtualMicrophone: dco_decode_bool(arr[3]),
+      supportedTransports: dco_decode_list_String(arr[4]),
+      defaultRole: dco_decode_String(arr[5]),
+    );
+  }
 
-@protected bool dco_decode_bool(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return raw as bool; }
+  @protected
+  FrbEngineSnapshot dco_decode_frb_engine_snapshot(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 8) throw Exception('unexpected arr length: expect 8 but see ${arr.length}');
+    return FrbEngineSnapshot(
+      roleMode: dco_decode_String(arr[0]),
+      resolvedRole: dco_decode_String(arr[1]),
+      isRunning: dco_decode_bool(arr[2]),
+      rttMs: dco_decode_u_32(arr[3]),
+      jitterMs: dco_decode_f_32(arr[4]),
+      packetLoss: dco_decode_f_32(arr[5]),
+      ringBufferLen: dco_decode_usize(arr[6]),
+      ringBufferCapacity: dco_decode_usize(arr[7]),
+    );
+  }
 
-@protected double dco_decode_f_32(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return raw as double; }
+  @protected
+  FrbNetworkInterface dco_decode_frb_network_interface(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return FrbNetworkInterface(
+      interfaceName: dco_decode_String(arr[0]),
+      ip: dco_decode_String(arr[1]),
+    );
+  }
 
-@protected FrbDeviceCapabilities dco_decode_frb_device_capabilities(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-final arr = raw as List<dynamic>;
-                if (arr.length != 6) throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
-                return FrbDeviceCapabilities(platformName: dco_decode_String(arr[0]),
-canCaptureAudio: dco_decode_bool(arr[1]),
-canPlayAudio: dco_decode_bool(arr[2]),
-canVirtualMicrophone: dco_decode_bool(arr[3]),
-supportedTransports: dco_decode_list_String(arr[4]),
-defaultRole: dco_decode_String(arr[5]),); }
+  @protected
+  List<String> dco_decode_list_String(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_String).toList();
+  }
 
-@protected FrbEngineSnapshot dco_decode_frb_engine_snapshot(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-final arr = raw as List<dynamic>;
-                if (arr.length != 8) throw Exception('unexpected arr length: expect 8 but see ${arr.length}');
-                return FrbEngineSnapshot(roleMode: dco_decode_String(arr[0]),
-resolvedRole: dco_decode_String(arr[1]),
-isRunning: dco_decode_bool(arr[2]),
-rttMs: dco_decode_u_32(arr[3]),
-jitterMs: dco_decode_f_32(arr[4]),
-packetLoss: dco_decode_f_32(arr[5]),
-ringBufferLen: dco_decode_usize(arr[6]),
-ringBufferCapacity: dco_decode_usize(arr[7]),); }
+  @protected
+  List<FrbNetworkInterface> dco_decode_list_frb_network_interface(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_frb_network_interface).toList();
+  }
 
-@protected List<String> dco_decode_list_String(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return (raw as List<dynamic>).map(dco_decode_String).toList(); }
+  @protected
+  Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as Uint8List;
+  }
 
-@protected Uint8List dco_decode_list_prim_u_8_strict(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return raw as Uint8List; }
+  @protected
+  int dco_decode_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
 
-@protected int dco_decode_u_32(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return raw as int; }
+  @protected
+  int dco_decode_u_8(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
 
-@protected int dco_decode_u_8(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return raw as int; }
+  @protected
+  void dco_decode_unit(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return;
+  }
 
-@protected void dco_decode_unit(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return; }
+  @protected
+  BigInt dco_decode_usize(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeU64(raw);
+  }
 
-@protected BigInt dco_decode_usize(dynamic raw){ // Codec=Dco (DartCObject based), see doc to use other codecs
-return dcoDecodeU64(raw); }
+  @protected
+  String sse_decode_String(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_list_prim_u_8_strict(deserializer);
+    return utf8.decoder.convert(inner);
+  }
 
-@protected String sse_decode_String(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-var inner = sse_decode_list_prim_u_8_strict(deserializer);
-        return utf8.decoder.convert(inner); }
+  @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
+  }
 
-@protected bool sse_decode_bool(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-return deserializer.buffer.getUint8() != 0; }
+  @protected
+  double sse_decode_f_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getFloat32();
+  }
 
-@protected double sse_decode_f_32(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-return deserializer.buffer.getFloat32(); }
+  @protected
+  FrbDeviceCapabilities sse_decode_frb_device_capabilities(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_platformName = sse_decode_String(deserializer);
+    var var_canCaptureAudio = sse_decode_bool(deserializer);
+    var var_canPlayAudio = sse_decode_bool(deserializer);
+    var var_canVirtualMicrophone = sse_decode_bool(deserializer);
+    var var_supportedTransports = sse_decode_list_String(deserializer);
+    var var_defaultRole = sse_decode_String(deserializer);
+    return FrbDeviceCapabilities(
+      platformName: var_platformName,
+      canCaptureAudio: var_canCaptureAudio,
+      canPlayAudio: var_canPlayAudio,
+      canVirtualMicrophone: var_canVirtualMicrophone,
+      supportedTransports: var_supportedTransports,
+      defaultRole: var_defaultRole,
+    );
+  }
 
-@protected FrbDeviceCapabilities sse_decode_frb_device_capabilities(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-var var_platformName = sse_decode_String(deserializer);
-var var_canCaptureAudio = sse_decode_bool(deserializer);
-var var_canPlayAudio = sse_decode_bool(deserializer);
-var var_canVirtualMicrophone = sse_decode_bool(deserializer);
-var var_supportedTransports = sse_decode_list_String(deserializer);
-var var_defaultRole = sse_decode_String(deserializer);
-return FrbDeviceCapabilities(platformName: var_platformName, canCaptureAudio: var_canCaptureAudio, canPlayAudio: var_canPlayAudio, canVirtualMicrophone: var_canVirtualMicrophone, supportedTransports: var_supportedTransports, defaultRole: var_defaultRole); }
+  @protected
+  FrbEngineSnapshot sse_decode_frb_engine_snapshot(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_roleMode = sse_decode_String(deserializer);
+    var var_resolvedRole = sse_decode_String(deserializer);
+    var var_isRunning = sse_decode_bool(deserializer);
+    var var_rttMs = sse_decode_u_32(deserializer);
+    var var_jitterMs = sse_decode_f_32(deserializer);
+    var var_packetLoss = sse_decode_f_32(deserializer);
+    var var_ringBufferLen = sse_decode_usize(deserializer);
+    var var_ringBufferCapacity = sse_decode_usize(deserializer);
+    return FrbEngineSnapshot(
+      roleMode: var_roleMode,
+      resolvedRole: var_resolvedRole,
+      isRunning: var_isRunning,
+      rttMs: var_rttMs,
+      jitterMs: var_jitterMs,
+      packetLoss: var_packetLoss,
+      ringBufferLen: var_ringBufferLen,
+      ringBufferCapacity: var_ringBufferCapacity,
+    );
+  }
 
-@protected FrbEngineSnapshot sse_decode_frb_engine_snapshot(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-var var_roleMode = sse_decode_String(deserializer);
-var var_resolvedRole = sse_decode_String(deserializer);
-var var_isRunning = sse_decode_bool(deserializer);
-var var_rttMs = sse_decode_u_32(deserializer);
-var var_jitterMs = sse_decode_f_32(deserializer);
-var var_packetLoss = sse_decode_f_32(deserializer);
-var var_ringBufferLen = sse_decode_usize(deserializer);
-var var_ringBufferCapacity = sse_decode_usize(deserializer);
-return FrbEngineSnapshot(roleMode: var_roleMode, resolvedRole: var_resolvedRole, isRunning: var_isRunning, rttMs: var_rttMs, jitterMs: var_jitterMs, packetLoss: var_packetLoss, ringBufferLen: var_ringBufferLen, ringBufferCapacity: var_ringBufferCapacity); }
+  @protected
+  FrbNetworkInterface sse_decode_frb_network_interface(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_interfaceName = sse_decode_String(deserializer);
+    var var_ip = sse_decode_String(deserializer);
+    return FrbNetworkInterface(interfaceName: var_interfaceName, ip: var_ip);
+  }
 
-@protected List<String> sse_decode_list_String(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
+  @protected
+  List<String> sse_decode_list_String(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
 
-        var len_ = sse_decode_i_32(deserializer);
-        var ans_ = <String>[];
-        for (var idx_ = 0; idx_ < len_; ++idx_) { ans_.add(sse_decode_String(deserializer)); }
-        return ans_;
-         }
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <String>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_String(deserializer));
+    }
+    return ans_;
+  }
 
-@protected Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-var len_ = sse_decode_i_32(deserializer);
-                return deserializer.buffer.getUint8List(len_); }
+  @protected
+  List<FrbNetworkInterface> sse_decode_list_frb_network_interface(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
 
-@protected int sse_decode_u_32(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-return deserializer.buffer.getUint32(); }
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <FrbNetworkInterface>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_frb_network_interface(deserializer));
+    }
+    return ans_;
+  }
 
-@protected int sse_decode_u_8(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-return deserializer.buffer.getUint8(); }
+  @protected
+  Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var len_ = sse_decode_i_32(deserializer);
+    return deserializer.buffer.getUint8List(len_);
+  }
 
-@protected void sse_decode_unit(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
- }
+  @protected
+  int sse_decode_u_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint32();
+  }
 
-@protected BigInt sse_decode_usize(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-return deserializer.buffer.getBigUint64(); }
+  @protected
+  int sse_decode_u_8(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8();
+  }
 
-@protected int sse_decode_i_32(SseDeserializer deserializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-return deserializer.buffer.getInt32(); }
+  @protected
+  void sse_decode_unit(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+  }
 
-@protected void sse_encode_String(String self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer); }
+  @protected
+  BigInt sse_decode_usize(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getBigUint64();
+  }
 
-@protected void sse_encode_bool(bool self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-serializer.buffer.putUint8(self ? 1 : 0); }
+  @protected
+  int sse_decode_i_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getInt32();
+  }
 
-@protected void sse_encode_f_32(double self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-serializer.buffer.putFloat32(self); }
+  @protected
+  void sse_encode_String(String self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
+  }
 
-@protected void sse_encode_frb_device_capabilities(FrbDeviceCapabilities self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-sse_encode_String(self.platformName, serializer);
-sse_encode_bool(self.canCaptureAudio, serializer);
-sse_encode_bool(self.canPlayAudio, serializer);
-sse_encode_bool(self.canVirtualMicrophone, serializer);
-sse_encode_list_String(self.supportedTransports, serializer);
-sse_encode_String(self.defaultRole, serializer);
- }
+  @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
+  }
 
-@protected void sse_encode_frb_engine_snapshot(FrbEngineSnapshot self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-sse_encode_String(self.roleMode, serializer);
-sse_encode_String(self.resolvedRole, serializer);
-sse_encode_bool(self.isRunning, serializer);
-sse_encode_u_32(self.rttMs, serializer);
-sse_encode_f_32(self.jitterMs, serializer);
-sse_encode_f_32(self.packetLoss, serializer);
-sse_encode_usize(self.ringBufferLen, serializer);
-sse_encode_usize(self.ringBufferCapacity, serializer);
- }
+  @protected
+  void sse_encode_f_32(double self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putFloat32(self);
+  }
 
-@protected void sse_encode_list_String(List<String> self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-sse_encode_i_32(self.length, serializer);
-        for (final item in self) { sse_encode_String(item, serializer); } }
+  @protected
+  void sse_encode_frb_device_capabilities(FrbDeviceCapabilities self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.platformName, serializer);
+    sse_encode_bool(self.canCaptureAudio, serializer);
+    sse_encode_bool(self.canPlayAudio, serializer);
+    sse_encode_bool(self.canVirtualMicrophone, serializer);
+    sse_encode_list_String(self.supportedTransports, serializer);
+    sse_encode_String(self.defaultRole, serializer);
+  }
 
-@protected void sse_encode_list_prim_u_8_strict(Uint8List self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-sse_encode_i_32(self.length, serializer);
-                    serializer.buffer.putUint8List(self); }
+  @protected
+  void sse_encode_frb_engine_snapshot(FrbEngineSnapshot self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.roleMode, serializer);
+    sse_encode_String(self.resolvedRole, serializer);
+    sse_encode_bool(self.isRunning, serializer);
+    sse_encode_u_32(self.rttMs, serializer);
+    sse_encode_f_32(self.jitterMs, serializer);
+    sse_encode_f_32(self.packetLoss, serializer);
+    sse_encode_usize(self.ringBufferLen, serializer);
+    sse_encode_usize(self.ringBufferCapacity, serializer);
+  }
 
-@protected void sse_encode_u_32(int self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-serializer.buffer.putUint32(self); }
+  @protected
+  void sse_encode_frb_network_interface(FrbNetworkInterface self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.interfaceName, serializer);
+    sse_encode_String(self.ip, serializer);
+  }
 
-@protected void sse_encode_u_8(int self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-serializer.buffer.putUint8(self); }
+  @protected
+  void sse_encode_list_String(List<String> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_String(item, serializer);
+    }
+  }
 
-@protected void sse_encode_unit(void self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
- }
+  @protected
+  void sse_encode_list_frb_network_interface(
+    List<FrbNetworkInterface> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_frb_network_interface(item, serializer);
+    }
+  }
 
-@protected void sse_encode_usize(BigInt self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-serializer.buffer.putBigUint64(self); }
+  @protected
+  void sse_encode_list_prim_u_8_strict(Uint8List self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    serializer.buffer.putUint8List(self);
+  }
 
-@protected void sse_encode_i_32(int self, SseSerializer serializer){ // Codec=Sse (Serialization based), see doc to use other codecs
-serializer.buffer.putInt32(self); }
-                }
-                
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint32(self);
+  }
+
+  @protected
+  void sse_encode_u_8(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self);
+  }
+
+  @protected
+  void sse_encode_unit(void self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  void sse_encode_usize(BigInt self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putBigUint64(self);
+  }
+
+  @protected
+  void sse_encode_i_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putInt32(self);
+  }
+}
