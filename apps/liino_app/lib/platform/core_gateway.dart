@@ -141,7 +141,8 @@ class MobileFrbCoreGateway implements CoreGateway {
     }
     if (previewSnapshot(mode: _mode).resolvedRole == 'sender') {
       try {
-        startSender(target: senderTarget, port: 8554);
+        final targetPort = _transport == 'bluetooth_rfcomm' ? 8555 : 8554;
+        startSender(target: senderTarget, port: targetPort);
       } catch (_) {
         // Mic unavailable or permission denied; link stays up but silent.
       }

@@ -95,7 +95,11 @@ class _LiinoHomePageState extends State<LiinoHomePage> {
     final l = AppLocalizations.of(context);
 
     final body = switch (_navIndex) {
-      1 => const DevicesView(),
+      1 => DevicesView(
+          gateway: _gateway,
+          connectedBluetoothAddress: _status?.bluetoothAddress,
+          onBluetoothChanged: _refreshFromCore,
+        ),
       2 => const DspView(),
       _ => DashboardView(
           selectedMode: _selectedMode,

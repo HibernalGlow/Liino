@@ -6,6 +6,7 @@ class _FakeCoreGateway implements CoreGateway {
   String _mode = 'auto';
   String _transport = 'lan_wifi';
   bool _running = false;
+  String? connectedBluetooth;
 
   @override
   Future<GatewayStatus> getStatus({required String preferredMode}) async {
@@ -21,6 +22,7 @@ class _FakeCoreGateway implements CoreGateway {
       canPlayAudio: true,
       canVirtualMicrophone: false,
       virtualMicDriver: 'BlackHole',
+      bluetoothAddress: connectedBluetooth,
     );
   }
 
@@ -37,13 +39,19 @@ class _FakeCoreGateway implements CoreGateway {
   Future<void> stopLink() async => _running = false;
 
   @override
-  Future<List<LiinoBluetoothDevice>> getBluetoothDevices() async => const [];
+  Future<List<LiinoBluetoothDevice>> getBluetoothDevices() async => const [
+    LiinoBluetoothDevice(address: 'f0-2c-7b-fb-ca-9f', name: 'Xiaomi 15'),
+  ];
 
   @override
-  Future<void> connectBluetooth(String address) async {}
+  Future<void> connectBluetooth(String address) async {
+    connectedBluetooth = address;
+  }
 
   @override
-  Future<void> disconnectBluetooth() async {}
+  Future<void> disconnectBluetooth() async {
+    connectedBluetooth = null;
+  }
 }
 
 void main() {
@@ -54,5 +62,31 @@ void main() {
     await tester.pump();
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('Ready to Connect'), findsOneWidget);
+  });
+
+  testWidgets('DevicesView lists paired Bluetooth devices and connects', (
+    WidgetTester tester,
+  ) async {
+    final fake = _FakeCoreGateway();
+    await tester.pumpWidget(LiinoApp(gateway: fake));
+    await tester.pump();
+
+    await tester.tap(find.text('Devices').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Xiaomi 15'), findsOneWidget);
+    expect(find.text('f0-2c-7b-fb-ca-9f'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Connect'));
+    await tester.tap(find.text('Connect'));
+    await tester.pumpAndSettle();
+    expect(fake.connectedBluetooth, 'f0-2c-7b-fb-ca-9f');
+    expect(find.text('Disconnect'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Disconnect'));
+    await tester.tap(find.text('Disconnect'));
+    await tester.pumpAndSettle();
+    expect(fake.connectedBluetooth, isNull);
+    expect(find.text('Connect'), findsOneWidget);
   });
 }

@@ -20,6 +20,7 @@ struct DaemonState {
     active_transport: String,
     is_running: bool,
     server: Option<Arc<ServerState>>,
+    server_port: Option<u16>,
     engine_snapshot: Arc<Mutex<engine::EngineSnapshot>>,
     presence: Option<Presence>,
     bluetooth: Option<bluetooth::BluetoothLink>,
@@ -48,6 +49,7 @@ impl Default for DaemonState {
             active_transport: "lan_wifi".to_string(),
             is_running: false,
             server: None,
+            server_port: None,
             engine_snapshot: Arc::new(Mutex::new(engine::EngineSnapshot::default())),
             presence,
             bluetooth: None,
@@ -176,7 +178,7 @@ async fn handle_request(
         },
         IpcRequest::ConnectBluetooth { address } => {
             state.bluetooth = None;
-            match bluetooth::BluetoothLink::connect(&address) {
+            match bluetooth::BluetoothLink::connect(&address, state.server_port) {
                 Ok(link) => {
                     state.bluetooth = Some(link);
                     IpcResponse::Ok
@@ -239,16 +241,15 @@ async fn handle_request(
             if state.server.is_some() {
                 return IpcResponse::Ok;
             }
-            // micyou-core has no Bluetooth transport yet (ADR-0005); the core
-            // server runs in wifi mode while the BT demo link stays separate.
             let mode = match state.active_transport.as_str() {
-                "usb" => "usb",
+                "usb" | "bluetooth_rfcomm" => "usb",
                 _ => "wifi",
             };
             let request = match StartRequest::resolve(None, Some(mode), None, None) {
                 Ok(request) => request,
                 Err(message) => return IpcResponse::Error { message },
             };
+            let listen_port = request.port;
             let events = Arc::new(engine::LiinoEventSink::new(state.engine_snapshot.clone()));
             let server = Arc::new(ServerState::new(events, Arc::new(engine::LiinoHost), None));
             match server::start_server(&server, request).await {
@@ -260,7 +261,18 @@ async fn handle_request(
                         }),
                     );
                     state.server = Some(server);
+                    state.server_port = Some(listen_port);
                     state.is_running = true;
+                    if state.active_transport == "bluetooth_rfcomm" {
+                        if let Some(addr) = state.bluetooth.take().map(|b| b.address().to_string()) {
+                            match bluetooth::BluetoothLink::connect(&addr, Some(listen_port)) {
+                                Ok(link) => state.bluetooth = Some(link),
+                                Err(err) => {
+                                    eprintln!("[liino-daemon] bluetooth rebind failed: {err}");
+                                }
+                            }
+                        }
+                    }
                     IpcResponse::Ok
                 }
                 Err(message) => IpcResponse::Error { message },
@@ -271,6 +283,7 @@ async fn handle_request(
                 let _ = server::stop_server(&server).await;
                 server::service::close_output_device(&server);
             }
+            state.server_port = None;
             state.is_running = false;
             IpcResponse::Ok
         }

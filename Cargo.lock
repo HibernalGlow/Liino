@@ -2802,6 +2802,7 @@ dependencies = [
  "liino-engine",
  "liino-platform",
  "micyou-core",
+ "prost",
  "serde",
  "serde_json",
  "tokio",
