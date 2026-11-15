@@ -35,8 +35,12 @@ while index < args.count {
         index += 1
         if index < args.count { serviceName = args[index] }
     case "--list":
-        for device in IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice] ?? [] {
-            log("\(device.addressString ?? "?") \(device.name ?? "?")")
+        let paired = IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice] ?? []
+        let payload: [[String: String]] = paired.map {
+            ["address": $0.addressString ?? "", "name": $0.name ?? ""]
+        }
+        if let data = try? JSONSerialization.data(withJSONObject: payload) {
+            FileHandle.standardOutput.write(data)
         }
         exit(0)
     default:
@@ -54,12 +58,20 @@ guard let device = IOBluetoothDevice(addressString: address) else {
 
 // Refresh the SDP cache so a service published after pairing is visible.
 _ = device.performSDPQuery(nil)
-Thread.sleep(forTimeInterval: 1.5)
+RunLoop.current.run(until: Date().addingTimeInterval(2.0))
+
+let targetUuidBytes: [UInt8] = [
+    0x6C, 0x69, 0x69, 0x6E, 0x6F, 0x00, 0x4B, 0x42,
+    0x8C, 0x4C, 0x6C, 0x69, 0x69, 0x6E, 0x00, 0x01,
+]
+let targetUuid = IOBluetoothSDPUUID(bytes: targetUuidBytes, length: 16)
 
 var channelID: BluetoothRFCOMMChannelID = 0
 var found = false
 for service in device.services as? [IOBluetoothSDPServiceRecord] ?? [] {
-    guard (service.getServiceName() ?? "") == serviceName else { continue }
+    let nameMatches = (service.getServiceName() ?? "") == serviceName
+    let uuidMatches = service.hasService(from: [targetUuid])
+    guard nameMatches || uuidMatches else { continue }
     if service.getRFCOMMChannelID(&channelID) == kIOReturnSuccess {
         found = true
         break

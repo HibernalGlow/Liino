@@ -26,6 +26,8 @@
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>liino uses the microphone to capture audio for the selected peer.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>liino uses Bluetooth Classic RFCOMM to connect to paired audio devices.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

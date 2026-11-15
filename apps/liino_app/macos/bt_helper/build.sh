@@ -9,6 +9,7 @@ mkdir -p "$OUT_DIR"
 
 swiftc -O "$SRC_DIR/main.swift" \
     -o "$OUT_DIR/liino-bt-helper" \
-    -framework IOBluetooth
+    -framework IOBluetooth \
+    -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker "$SRC_DIR/Info.plist"
 codesign --force --sign - "$OUT_DIR/liino-bt-helper"
 echo "Built $OUT_DIR/liino-bt-helper"
