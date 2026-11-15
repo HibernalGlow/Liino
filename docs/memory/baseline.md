@@ -1,78 +1,78 @@
-# Phase 1 内存基线与编译验证记录（Memory Baseline）
-
-> 最后更新：2026-11-14（补齐 macOS Release GUI 与 `liino-daemon` 实测）
+# Phase 1 / Phase 3 内存基线与编译验证记录（Memory Baseline）
 
 ## 1. 测试环境
 
 - **主机平台**：macOS Apple Silicon (`darwin-arm64`)
-- **Xcode**：`27.2`（`Build 27B52`，`/Applications/Xcode.app`）
-- **Rust 工具链**：`cargo 1.99.1` / `rustc 1.99.1`（Homebrew；本机 `sccache` 在沙箱内不可用，采集时以 `RUSTC_WRAPPER=` 直连 rustc）
-- **Flutter / Dart 工具链**：Flutter `3.47.4` / Dart `3.13.3`（mise 提供；仓库 `.fvmrc` 目标为 `3.47.9`，本机未安装 fvm，`3.47.x` 满足 `pubspec.yaml` 约束）
-- **FRB**：`flutter_rust_bridge_codegen 2.12.0`
-- **测量工具**：`ps -o rss`、`vmmap -summary`、`footprint -p`、`screencapture` + 目视核对
+  - Rust 工具链：`cargo 1.99.1` / `rustc 1.99.1`（Homebrew）
+  - Flutter / Dart 工具链：Flutter `3.47.4` / Dart `3.13.7` / `flutter_rust_bridge_codegen 2.12.0`
+  - 测量工具：`/usr/bin/time -l`
+- **Android 真机**：`24129PN74C`（设备序列号 `3ade0ba3`，`android-arm64`，Android 17 / API 37）
+  - 测量工具：`adb -s 3ade0ba3 shell dumpsys meminfo app.liino.liino_app`
 
-## 2. 已验证产物（macOS arm64 Release）
+## 2. macOS arm64 Rust Release 基线
 
 | 验证项 | 命令 / 产物 | 实测结果 |
 | :--- | :--- | :--- |
-| Rust 核心单元测试 | `cargo test -p liino-{protocol,audio-core,engine,platform,daemon,infer,core}` | **116 passed, 0 failed**（engine 78 / audio-core 33 / core 2 / daemon 2 / platform 1） |
-| Clippy（`--all-targets`） | `cargo clippy ... --all-targets` | 无 `error`；仍有 `liino-infer` 数值代码的循环索引 / 精度类 warning 待清理 |
-| FRB Release 动态库 | `cargo build --release -p liino_api` | `target/release/libliino_api.dylib` = **1.6 MB**（已链入 vendored `micyou-core`） |
-| Flutter GUI Release | `flutter build macos --release` | `liino_app.app` = **23.9 MB**，内含 `Contents/Frameworks/libliino_api.dylib`（1.6 MB）与 `Contents/Resources/liino-daemon`（1.1 MB） |
-| `liino-daemon` Release | `cargo build --release -p liino-daemon` | 二进制可启动，IPC socket 建在 `$XDG_RUNTIME_DIR` 或 `/tmp` |
+| Rust 核心单元测试 | `cargo test -p liino-core -p liino-engine -p liino-platform -p liino-daemon` | 全部通过（`liino-core` 2、`liino-engine` 78、`liino-platform` 2、`liino-daemon` 2） |
+| `liino_api` Release 库 | `cargo build --release -p liino-core -p liino_api` | `libliino_api.dylib` = **857 KB**；`libliino_api.a` = **10 MB** |
+| `liino-daemon` Release 二进制 | `cargo build --release -p liino-daemon` | `target/release/liino-daemon` = **1.1 MB** |
+| Rust Core Release 进程基线 | `/usr/bin/time -l ./target/release/examples/mem_probe` | `maximum resident set size` = **1,867,776 B (~1.78 MiB)**；`peak memory footprint` = **1,261,952 B (~1.20 MiB)** |
 
-## 3. Release 进程内存基线（2026-11-14 实测）
+## 3. Android arm64 真机 Release 基线（`24129PN74C` / Android 17）
 
-| 指标 | `liino_app` GUI（空闲，已连 daemon） | `liino-daemon`（空闲） |
-| :--- | :--- | :--- |
-| RSS | 启动约 **120 MB**，16 s 后稳定在 **90–125 MB** | **~1.7 MB** |
-| `vmmap` Physical footprint | **111.9 MB**（peak **180.3 MB**） | **1.7 MB**（peak 1.7 MB） |
-| `footprint` phys_footprint | **~53–58 MB**（peak ~185 MB） | **~1.2 MB** |
-| 说明 | Flutter Engine + Impeller + Dart Heap 占绝对主体；Rust 核心以 dylib 形式常驻，自身贡献远小于 GUI 框架 | 纯 Rust + Tokio，无 GUI 依赖，适合常驻 |
+- **测试包**：`apps/liino_app/build/app/outputs/flutter-apk/app-release.apk`（**17 MB**，`Nov 15 14:20` 编译，含 `jniLibs/arm64-v8a/libliino_api.so` 2.51 MB）
+- **冷启动耗时**：`TotalTime = 335 ms`，`WaitTime = 339 ms`
+- **首页空闲内存（PID 30714，启动后 3s 采集）**：
 
-### 3.1 IPC 与生命周期验证
+| 指标 | PSS (KB) | RSS (KB) |
+| :--- | ---: | ---: |
+| **TOTAL** | **130,166 (~127.1 MiB)** | **266,576 (~260.3 MiB)** |
+| Native Heap | 24,768 | 26,536 |
+| Java Heap | 3,484 | 18,220 |
+| Graphics (`EGL/GL/Gfx`) | 40,516 | 40,520 |
+| Code | 33,180 | 156,256 |
+| Stack | 1,628 | 1,636 |
+| Private Dirty | 98,860 | — |
 
-| 验证项 | 方法 | 结果 |
-| :--- | :--- | :--- |
-| IPC 功能 | 经 Unix socket 依次发 `ping` / `get_status` / `set_role_mode` / `start_link` / `stop_link` | 全部返回预期 JSON；`get_status` 正确报告 `virtual_mic_installed=true`（BlackHole 2ch） |
-| IPC 延迟 | 200 次 `ping` 往返 | p50 **0.02 ms**，p95 **0.03 ms**，max **0.04 ms**（本机回环） |
-| GUI 自动拉起 daemon | 预先杀掉 daemon 与 socket 后启动 App | `DesktopIpcCoreGateway` 从 `Contents/Resources/liino-daemon` 拉起，~1 s 内 UI 显示“守护进程 IPC 已激活”，PID 与实际进程一致 |
-| GUI 重启复用 daemon | 窗口关闭后再次启动 App | 仍只有 1 个 daemon 进程，复用原 PID，不重复拉起 |
-| 关闭窗口释放 GUI | 关闭唯一窗口 | GUI 进程 **完全退出**，RSS 归零；daemon 进程与 socket 均存活 |
-| daemon 优雅退出 | IPC `shutdown_daemon` | 进程退出并删除 socket 文件 |
+## 4. Android 活跃态内存（`AudioForegroundService` + `BluetoothRfcommServer`）
 
-## 4. 本轮发现并修复的问题（诚实记录）
+- **状态**：`AudioForegroundService` 运行中，`BluetoothRfcommServer` 已在 RFCOMM SCN `13` 进入 `STATE_LISTENING`（`Role: SENDER · Transport: BT RFCOMM · Buffer: 20 ms`，PID `31909`）
+- **实测内存（`dumpsys meminfo app.liino.liino_app`）**：
 
-1. **App Sandbox 阻断桌面端 IPC**：Flutter macOS 模板默认开启 `com.apple.security.app-sandbox`。沙箱内 `File('/tmp/liino-daemon.sock').existsSync()` 失败，`DesktopIpcCoreGateway` 会静默回退到进程内 FRB（UI 显示“进程内 FRB”而非“守护进程 IPC 已激活”）。
-   - 处理：`DebugProfile.entitlements` / `Release.entitlements` 显式关闭 App Sandbox，并在 `Info.plist` 增加 `NSMicrophoneUsageDescription`。桌面端需要访问 daemon socket 与 CoreAudio/BlackHole，非 App Store 分发下这是必要取舍。
-   - 验证：重新 `flutter build macos --release` 后，界面显示“守护进程 IPC 已激活 · 主机: macOS (PID …)”，PID 与 daemon 实际进程一致。
-2. **桌面端缺少 daemon 拉起逻辑**：此前必须手动运行 `target/release/liino-daemon`，否则 GUI 只能走进程内 FRB，关闭窗口后音频会随 GUI 一起消失。
-   - 处理：`DesktopIpcCoreGateway._ensureDaemon()` 在 socket 不可用时按 `LIINO_DAEMON_BIN` → `Contents/Resources/liino-daemon` → 工作区 `target/release/liino-daemon` 的顺序查找并 detached 启动，随后轮询 `ping` 直到就绪；Xcode 构建脚本把 daemon 复制进 `Contents/Resources` 并 ad-hoc 签名。
-   - 验证：杀掉 daemon 后启动 App 会自动拉起；再次启动 App 时复用同一 PID。
-3. **`liino-infer` 的 clippy deny 错误**：`fast_exp` 中 `LOG2E` 字面量触发 `clippy::approx_constant`，导致 `cargo clippy --all-targets` 直接失败；已改用 `std::f32::consts::LOG2_E`。
-4. **daemon 未使用导入**：`use std::sync::Arc` 已移除。
+| 指标 | PSS (KB) | RSS (KB) |
+| :--- | ---: | ---: |
+| **TOTAL** | **121,166 (~118.3 MiB)** | **253,504 (~247.6 MiB)** |
+| Native Heap | 18,380 | 19,996 |
+| Java Heap | 4,504 | 27,028 |
+| Graphics (`EGL/GL/Gfx`) | 40,616 | 40,620 |
+| Code | 26,468 | 139,624 |
+| Stack | 1,032 | 1,044 |
+| Private Dirty | 79,492 | — |
 
-## 4. Android arm64 基线（2026-11-14 真机实测）
+## 5. macOS Desktop `liino-daemon` + `liino_app.app` 联调与生命周期内存
 
-- **构建**：`apps/liino_app/tool/build_android_rust.sh` 交叉编译 `liino_api`（`aarch64-linux-android`，API 26），产物复制到 `android/app/src/main/jniLibs/arm64-v8a/`；随后 `flutter build apk --release --target-platform android-arm64`。
-- **产物**：`app-release.apk` = **18.2 MB**；包内 `lib/arm64-v8a/libliino_api.so` = **1.15 MB**（Gradle strip 后，未压缩 2.2 MB）。`minSdk=26`，因为 vendored `micyou-audio` 的 cpal 后端链接 `libaaudio`。
-- **安装**：本机 `adb install` 被系统限制拒绝（`INSTALL_FAILED_USER_RESTRICTED`），改用 `adb push` 到 `/data/local/tmp` 后 `adb shell pm install -r -d` 成功。属设备侧“USB 安装”限制，不是 APK 问题。
-- **运行验证**（真机 Android 17 / API 37，arm64）：
-  - App 正常启动并渲染仪表盘，`logcat` 输出 `[liino] Rust core loaded`，确认 FRB 成功加载 `lib/arm64-v8a/libliino_api.so`。
-  - 角色默认解析为 `SENDER`，与 `DeviceCapabilities::detect_current()` 的 Android 分支一致。
-  - 点击开始后 `AudioForegroundService` 进入前台：`isForeground=true`、`types=0x00000080`（microphone）、通知渠道 `liino_audio` 正常创建；按 Home 后进程与服务继续存活。
-- **内存（空闲）**：`dumpsys meminfo` TOTAL PSS **124,139 KB（约 121 MB）**，TOTAL RSS **256,316 KB**；其中 Graphics 46.7 MB、Native Heap 17.9 MB、Java Heap 3.9 MB。
+- **IPC 端点**：`/tmp/liino-daemon.sock`（`liino-daemon` PID `14474`，`is_running: true`，`active_transport: bluetooth_rfcomm`，`virtual_mic_driver: BlackHole 2ch`）
+- **测量工具**：`libc` `proc_pidinfo(PROC_PIDTASKINFO)`
 
-## 5. 未能在本环境验证的平台与原因
+| 阶段 | `liino-daemon` PID / RSS | `liino_app` GUI PID / RSS | 说明 |
+| :--- | :--- | :--- | :--- |
+| GUI 启动前 | `14474` / **14.12 MiB** | — | Daemon 独立常驻 |
+| GUI 首次拉起 | `14474` / **14.27 MiB** | `32301` / **81.38 MiB** | IPC `get_status` 连接成功 |
+| 关闭 GUI 进程后 | `14474` / **14.27 MiB** | 已退出（**0 / 释放 81.38 MiB**） | `ping` 仍返回同一 `pid: 14474` |
+| 重新拉起 GUI | `14474` / **14.23 MiB** | `32314` / **80.92 MiB** | 成功重新挂载到同一 Daemon |
 
-1. **Android 音频链路**：APK 已编译、安装并验证 FRB 加载与前台服务生命周期；但 `AudioRecord` 采集、Opus 传输与长时运行尚未接入 Rust，因此“传输中”和数小时级内存曲线仍缺失。
-2. **Windows / Linux Release**：需在对应目标系统或 CI Runner 上执行编译与 Private Working Set / RSS 采集；Windows Named Pipe 路径仅通过 `cfg` 代码审查，未实机运行。
+## 6. macOS ↔ Android 蓝牙 RFCOMM 实机联调（`glow-air` ↔ `Xiaomi 15` / `3ade0ba3`）
 
-## 6. 下一步基线补全清单
+- **连接路径**：`liino_app.app` → `liino-daemon`（PID `42099`）→ `liino-bt-helper` → `IOBluetooth` → Android `BluetoothRfcommServer`（UUID `6C69696E-6F00-4B42-8C4C-6C69696E0001`）
+- **实测结果**：
+  - `list_bluetooth_devices` 成功枚举出 `{"address":"f0-2c-7b-fb-ca-9f","name":"Xiaomi 15"}` 等 11 条已配对记录。
+  - `connect_bluetooth("f0-2c-7b-fb-ca-9f")` 返回 `{"type":"ok"}`，`get_status` 显示 `"bluetooth_address":"f0-2c-7b-fb-ca-9f"`。
+  - Android `logcat -d -s liino-bt` 记录：`11-15 15:03:40.966 31909 4093 I liino-bt: channel accepted from DC:93:96:12:9B:34`（服务端随后写出 `LIINO-BT-READY\n`；`liino-daemon` 当前 `BluetoothLink` 为原始字节流通道占位，尚未接入帧化音频/echo 协议）。
+- **连接态内存**：
+  - macOS `liino-daemon`（PID `42099`）：**19.78 MiB RSS**
+  - Android `app.liino.liino_app`（PID `31909`）：**TOTAL PSS = 100,882 KB (~98.5 MiB)** / **TOTAL RSS = 219,788 KB (~214.6 MiB)**
 
-- [x] 安装完整 Xcode 后运行 `flutter build macos --release`，记录 GUI 启动、空闲、关闭销毁后的内存与 daemon 独立进程 RSS。
-- [x] 验证关闭桌面窗口后 Flutter 进程完全退出、daemon 继续运行（Phase 4 关键行为）。
-- [x] 构建并安装 Android arm64 APK，记录启动与空闲 PSS，验证 FRB 加载与 `AudioForegroundService`。
-- [ ] 接入 Android `AudioRecord` → Rust 采集/编码/传输后，补测连接建立、音频传输与长时运行内存。
-- [ ] 在 Windows 11 环境运行 `flutter build windows --release`，记录 Private Working Set 与 Named Pipe IPC 内存开销。
-- [ ] 音频链路真正跑通后，补测“传输中”与“数小时级长时运行”的 RSS 增长曲线（Phase 6）。
+## 7. 尚未验证与环境限制
+
+1. **蓝牙音频帧传输**：`BluetoothRfcommServer` 与 `BluetoothLink` 当前完成 RFCOMM 通道建立与服务端就绪握手（`LIINO-BT-READY\n`），`micyou-core` 蓝牙帧传输层尚未接入。
+2. **Windows / Linux 实机基线**：待在对应平台补测。
