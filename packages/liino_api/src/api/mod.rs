@@ -75,6 +75,26 @@ pub fn detect_capabilities() -> FrbDeviceCapabilities {
 }
 
 #[frb(sync)]
+pub fn start_sender(target: String, port: u16) -> Result<(), String> {
+    crate::sender::start_sender(target, port)
+}
+
+#[frb(sync)]
+pub fn stop_sender() {
+    crate::sender::stop_sender();
+}
+
+#[frb(sync)]
+pub fn sender_running() -> bool {
+    crate::sender::sender_running()
+}
+
+#[frb(sync)]
+pub fn send_remote_key(action: String) -> Result<(), String> {
+    crate::sender::send_remote_key(action)
+}
+
+#[frb(sync)]
 pub fn preview_snapshot(mode: String) -> Result<FrbEngineSnapshot, String> {
     let caps = DeviceCapabilities::detect_current();
     let parsed_mode = match mode.as_str() {

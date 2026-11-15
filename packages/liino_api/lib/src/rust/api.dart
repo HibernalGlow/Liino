@@ -15,6 +15,16 @@ List<FrbNetworkInterface> networkInterfaces() => RustLib.instance.api.crateApiNe
 
 FrbDeviceCapabilities detectCapabilities() => RustLib.instance.api.crateApiDetectCapabilities();
 
+void startSender({required String target, required int port}) =>
+    RustLib.instance.api.crateApiStartSender(target: target, port: port);
+
+void stopSender() => RustLib.instance.api.crateApiStopSender();
+
+bool senderRunning() => RustLib.instance.api.crateApiSenderRunning();
+
+void sendRemoteKey({required String action}) =>
+    RustLib.instance.api.crateApiSendRemoteKey(action: action);
+
 FrbEngineSnapshot previewSnapshot({required String mode}) =>
     RustLib.instance.api.crateApiPreviewSnapshot(mode: mode);
 
