@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:liino_app/l10n/app_localizations.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 import '../../platform/core_gateway.dart';
@@ -34,22 +33,21 @@ class DashboardView extends StatelessWidget {
   final ValueChanged<UiTransportMode> onTransportChanged;
   final VoidCallback onToggleLink;
 
-  String _transportLabel(AppLocalizations l) => switch (selectedTransport) {
-        UiTransportMode.lanWifi => l.transportLanWifi,
-        UiTransportMode.usb => l.transportUsb,
-        UiTransportMode.bluetoothRfcomm => l.transportBtRfcomm,
+  String get _transportLabel => switch (selectedTransport) {
+        UiTransportMode.lanWifi => 'LAN Wi-Fi',
+        UiTransportMode.usb => 'USB Tunnel',
+        UiTransportMode.bluetoothRfcomm => 'BT RFCOMM',
       };
 
   @override
   Widget build(BuildContext context) {
     final m3e = M3ETheme.of(context);
     final emphasized = m3e.typography.emphasized;
-    final l = AppLocalizations.of(context);
 
     return CustomScrollView(
       slivers: [
-        M3EAppBar.sliver(
-          titleText: l.navDashboard,
+        const M3EAppBar.sliver(
+          titleText: 'Dashboard',
           variant: M3EAppBarVariant.mediumFlexible,
           pinned: true,
         ),
@@ -73,11 +71,11 @@ class DashboardView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (columns == 4)
-                      _buildFourColumnGrid(context, l, m3e, emphasized, gap)
+                      _buildFourColumnGrid(context, m3e, emphasized, gap)
                     else if (columns == 2)
-                      _buildTwoColumnGrid(context, l, m3e, emphasized, gap)
+                      _buildTwoColumnGrid(context, m3e, emphasized, gap)
                     else
-                      _buildSingleColumn(context, l, m3e, emphasized, gap),
+                      _buildSingleColumn(context, m3e, emphasized, gap),
                   ],
                 ),
               ),
@@ -90,7 +88,6 @@ class DashboardView extends StatelessWidget {
 
   Widget _buildFourColumnGrid(
     BuildContext context,
-    AppLocalizations l,
     M3EThemeData m3e,
     M3ETypeScale emphasized,
     double gap,
@@ -106,18 +103,17 @@ class DashboardView extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: RepaintBoundary(
-                  child: _buildHeroCard(l, m3e, emphasized),
+                  child: _buildHeroCard(m3e, emphasized),
                 ),
               ),
               Expanded(
                 child: RepaintBoundary(
                   child: _buildMetricCard(
-                    title: l.metricLatencyJitter,
+                    title: 'Latency & Jitter',
                     primary: '${status?.rttMs ?? 0} ms',
                     secondary:
-                        '${l.wordJitter} ${(status?.jitterMs ?? 0.0).toStringAsFixed(1)} ms',
+                        'Jitter ${(status?.jitterMs ?? 0.0).toStringAsFixed(1)} ms',
                     icon: Icons.speed_rounded,
-                    emphasized: emphasized,
                     m3e: m3e,
                   ),
                 ),
@@ -125,13 +121,11 @@ class DashboardView extends StatelessWidget {
               Expanded(
                 child: RepaintBoundary(
                   child: _buildMetricCard(
-                    title: l.metricStreamBitrate,
+                    title: 'Stream Bitrate',
                     primary: '${((status?.bitrate ?? 0) / 1000).toStringAsFixed(1)} kbps',
                     secondary:
-                        '${(status?.sampleRate ?? 48000) ~/ 1000} kHz · ${l.wordLoss} '
-                        '${((status?.packetLossRate ?? 0.0) * 100).toStringAsFixed(1)}%',
+                        '${(status?.sampleRate ?? 48000) ~/ 1000} kHz · Loss ${((status?.packetLossRate ?? 0.0) * 100).toStringAsFixed(1)}%',
                     icon: Icons.graphic_eq_rounded,
-                    emphasized: emphasized,
                     m3e: m3e,
                   ),
                 ),
@@ -142,8 +136,8 @@ class DashboardView extends StatelessWidget {
         Row(
           spacing: gap,
           children: [
-            Expanded(flex: 2, child: _buildRoleControlBar(l)),
-            Expanded(flex: 2, child: _buildTransportControlBar(l)),
+            Expanded(flex: 2, child: _buildRoleControlBar()),
+            Expanded(flex: 2, child: _buildTransportControlBar()),
           ],
         ),
         IntrinsicHeight(
@@ -151,8 +145,8 @@ class DashboardView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: gap,
             children: [
-              Expanded(child: RepaintBoundary(child: _buildVirtualMicCard(l, m3e, emphasized))),
-              Expanded(child: RepaintBoundary(child: _buildDaemonCard(context, l, m3e, emphasized))),
+              Expanded(child: RepaintBoundary(child: _buildVirtualMicCard(m3e))),
+              Expanded(child: RepaintBoundary(child: _buildDaemonCard(context, m3e))),
             ],
           ),
         ),
@@ -162,7 +156,6 @@ class DashboardView extends StatelessWidget {
 
   Widget _buildTwoColumnGrid(
     BuildContext context,
-    AppLocalizations l,
     M3EThemeData m3e,
     M3ETypeScale emphasized,
     double gap,
@@ -170,9 +163,9 @@ class DashboardView extends StatelessWidget {
     return Column(
       spacing: gap,
       children: [
-        _buildHeroCard(l, m3e, emphasized),
-        _buildRoleControlBar(l),
-        _buildTransportControlBar(l),
+        _buildHeroCard(m3e, emphasized),
+        _buildRoleControlBar(),
+        _buildTransportControlBar(),
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -180,22 +173,20 @@ class DashboardView extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildMetricCard(
-                  title: l.metricLatencyJitter,
+                  title: 'Latency & Jitter',
                   primary: '${status?.rttMs ?? 0} ms',
                   secondary:
-                      '${l.wordJitter} ${(status?.jitterMs ?? 0.0).toStringAsFixed(1)} ms',
+                      'Jitter ${(status?.jitterMs ?? 0.0).toStringAsFixed(1)} ms',
                   icon: Icons.speed_rounded,
-                  emphasized: emphasized,
                   m3e: m3e,
                 ),
               ),
               Expanded(
                 child: _buildMetricCard(
-                  title: l.metricStreamBitrate,
+                  title: 'Stream Bitrate',
                   primary: '${((status?.bitrate ?? 0) / 1000).toStringAsFixed(1)} kbps',
                   secondary: '${(status?.sampleRate ?? 48000) ~/ 1000} kHz',
                   icon: Icons.graphic_eq_rounded,
-                  emphasized: emphasized,
                   m3e: m3e,
                 ),
               ),
@@ -207,8 +198,8 @@ class DashboardView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: gap,
             children: [
-              Expanded(child: _buildVirtualMicCard(l, m3e, emphasized)),
-              Expanded(child: RepaintBoundary(child: _buildDaemonCard(context, l, m3e, emphasized))),
+              Expanded(child: _buildVirtualMicCard(m3e)),
+              Expanded(child: _buildDaemonCard(context, m3e)),
             ],
           ),
         ),
@@ -218,7 +209,6 @@ class DashboardView extends StatelessWidget {
 
   Widget _buildSingleColumn(
     BuildContext context,
-    AppLocalizations l,
     M3EThemeData m3e,
     M3ETypeScale emphasized,
     double gap,
@@ -227,31 +217,30 @@ class DashboardView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: gap,
       children: [
-        _buildHeroCard(l, m3e, emphasized),
-        _buildRoleControlBar(l),
-        _buildTransportControlBar(l),
+        _buildHeroCard(m3e, emphasized),
+        _buildRoleControlBar(),
+        _buildTransportControlBar(),
         _buildMetricCard(
-          title: l.metricLatencyStream,
+          title: 'Latency & Stream',
           primary: '${status?.rttMs ?? 0} ms RTT',
           secondary:
-              '${l.wordJitter} ${(status?.jitterMs ?? 0.0).toStringAsFixed(1)} ms · ${(status?.sampleRate ?? 48000) ~/ 1000} kHz',
+              'Jitter ${(status?.jitterMs ?? 0.0).toStringAsFixed(1)} ms · ${(status?.sampleRate ?? 48000) ~/ 1000} kHz',
           icon: Icons.speed_rounded,
-          emphasized: emphasized,
           m3e: m3e,
         ),
-        _buildVirtualMicCard(l, m3e, emphasized),
-        _buildDaemonCard(context, l, m3e, emphasized),
+        _buildVirtualMicCard(m3e),
+        _buildDaemonCard(context, m3e),
       ],
     );
   }
 
-  Widget _buildHeroCard(AppLocalizations l, M3EThemeData m3e, M3ETypeScale emphasized) {
+  Widget _buildHeroCard(M3EThemeData m3e, M3ETypeScale emphasized) {
     final resolved = (status?.resolvedRole ?? selectedMode.name).toUpperCase();
     return M3ECard(
       variant: isStreaming ? M3ECardVariant.filled : M3ECardVariant.outlined,
-      headline: isStreaming ? l.audioLinkActive : l.readyToConnect,
+      headline: isStreaming ? 'Audio Link Active' : 'Ready to Connect',
       supportingText:
-          '${l.labelRole}: $resolved · ${l.labelTransport}: ${_transportLabel(l)} · ${l.labelBuffer}: ${status?.bufferDurationMs ?? 0} ms',
+          'Role: $resolved · Transport: $_transportLabel · Buffer: ${status?.bufferDurationMs ?? 0} ms',
       actions: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -276,10 +265,10 @@ class DashboardView extends StatelessWidget {
                 onPressed: isTransitioning ? null : onToggleLink,
                 child: Text(
                   isTransitioning
-                      ? l.syncing
+                      ? 'Syncing...'
                       : isStreaming
-                          ? l.stopLink
-                          : l.startLink,
+                          ? 'Stop Link'
+                          : 'Start Link',
                 ),
               ),
             ],
@@ -289,18 +278,18 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildRoleControlBar(AppLocalizations l) {
+  Widget _buildRoleControlBar() {
     return M3ESegmentedButton<UiRoleMode>(
       segments: [
-        M3ESegment(value: UiRoleMode.auto, label: l.modeAuto),
+        const M3ESegment(value: UiRoleMode.auto, label: 'AUTO'),
         M3ESegment(
           value: UiRoleMode.sender,
-          label: l.modeSender,
+          label: 'SENDER',
           enabled: status?.canCaptureAudio ?? true,
         ),
         M3ESegment(
           value: UiRoleMode.receiver,
-          label: l.modeReceiver,
+          label: 'RECEIVER',
           enabled:
               (status?.canPlayAudio ?? true) ||
               (status?.canVirtualMicrophone ?? true),
@@ -313,12 +302,12 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildTransportControlBar(AppLocalizations l) {
+  Widget _buildTransportControlBar() {
     return M3ESegmentedButton<UiTransportMode>(
-      segments: [
-        M3ESegment(value: UiTransportMode.lanWifi, label: l.segLan),
-        M3ESegment(value: UiTransportMode.usb, label: l.segUsb),
-        M3ESegment(value: UiTransportMode.bluetoothRfcomm, label: l.segBt),
+      segments: const [
+        M3ESegment(value: UiTransportMode.lanWifi, label: 'LAN'),
+        M3ESegment(value: UiTransportMode.usb, label: 'USB'),
+        M3ESegment(value: UiTransportMode.bluetoothRfcomm, label: 'BT'),
       ],
       selected: {selectedTransport},
       onSelectionChanged: (v) {
@@ -332,7 +321,6 @@ class DashboardView extends StatelessWidget {
     required String primary,
     required String secondary,
     required IconData icon,
-    required M3ETypeScale emphasized,
     required M3EThemeData m3e,
   }) {
     return M3ECard(
@@ -343,15 +331,15 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildVirtualMicCard(AppLocalizations l, M3EThemeData m3e, M3ETypeScale emphasized) {
-    final driver = status?.virtualMicDriver ?? l.virtualMicDriverFallback;
+  Widget _buildVirtualMicCard(M3EThemeData m3e) {
+    final driver = status?.virtualMicDriver ?? 'System Audio';
     final ready = status?.canVirtualMicrophone ?? false;
     return M3ECard(
       variant: M3ECardVariant.outlined,
-      headline: l.virtualMicTitle,
+      headline: 'Virtual Microphone',
       supportingText: ready
-          ? l.virtualMicReady(driver)
-          : l.virtualMicMissing(driver),
+          ? '$driver installed & ready'
+          : '$driver not detected (fallback: speaker monitor)',
       overflow: Icon(
         ready ? Icons.mic_rounded : Icons.mic_off_rounded,
         color: ready ? m3e.colorScheme.primary : m3e.colorScheme.error,
@@ -359,24 +347,16 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildDaemonCard(
-    BuildContext context,
-    AppLocalizations l,
-    M3EThemeData m3e,
-    M3ETypeScale emphasized,
-  ) {
+  Widget _buildDaemonCard(BuildContext context, M3EThemeData m3e) {
     final viaDaemon = status?.viaDaemon ?? false;
-    final pidText = status?.daemonPid != null ? 'PID ${status!.daemonPid}' : l.inProcess;
+    final pidText = status?.daemonPid != null ? 'PID ${status!.daemonPid}' : 'In-Process';
     final isDesktop =
         !kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows);
-    final hostName = status?.platformName ?? l.unknown;
-    final ring = status?.ringBufferSummary != null
-        ? ' · ${l.ringLabel} ${status!.ringBufferSummary}'
-        : '';
     return M3ECard(
       variant: M3ECardVariant.outlined,
-      headline: viaDaemon ? l.daemonActive : l.frbInProcess,
-      supportingText: '${l.hostLabel}: $hostName ($pidText)$ring',
+      headline: viaDaemon ? 'Daemon IPC Active' : 'FRB In-Process',
+      supportingText:
+          'Host: ${status?.platformName ?? "unknown"} ($pidText)${status?.ringBufferSummary != null ? " · Ring ${status!.ringBufferSummary}" : ""}',
       actions: isDesktop && viaDaemon
           ? Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -386,7 +366,7 @@ class DashboardView extends StatelessWidget {
                   onPressed: () {
                     SystemNavigator.pop();
                   },
-                  child: Text(l.detachGui),
+                  child: const Text('Detach GUI'),
                 ),
               ],
             )

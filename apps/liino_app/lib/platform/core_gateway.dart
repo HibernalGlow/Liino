@@ -16,6 +16,9 @@ abstract class CoreGateway {
   Future<void> setTransport(String transport);
   Future<void> startLink();
   Future<void> stopLink();
+  Future<List<LiinoBluetoothDevice>> getBluetoothDevices();
+  Future<void> connectBluetooth(String address);
+  Future<void> disconnectBluetooth();
 
   factory CoreGateway.platformDefault() {
     if (!kIsWeb &&
@@ -24,6 +27,13 @@ abstract class CoreGateway {
     }
     return MobileFrbCoreGateway();
   }
+}
+
+class LiinoBluetoothDevice {
+  const LiinoBluetoothDevice({required this.address, required this.name});
+
+  final String address;
+  final String name;
 }
 
 class GatewayStatus {
@@ -46,6 +56,7 @@ class GatewayStatus {
     this.sampleRate = 48000,
     this.bufferDurationMs = 0,
     this.ringBufferSummary,
+    this.bluetoothAddress,
   });
 
   final String platformName;
@@ -66,12 +77,18 @@ class GatewayStatus {
   final int sampleRate;
   final int bufferDurationMs;
   final String? ringBufferSummary;
+  final String? bluetoothAddress;
 }
 
 class MobileFrbCoreGateway implements CoreGateway {
   String _mode = 'auto';
   String _transport = 'lan_wifi';
   bool _running = false;
+
+  /// Receiver address for the in-process sender. Defaults to loopback, which
+  /// is what `adb reverse tcp:8554 tcp:8554` (USB mode) delivers; set to the
+  /// receiver's LAN IP for Wi-Fi.
+  String senderTarget = '127.0.0.1';
 
   @override
   Future<GatewayStatus> getStatus({required String preferredMode}) async {
@@ -122,11 +139,23 @@ class MobileFrbCoreGateway implements CoreGateway {
         // The foreground host is best-effort; the link itself stays usable.
       }
     }
+    if (previewSnapshot(mode: _mode).resolvedRole == 'sender') {
+      try {
+        startSender(target: senderTarget, port: 8554);
+      } catch (_) {
+        // Mic unavailable or permission denied; link stays up but silent.
+      }
+    }
     _running = true;
   }
 
   @override
   Future<void> stopLink() async {
+    try {
+      stopSender();
+    } catch (_) {
+      // Sender may never have started.
+    }
     if (AndroidAudioBridge.isSupported) {
       try {
         await AndroidAudioBridge().stopBluetoothServer();
@@ -137,6 +166,15 @@ class MobileFrbCoreGateway implements CoreGateway {
     }
     _running = false;
   }
+
+  @override
+  Future<List<LiinoBluetoothDevice>> getBluetoothDevices() async => const [];
+
+  @override
+  Future<void> connectBluetooth(String address) async {}
+
+  @override
+  Future<void> disconnectBluetooth() async {}
 }
 
 class DesktopIpcCoreGateway implements CoreGateway {
@@ -291,6 +329,7 @@ class DesktopIpcCoreGateway implements CoreGateway {
         bitrate: (resp['bitrate'] as num?)?.toInt() ?? 0,
         sampleRate: (resp['sample_rate'] as num?)?.toInt() ?? 48000,
         bufferDurationMs: (resp['buffer_duration_ms'] as num?)?.toInt() ?? 0,
+        bluetoothAddress: resp['bluetooth_address'] as String?,
       );
     }
     return _frbFallback.getStatus(preferredMode: preferredMode);
@@ -329,5 +368,32 @@ class DesktopIpcCoreGateway implements CoreGateway {
     if (resp == null) {
       await _frbFallback.stopLink();
     }
+  }
+
+  @override
+  Future<List<LiinoBluetoothDevice>> getBluetoothDevices() async {
+    final resp = await _sendUnixIpc({'type': 'list_bluetooth_devices'});
+    final devices = resp?['devices'];
+    if (devices is! List) return const [];
+    return devices
+        .whereType<Map<String, dynamic>>()
+        .map(
+          (device) => LiinoBluetoothDevice(
+            address: device['address'] as String? ?? '',
+            name: device['name'] as String? ?? '',
+          ),
+        )
+        .where((device) => device.address.isNotEmpty)
+        .toList();
+  }
+
+  @override
+  Future<void> connectBluetooth(String address) async {
+    await _sendUnixIpc({'type': 'connect_bluetooth', 'address': address});
+  }
+
+  @override
+  Future<void> disconnectBluetooth() async {
+    await _sendUnixIpc({'type': 'disconnect_bluetooth'});
   }
 }

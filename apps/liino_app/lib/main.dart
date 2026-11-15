@@ -1,53 +1,24 @@
-import 'dart:io' show File, Platform;
-
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:liino_api/liino_api.dart';
-import 'package:liino_app/l10n/app_localizations.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
-
 import 'features/home/home_page.dart';
+import 'l10n/app_localizations.dart';
+import 'platform/core_gateway.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await RustLib.init(externalLibrary: _externalLibrary());
-    debugPrint('[liino] Rust core loaded');
-  } catch (e) {
-    debugPrint('[liino] Rust core unavailable: $e');
+    await RustLib.init();
+  } catch (_) {
+    // Allow UI preview even when native dylib is not yet bundled on host.
   }
   runApp(const LiinoApp());
 }
 
-/// Resolves the FRB dylib per platform. Android packages it in `jniLibs`, so
-/// the bare soname is enough for the dynamic linker to find it.
-ExternalLibrary _externalLibrary() {
-  final override = Platform.environment['LIINO_NATIVE_LIB'];
-  if (override != null && override.isNotEmpty) {
-    return ExternalLibrary.open(override);
-  }
-  if (Platform.isAndroid) {
-    return ExternalLibrary.open('libliino_api.so');
-  }
-  if (Platform.isIOS) {
-    return ExternalLibrary.open('libliino_api.framework/libliino_api');
-  }
-  final executable = File(Platform.resolvedExecutable);
-  if (Platform.isMacOS) {
-    // <App>.app/Contents/MacOS/<executable> -> Contents/Frameworks/
-    final contents = executable.parent.parent;
-    return ExternalLibrary.open(
-      '${contents.path}/Frameworks/libliino_api.dylib',
-    );
-  }
-  if (Platform.isWindows) {
-    return ExternalLibrary.open('${executable.parent.path}/libliino_api.dll');
-  }
-  return ExternalLibrary.open('${executable.parent.path}/libliino_api.so');
-}
-
 class LiinoApp extends StatelessWidget {
-  const LiinoApp({super.key});
+  const LiinoApp({super.key, this.gateway});
+
+  final CoreGateway? gateway;
 
   static const Color _seedColor = Color(0xFF006A6A);
 
@@ -56,15 +27,13 @@ class LiinoApp extends StatelessWidget {
     return M3EMaterialApp(
       title: 'liino',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       data: M3EThemeData.light(seedColor: _seedColor),
       autoTheming: true,
       dynamicColoring: true,
       drawUnderSystemBars: true,
-      // Follow the system language: Chinese systems resolve to zh, all others
-      // fall back to en. Leaving `locale` unset enables this default behavior.
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const LiinoHomePage(),
+      home: LiinoHomePage(gateway: gateway),
     );
   }
 }

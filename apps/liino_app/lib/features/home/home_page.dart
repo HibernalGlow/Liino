@@ -9,14 +9,16 @@ import '../devices/devices_view.dart';
 import '../dsp/dsp_view.dart';
 
 class LiinoHomePage extends StatefulWidget {
-  const LiinoHomePage({super.key});
+  const LiinoHomePage({super.key, this.gateway});
+
+  final CoreGateway? gateway;
 
   @override
   State<LiinoHomePage> createState() => _LiinoHomePageState();
 }
 
 class _LiinoHomePageState extends State<LiinoHomePage> {
-  final CoreGateway _gateway = CoreGateway.platformDefault();
+  late final CoreGateway _gateway = widget.gateway ?? CoreGateway.platformDefault();
   UiRoleMode _selectedMode = UiRoleMode.auto;
   UiTransportMode _selectedTransport = UiTransportMode.lanWifi;
   int _navIndex = 0;
