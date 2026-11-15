@@ -1,4 +1,7 @@
+mod bluetooth;
+mod engine;
 mod ipc;
+mod remote_key;
 
 use ipc::{
     default_ipc_endpoint, parse_ipc_line, IpcRequest, IpcResponse, MAX_IPC_FRAME_BYTES,
@@ -6,8 +9,9 @@ use ipc::{
 };
 use liino_core::{ResolvedRole, RoleMode, TransportType};
 use liino_engine::presence::{Presence, PresenceConfig};
-use liino_engine::stats::NetworkStats;
 use liino_platform::{enriched_capabilities, probe_current_platform, VirtualMicStatus};
+use micyou_core::server::{self, ServerState, StartRequest};
+use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::{mpsc, oneshot, watch};
 
@@ -15,14 +19,14 @@ struct DaemonState {
     role_mode: RoleMode,
     active_transport: String,
     is_running: bool,
-    stats: NetworkStats,
+    server: Option<Arc<ServerState>>,
+    engine_snapshot: Arc<Mutex<engine::EngineSnapshot>>,
     presence: Option<Presence>,
+    bluetooth: Option<bluetooth::BluetoothLink>,
 }
 
 impl Default for DaemonState {
     fn default() -> Self {
-        let stats = NetworkStats::default();
-        stats.set_audio_info(48_000, 1);
         let caps = enriched_capabilities();
         let role = caps
             .resolve_role(RoleMode::Auto)
@@ -43,8 +47,10 @@ impl Default for DaemonState {
             role_mode: RoleMode::Auto,
             active_transport: "lan_wifi".to_string(),
             is_running: false,
-            stats,
+            server: None,
+            engine_snapshot: Arc::new(Mutex::new(engine::EngineSnapshot::default())),
             presence,
+            bluetooth: None,
         }
     }
 }
@@ -84,7 +90,7 @@ fn resolved_role_str(role: ResolvedRole) -> &'static str {
     }
 }
 
-fn handle_request(
+async fn handle_request(
     req: IpcRequest,
     state: &mut DaemonState,
     shutdown_tx: &watch::Sender<bool>,
@@ -99,7 +105,20 @@ fn handle_request(
             let resolved = caps
                 .resolve_role(state.role_mode)
                 .unwrap_or_else(|_| caps.default_role());
-            let metrics = state.stats.to_metrics(if state.is_running { 20 } else { 0 });
+            let metrics = match &state.server {
+                Some(server) => server
+                    .network_stats
+                    .to_metrics(if state.is_running { 20 } else { 0 }),
+                None => micyou_core::stats::AudioMetrics {
+                    bitrate: 0,
+                    sample_rate: 48_000,
+                    latency_ms: 0,
+                    network_latency_ms: 0,
+                    packet_loss_rate: 0.0,
+                    jitter_ms: 0.0,
+                    buffer_duration_ms: 0,
+                },
+            };
             IpcResponse::Status {
                 pid: std::process::id(),
                 platform: caps.platform_name,
@@ -115,6 +134,10 @@ fn handle_request(
                 bitrate: metrics.bitrate,
                 sample_rate: metrics.sample_rate,
                 buffer_duration_ms: metrics.buffer_duration_ms,
+                bluetooth_address: state
+                    .bluetooth
+                    .as_ref()
+                    .map(|link| link.address().to_string()),
             }
         }
         IpcRequest::GetPeers => {
@@ -145,6 +168,24 @@ fn handle_request(
             if let Some(presence) = &state.presence {
                 presence.disconnect();
             }
+            IpcResponse::Ok
+        }
+        IpcRequest::ListBluetoothDevices => match bluetooth::list_devices() {
+            Ok(devices) => IpcResponse::BluetoothDevices { devices },
+            Err(message) => IpcResponse::Error { message },
+        },
+        IpcRequest::ConnectBluetooth { address } => {
+            state.bluetooth = None;
+            match bluetooth::BluetoothLink::connect(&address) {
+                Ok(link) => {
+                    state.bluetooth = Some(link);
+                    IpcResponse::Ok
+                }
+                Err(message) => IpcResponse::Error { message },
+            }
+        }
+        IpcRequest::DisconnectBluetooth => {
+            state.bluetooth = None;
             IpcResponse::Ok
         }
         IpcRequest::SetRoleMode { mode } => {
@@ -182,19 +223,63 @@ fn handle_request(
                 }
             }
         }
-        IpcRequest::StartLink => {
-            state.is_running = true;
-            state.stats.mark_tcp_connected(liino_engine::stats::unix_millis());
+        IpcRequest::SetRemoteKeyEnabled { enabled } => {
+            remote_key::set_enabled(enabled);
             IpcResponse::Ok
         }
+        IpcRequest::SetRemoteKeyTarget { keycode } => {
+            remote_key::set_target(keycode);
+            IpcResponse::Ok
+        }
+        IpcRequest::GetRemoteKey => IpcResponse::RemoteKeyState {
+            enabled: remote_key::enabled(),
+            target_key: remote_key::target(),
+        },
+        IpcRequest::StartLink => {
+            if state.server.is_some() {
+                return IpcResponse::Ok;
+            }
+            // micyou-core has no Bluetooth transport yet (ADR-0005); the core
+            // server runs in wifi mode while the BT demo link stays separate.
+            let mode = match state.active_transport.as_str() {
+                "usb" => "usb",
+                _ => "wifi",
+            };
+            let request = match StartRequest::resolve(None, Some(mode), None, None) {
+                Ok(request) => request,
+                Err(message) => return IpcResponse::Error { message },
+            };
+            let events = Arc::new(engine::LiinoEventSink::new(state.engine_snapshot.clone()));
+            let server = Arc::new(ServerState::new(events, Arc::new(engine::LiinoHost), None));
+            match server::start_server(&server, request).await {
+                Ok(_) => {
+                    let _ = server.plugins.bus.subscribe(
+                        "liino.remote_key",
+                        Arc::new(|msg: &micyou_core::micyou_plugin::bus::PluginMessage| {
+                            remote_key::handle_payload(&msg.payload);
+                        }),
+                    );
+                    state.server = Some(server);
+                    state.is_running = true;
+                    IpcResponse::Ok
+                }
+                Err(message) => IpcResponse::Error { message },
+            }
+        }
         IpcRequest::StopLink => {
+            if let Some(server) = state.server.take() {
+                let _ = server::stop_server(&server).await;
+                server::service::close_output_device(&server);
+            }
             state.is_running = false;
-            state.stats.mark_tcp_disconnected();
             IpcResponse::Ok
         }
         IpcRequest::ShutdownDaemon => {
+            if let Some(server) = state.server.take() {
+                let _ = server::stop_server(&server).await;
+                server::service::close_output_device(&server);
+            }
             state.is_running = false;
-            state.stats.mark_tcp_disconnected();
             let _ = shutdown_tx.send(true);
             IpcResponse::Ok
         }
@@ -330,7 +415,7 @@ async fn main() -> std::io::Result<()> {
     tokio::spawn(async move {
         let mut state = DaemonState::default();
         while let Some(cmd) = cmd_rx.recv().await {
-            let resp = handle_request(cmd.req, &mut state, &shutdown_actor);
+            let resp = handle_request(cmd.req, &mut state, &shutdown_actor).await;
             let _ = cmd.reply.send(resp);
         }
     });

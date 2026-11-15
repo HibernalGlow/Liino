@@ -1,3 +1,4 @@
+use crate::bluetooth::BtDevice;
 use liino_engine::presence::PeerInfo;
 use serde::{Deserialize, Serialize};
 
@@ -14,8 +15,14 @@ pub enum IpcRequest {
     GetPeers,
     ConnectPeer { id: String },
     DisconnectPeer,
+    ListBluetoothDevices,
+    ConnectBluetooth { address: String },
+    DisconnectBluetooth,
     SetRoleMode { mode: String },
     SetTransport { transport: String },
+    SetRemoteKeyEnabled { enabled: bool },
+    SetRemoteKeyTarget { keycode: u16 },
+    GetRemoteKey,
     StartLink,
     StopLink,
     ShutdownDaemon,
@@ -42,11 +49,19 @@ pub enum IpcResponse {
         bitrate: i32,
         sample_rate: i32,
         buffer_duration_ms: i64,
+        bluetooth_address: Option<String>,
     },
     Peers {
         peers: Vec<PeerInfo>,
         connected: Option<PeerInfo>,
         connecting: Option<String>,
+    },
+    BluetoothDevices {
+        devices: Vec<BtDevice>,
+    },
+    RemoteKeyState {
+        enabled: bool,
+        target_key: u16,
     },
     Ok,
     Error {

@@ -9,6 +9,10 @@ description = "Standalone desktop background host, IPC server, and GUI process c
 liino-core = { path = "../liino-core" }
 liino-engine = { path = "../liino-engine" }
 liino-platform = { path = "../liino-platform" }
+micyou-core = { path = "../../vendor/micyou/tauri-app/crates/micyou-core", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "signal", "sync"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-graphics = "0.23"
